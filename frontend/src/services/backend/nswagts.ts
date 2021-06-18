@@ -257,7 +257,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
 
 export interface IChannelClient {
     getMyChannels(): Promise<ChannelSettingsIdDto[]>;
-    updateChannelState(command: NewChannelMessagerCommand): Promise<boolean>;
+    updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
 }
 
 export class ChannelClient extends ClientBase implements IChannelClient {
@@ -311,7 +311,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         return Promise.resolve<ChannelSettingsIdDto[]>(<any>null);
     }
 
-    updateChannelState(command: NewChannelMessagerCommand): Promise<boolean> {
+    updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/Channel/UpdateChannelState";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -322,7 +322,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/octet-stream"
             }
         };
 
@@ -333,22 +333,20 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         });
     }
 
-    protected processUpdateChannelState(response: Response): Promise<boolean> {
+    protected processUpdateChannelState(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<boolean>(<any>null);
+        return Promise.resolve<FileResponse>(<any>null);
     }
 }
 
@@ -689,6 +687,117 @@ export enum DayOfWeek {
     Saturday = 6,
 }
 
+export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
+    input?: UpdateChannelPauseInput | null;
+
+    constructor(data?: IUpdateChannelPauseCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.input = _data["input"] ? UpdateChannelPauseInput.fromJS(_data["input"]) : <any>null;
+        }
+    }
+
+    static fromJS(data: any): UpdateChannelPauseCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateChannelPauseCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["input"] = this.input ? this.input.toJSON() : <any>null;
+        return data; 
+    }
+}
+
+export interface IUpdateChannelPauseCommand {
+    input?: IUpdateChannelPauseInput | null;
+}
+
+export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
+    slackUserId?: string | null;
+    channelId?: number;
+    paused?: boolean;
+
+    constructor(data?: IUpdateChannelPauseInput) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
+            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
+            this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): UpdateChannelPauseInput {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateChannelPauseInput();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
+        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
+        data["paused"] = this.paused !== undefined ? this.paused : <any>null;
+        return data; 
+    }
+}
+
+export interface IUpdateChannelPauseInput {
+    slackUserId?: string | null;
+    channelId?: number;
+    paused?: boolean;
+}
+
+export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
+
+    constructor(data?: ISyncronizeChannelsCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): SyncronizeChannelsCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new SyncronizeChannelsCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data; 
+    }
+}
+
+export interface ISyncronizeChannelsCommand {
+}
+
 export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
     slackChannelId?: string | null;
 
@@ -723,36 +832,6 @@ export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
 
 export interface INewChannelMessagerCommand {
     slackChannelId?: string | null;
-}
-
-export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
-
-    constructor(data?: ISyncronizeChannelsCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-    }
-
-    static fromJS(data: any): SyncronizeChannelsCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new SyncronizeChannelsCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        return data; 
-    }
-}
-
-export interface ISyncronizeChannelsCommand {
 }
 
 export class RoundInitiatorCommand implements IRoundInitiatorCommand {
@@ -817,6 +896,13 @@ export enum CommandErrorCode {
     RegularExpressionValidator = 28,
     ScalePrecisionValidator = 29,
     StringEnumValidator = 30,
+}
+
+export interface FileResponse {
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class SwaggerException extends Error {

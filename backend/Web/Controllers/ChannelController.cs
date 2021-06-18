@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.ChannelSetting;
+using Application.ChannelSetting.Commands.UpdateChannelPaused;
 using Application.ChannelSetting.Queries.GetMyChannelsSettings;
 using Application.ChannelSync.Commands;
 using Application.Common.Hangfire.MediatR;
@@ -18,10 +19,10 @@ namespace Web.Controllers
     }
 
     [HttpPut("UpdateChannelState")]
-    public ActionResult<bool> UpdateChannelState(NewChannelMessagerCommand command)
+    public async Task<ActionResult> UpdateChannelState(UpdateChannelPauseCommand command)
     {
-
-      return true;
+      await Mediator.Send(command);
+      return NoContent();
     }
 
     //[HttpPost("round-init")]
