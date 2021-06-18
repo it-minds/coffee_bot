@@ -1,14 +1,16 @@
-const logCreator = (log: Console["log"]) => (message: string, ...args: unknown[]) => {
-  if (!process.browser) {
-    const logObj = JSON.stringify({
-      message,
-      args
-    });
-    log(logObj);
-  } else {
-    log(message, ...args);
-  }
-};
+const logCreator =
+  (log: Console["log"]) =>
+  (message: string, ...args: unknown[]) => {
+    if (!process.browser) {
+      const logObj = JSON.stringify({
+        message,
+        args
+      });
+      log(logObj);
+    } else {
+      log(message, ...args);
+    }
+  };
 
 type SingleLogLine = (message: string, ...args: unknown[]) => void;
 type MyLog = {

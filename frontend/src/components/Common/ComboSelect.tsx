@@ -16,7 +16,7 @@ import {
 import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDown";
 import { MdKeyboardArrowUp } from "@react-icons/all-files/md/MdKeyboardArrowUp";
 import { useColors } from "hooks/useColors";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DropdownType from "types/SelectType";
 
 import styles from "./styles.module.css";
@@ -55,10 +55,10 @@ const ComboSelect: FC<Props> = ({
     if (borderColorToken === DARK) return darkColor;
   }, [lightColor, darkColor, borderColorToken]);
 
-  const filteredOptions = useMemo(() => options.filter(x => x.name.indexOf(searchValue) !== -1), [
-    searchValue,
-    options
-  ]);
+  const filteredOptions = useMemo(
+    () => options.filter(x => x.name.indexOf(searchValue) !== -1),
+    [searchValue, options]
+  );
 
   useEffect(() => {
     setActiveItem(value);

@@ -4,18 +4,17 @@ import "isomorphic-unfetch";
 import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
-import { usePWA } from "hooks/usePWA";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
+import { withApplicationInsights } from "next-applicationinsights";
 import { I18nProvider } from "next-rosetta";
 import React, { ReactElement, useEffect } from "react";
 import EnvSettings from "types/EnvSettings";
 import isomorphicEnvSettings, { setEnvSettings } from "utils/envSettings";
 import { logger } from "utils/logger";
-import { withApplicationInsights } from "next-applicationinsights";
+import { openSignInWindow } from "utils/openPopup";
 
 import theme from "../theme/theme";
-import { openSignInWindow } from "utils/openPopup";
 
 type Props = {
   envSettings: EnvSettings;
@@ -58,7 +57,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
         if (typeof e.data == "string") {
           console.log(e.source);
           try {
-            var pairs = (e.data as string).substring(1).split("&");
+            const pairs = (e.data as string).substring(1).split("&");
 
             let i: string;
             for (i in pairs) {
