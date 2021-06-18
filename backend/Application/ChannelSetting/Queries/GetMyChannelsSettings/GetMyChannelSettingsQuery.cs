@@ -10,9 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.ChannelSetting.Queries.GetMyChannelsSettings
 {
-  /**
-   * Not Currently used and might be deleted at a later point
-   */
   public class GetMyChannelSettingsQuery : IRequest<List<ChannelSettingsIdDto>>
   {
     public class GetMyChannelSettingsQueryHandler : IRequestHandler<GetMyChannelSettingsQuery, List<ChannelSettingsIdDto>>
@@ -35,12 +32,17 @@ namespace Application.ChannelSetting.Queries.GetMyChannelsSettings
 
         var myChannels = await _context.ChannelMembers
           .Where(x => x.SlackUserId == _currentUserService.UserSlackId)
-          .Select(x => x.ChannelSettingsId)
           .ToListAsync(cancellationToken);
+        var myChannelIds = myChannels.Select(x => x.ChannelSettingsId);
         viewModel = await _context.ChannelSettings
-          .Where(x => myChannels.Contains(x.Id))
+          .Where(x => myChannelIds.Contains(x.Id))
           .ProjectTo<ChannelSettingsIdDto>(_mapper.ConfigurationProvider)
           .ToListAsync(cancellationToken);
+
+        foreach (var channel in viewModel) //To Add the pause attributive from ChannelMembers table to the ChannelSettingsIdDto Array
+        {
+          channel.Paused = myChannels.First(x => x.ChannelSettingsId == channel.Id).OnPause;
+        }
 
         return viewModel;
       }

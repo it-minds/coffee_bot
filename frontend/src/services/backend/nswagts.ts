@@ -638,6 +638,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
     id?: number;
     slackChannelId?: string | null;
     slackChannelName?: string | null;
+    paused?: boolean;
 
     constructor(data?: IChannelSettingsIdDto) {
         super(data);
@@ -649,6 +650,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
             this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
             this.slackChannelName = _data["slackChannelName"] !== undefined ? _data["slackChannelName"] : <any>null;
+            this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
         }
     }
 
@@ -664,6 +666,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         data["id"] = this.id !== undefined ? this.id : <any>null;
         data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
         data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
+        data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
         return data; 
     }
@@ -673,6 +676,7 @@ export interface IChannelSettingsIdDto extends IChannelSettingsDto {
     id?: number;
     slackChannelId?: string | null;
     slackChannelName?: string | null;
+    paused?: boolean;
 }
 
 export enum DayOfWeek {

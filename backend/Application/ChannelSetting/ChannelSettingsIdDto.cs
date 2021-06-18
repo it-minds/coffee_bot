@@ -11,5 +11,6 @@ namespace Application.ChannelSetting
     public int Id { get; set; }
     public string SlackChannelId { get; set; }
     public string SlackChannelName { get; set; }
+    public bool Paused { get; set; }
   }
 }
