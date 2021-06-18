@@ -1,4 +1,3 @@
-import Demo from "components/Demo/Demo";
 import { AuthContext } from "contexts/AuthContext";
 import { Locale } from "i18n/Locale";
 import { GetStaticProps, NextPage } from "next";
