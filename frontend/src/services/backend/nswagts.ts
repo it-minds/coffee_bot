@@ -255,6 +255,103 @@ export class AuthClient extends ClientBase implements IAuthClient {
     }
 }
 
+export interface IChannelClient {
+    getMyChannels(): Promise<ChannelSettingsIdDto[]>;
+    updateChannelState(command: NewChannelMessagerCommand): Promise<boolean>;
+}
+
+export class ChannelClient extends ClientBase implements IChannelClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getMyChannels(): Promise<ChannelSettingsIdDto[]> {
+        let url_ = this.baseUrl + "/api/Channel/MyChannels";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyChannels(_response));
+        });
+    }
+
+    protected processGetMyChannels(response: Response): Promise<ChannelSettingsIdDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ChannelSettingsIdDto.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ChannelSettingsIdDto[]>(<any>null);
+    }
+
+    updateChannelState(command: NewChannelMessagerCommand): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Channel/UpdateChannelState";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processUpdateChannelState(_response));
+        });
+    }
+
+    protected processUpdateChannelState(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(<any>null);
+    }
+}
+
 export interface IHealthClient {
     getBackendHealth(): Promise<boolean>;
 }
@@ -485,9 +582,14 @@ export interface IAuthUser {
     email?: string | null;
 }
 
-export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
+export class ChannelSettingsDto implements IChannelSettingsDto {
+    groupSize?: number;
+    startsDay?: DayOfWeek;
+    weekRepeat?: number;
+    durationInDays?: number;
+    individualMessage?: boolean;
 
-    constructor(data?: ISyncronizeChannelsCommand) {
+    constructor(data?: IChannelSettingsDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -497,22 +599,90 @@ export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.groupSize = _data["groupSize"] !== undefined ? _data["groupSize"] : <any>null;
+            this.startsDay = _data["startsDay"] !== undefined ? _data["startsDay"] : <any>null;
+            this.weekRepeat = _data["weekRepeat"] !== undefined ? _data["weekRepeat"] : <any>null;
+            this.durationInDays = _data["durationInDays"] !== undefined ? _data["durationInDays"] : <any>null;
+            this.individualMessage = _data["individualMessage"] !== undefined ? _data["individualMessage"] : <any>null;
+        }
     }
 
-    static fromJS(data: any): SyncronizeChannelsCommand {
+    static fromJS(data: any): ChannelSettingsDto {
         data = typeof data === 'object' ? data : {};
-        let result = new SyncronizeChannelsCommand();
+        let result = new ChannelSettingsDto();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["groupSize"] = this.groupSize !== undefined ? this.groupSize : <any>null;
+        data["startsDay"] = this.startsDay !== undefined ? this.startsDay : <any>null;
+        data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
+        data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
+        data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
         return data; 
     }
 }
 
-export interface ISyncronizeChannelsCommand {
+export interface IChannelSettingsDto {
+    groupSize?: number;
+    startsDay?: DayOfWeek;
+    weekRepeat?: number;
+    durationInDays?: number;
+    individualMessage?: boolean;
+}
+
+export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannelSettingsIdDto {
+    id?: number;
+    slackChannelId?: string | null;
+    slackChannelName?: string | null;
+
+    constructor(data?: IChannelSettingsIdDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.slackChannelName = _data["slackChannelName"] !== undefined ? _data["slackChannelName"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): ChannelSettingsIdDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelSettingsIdDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
+        super.toJSON(data);
+        return data; 
+    }
+}
+
+export interface IChannelSettingsIdDto extends IChannelSettingsDto {
+    id?: number;
+    slackChannelId?: string | null;
+    slackChannelName?: string | null;
+}
+
+export enum DayOfWeek {
+    Sunday = 0,
+    Monday = 1,
+    Tuesday = 2,
+    Wednesday = 3,
+    Thursday = 4,
+    Friday = 5,
+    Saturday = 6,
 }
 
 export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
@@ -549,6 +719,36 @@ export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
 
 export interface INewChannelMessagerCommand {
     slackChannelId?: string | null;
+}
+
+export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
+
+    constructor(data?: ISyncronizeChannelsCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): SyncronizeChannelsCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new SyncronizeChannelsCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data; 
+    }
+}
+
+export interface ISyncronizeChannelsCommand {
 }
 
 export class RoundInitiatorCommand implements IRoundInitiatorCommand {
