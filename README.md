@@ -1,4 +1,4 @@
-# PROJ_NAME
+# IT Minds Coffee Bot
 
 Developed by IT Minds
 
