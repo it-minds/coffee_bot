@@ -1,4 +1,4 @@
-import { Box, Center, Flex, Heading, VStack } from "@chakra-ui/react";
+import { Box, Center, Flex, Heading } from "@chakra-ui/react";
 import { ChannelContext } from "contexts/ChannelContext";
 import { FC, useContext } from "react";
 import { ChannelSettingsIdDto } from "services/backend/nswagts";
@@ -14,15 +14,6 @@ const ChannelList: FC = () => {
       <Flex direction="column">
         <Heading>Your Channels:</Heading>
         <Box m="5px">
-          {channels.map((channel: ChannelSettingsIdDto) => (
-            <ChannelListItem key={channel.id} channel={channel} />
-          ))}
-          {channels.map((channel: ChannelSettingsIdDto) => (
-            <ChannelListItem key={channel.id} channel={channel} />
-          ))}
-          {channels.map((channel: ChannelSettingsIdDto) => (
-            <ChannelListItem key={channel.id} channel={channel} />
-          ))}
           {channels.map((channel: ChannelSettingsIdDto) => (
             <ChannelListItem key={channel.id} channel={channel} />
           ))}

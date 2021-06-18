@@ -7,6 +7,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Spacer,
   Text
 } from "@chakra-ui/react";
@@ -29,31 +30,39 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
   return (
     <Flex rounded="lg" w="m" h="40px" justify="center" align="center" borderWidth={2} m="10px">
       {channel.paused ? <Icon as={BsPause} /> : <Icon as={BsPlay} />}
-      <Text>{channel.slackChannelName}</Text>
+      <Text m="3">{channel.slackChannelName}</Text>
       <Spacer />
-
-      <Popover>
-        <PopoverTrigger>
-          <IconButton icon={<BsThreeDots />} aria-label="menu"></IconButton>
-        </PopoverTrigger>
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverBody>
-            <PopoverMenuButton
-              btnText={channel.paused ? "Unpause this channel" : "Pause this channel"}
-              onClickMethod={() =>
-                updateChannelPaused(
-                  new UpdateChannelPauseInput({
-                    slackUserId: activeUser.slackUserId,
-                    channelId: channel.id,
-                    paused: !channel.paused
-                  })
-                )
-              }
-            />
-          </PopoverBody>
-        </PopoverContent>
+      <Popover placement="right">
+        {({ onClose }) => (
+          <>
+            <PopoverTrigger>
+              <IconButton icon={<BsThreeDots />} aria-label="menu"></IconButton>
+            </PopoverTrigger>
+            <Portal>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverBody p="0">
+                  <PopoverMenuButton
+                    btnText={channel.paused ? "Unpause this channel" : "Pause this channel"}
+                    onClickMethod={() => {
+                      updateChannelPaused(
+                        new UpdateChannelPauseInput({
+                          slackUserId: activeUser.slackUserId,
+                          channelId: channel.id,
+                          paused: !channel.paused
+                        })
+                      );
+                      onClose();
+                    }}
+                  />
+                </PopoverBody>
+              </PopoverContent>
+            </Portal>
+          </>
+        )}
       </Popover>
+
+      <Popover></Popover>
     </Flex>
   );
 };

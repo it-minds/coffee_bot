@@ -1,5 +1,5 @@
-import "../styles.global.css";
 import "isomorphic-unfetch";
+import "../styles.global.css";
 
 import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
