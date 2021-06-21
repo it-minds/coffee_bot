@@ -12,7 +12,7 @@ const ChannelList: FC = () => {
   return (
     <Center>
       <Flex direction="column">
-        <Heading>Your Channels:</Heading>
+        <Heading size="lg">{`Channels you're a part of`}</Heading>
         <Box m="5px">
           {channels.map((channel: ChannelSettingsIdDto) => (
             <ChannelListItem key={channel.id} channel={channel} />

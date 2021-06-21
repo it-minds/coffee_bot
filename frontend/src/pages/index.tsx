@@ -1,4 +1,4 @@
-import { Center, Container, Flex, Text } from "@chakra-ui/react";
+import { Center, Container, Flex, Heading, Spacer, Text } from "@chakra-ui/react";
 import ChannelList from "components/Channels/ChannelList";
 import ColorModeToggler from "components/Common/ColorModeToggler";
 import { AuthContext } from "contexts/AuthContext";
@@ -12,8 +12,9 @@ const IndexPage: NextPage = () => {
   return (
     <Center>
       <Container pt="20px" w="6xl" maxW="unset">
-        <Flex>
+        <Flex justify="center" align="center">
           <ColorModeToggler />
+          <Spacer />
           <Text> User: {activeUser.email}</Text>
         </Flex>
         <ChannelList />
