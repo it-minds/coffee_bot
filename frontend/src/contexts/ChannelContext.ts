@@ -7,5 +7,6 @@ export const ChannelContext = createContext<ContextType>({
   channels: [],
   dispatchChannels: null,
   fetchChannels: () => null,
-  updateChannelPaused: () => null
+  updateChannelPaused: () => null,
+  updateChannelSettings: () => null
 });
