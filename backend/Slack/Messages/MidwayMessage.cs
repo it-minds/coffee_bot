@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using SlackNet.Blocks;
 using SlackNet.WebApi;
 
@@ -23,27 +25,26 @@ namespace Slack.Messages
 
       var message = new Message
       {
-        Blocks = {
-          new SectionBlock {
-            Text = {
-              Type = "mrkdwn",
-              Text = "Hello, guys! I am checking in to see if you met for a cup of coffee this round."
-            }
+        Blocks = new List<Block>
+        {
+          new SectionBlock
+          {
+            Text = new Markdown("Hello, guys! I am checking in to see if you met for a cup of coffee this round.")
           },
-          new ActionsBlock {
-            Elements = {
+          new ActionsBlock
+          {
+            Elements = new List<IActionElement>
+            {
               new Button {
                 Style = ButtonStyle.Primary,
-                Text = {
-                  Emoji= false,
+                Text = new PlainText{
                   Text = "Yes, We have met!",
                 },
                 Value = "Yes"
               },
               new Button {
                 Style = ButtonStyle.Danger,
-                Text = {
-                  Emoji= false,
+                Text = new PlainText {
                   Text = "No, We haven't met yet."
                 },
                 Value = "No"
@@ -52,7 +53,6 @@ namespace Slack.Messages
           }
         }
       };
-
       return message;
     }
   }

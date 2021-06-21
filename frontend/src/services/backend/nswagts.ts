@@ -307,10 +307,67 @@ export class HealthClient extends ClientBase implements IHealthClient {
     }
 }
 
+export interface ISlashClient {
+    tEST(body: any): Promise<boolean>;
+}
+
+export class SlashClient extends ClientBase implements ISlashClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    tEST(body: any): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Slash/coffee-group-done";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTEST(_response));
+        });
+    }
+
+    protected processTEST(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(<any>null);
+    }
+}
+
 export interface ITestClient {
     channelSync(command: SyncronizeChannelsCommand): Promise<boolean>;
     newChannelMessager(command: NewChannelMessagerCommand): Promise<boolean>;
     roundInitiator(command: RoundInitiatorCommand): Promise<boolean>;
+    roundCheckup(command: RoundCheckupCommand): Promise<boolean>;
 }
 
 export class TestClient extends ClientBase implements ITestClient {
@@ -427,6 +484,46 @@ export class TestClient extends ClientBase implements ITestClient {
     }
 
     protected processRoundInitiator(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(<any>null);
+    }
+
+    roundCheckup(command: RoundCheckupCommand): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Test/round-checkup";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processRoundCheckup(_response));
+        });
+    }
+
+    protected processRoundCheckup(response: Response): Promise<boolean> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -579,6 +676,36 @@ export class RoundInitiatorCommand implements IRoundInitiatorCommand {
 }
 
 export interface IRoundInitiatorCommand {
+}
+
+export class RoundCheckupCommand implements IRoundCheckupCommand {
+
+    constructor(data?: IRoundCheckupCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): RoundCheckupCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoundCheckupCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data; 
+    }
+}
+
+export interface IRoundCheckupCommand {
 }
 
 export enum CommandErrorCode {
