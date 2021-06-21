@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.ChannelSetting;
 using Application.ChannelSetting.Commands.UpdateChannelPaused;
+using Application.ChannelSetting.Commands.UpdateChannelSettings;
 using Application.ChannelSetting.Queries.GetMyChannelsSettings;
 using Application.ChannelSync.Commands;
 using Application.Common.Hangfire.MediatR;
@@ -25,12 +26,12 @@ namespace Web.Controllers
       return NoContent();
     }
 
-    //[HttpPost("round-init")]
-    //public async Task<ActionResult<bool>> RoundInitiator(RoundInitiatorCommand command)
-    //{
-    //  await Mediator.Send(command);
-
-    //  return true;
-    //}
+    [HttpPut("UpdateChannelSettings/{id}")]
+    public async Task<ActionResult> UpdateChannelSettings([FromRoute] int id, UpdateChannelSettingsCommand command)
+    {
+      command.Id = id;
+      await Mediator.Send(command);
+      return NoContent();
+    }
   }
 }

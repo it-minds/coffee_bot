@@ -258,6 +258,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
 export interface IChannelClient {
     getMyChannels(): Promise<ChannelSettingsIdDto[]>;
     updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
+    updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse>;
 }
 
 export class ChannelClient extends ClientBase implements IChannelClient {
@@ -334,6 +335,47 @@ export class ChannelClient extends ClientBase implements IChannelClient {
     }
 
     protected processUpdateChannelState(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Channel/UpdateChannelSettings/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processUpdateChannelSettings(_response));
+        });
+    }
+
+    protected processUpdateChannelSettings(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -766,6 +808,43 @@ export interface IUpdateChannelPauseInput {
     slackUserId?: string | null;
     channelId?: number;
     paused?: boolean;
+}
+
+export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsCommand {
+    settings?: ChannelSettingsDto | null;
+
+    constructor(data?: IUpdateChannelSettingsCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.settings = _data["settings"] ? ChannelSettingsDto.fromJS(_data["settings"]) : <any>null;
+        }
+    }
+
+    static fromJS(data: any): UpdateChannelSettingsCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateChannelSettingsCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
+        return data; 
+    }
+}
+
+export interface IUpdateChannelSettingsCommand {
+    settings?: IChannelSettingsDto | null;
 }
 
 export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
