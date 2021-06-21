@@ -114,6 +114,11 @@ namespace Slack.Clients
         Channel = conversationId
       };
 
+      return await SendMessageToChannel(message: message, cancellationToken: cancellationToken);
+    }
+
+    public async Task<Slack.DTO.SlackThread> SendMessageToChannel(CancellationToken cancellationToken, Message message )
+    {
       var response = await apiClient.Chat.PostMessage(message: message, cancellationToken:cancellationToken);
 
       return new Slack.DTO.SlackThread {
@@ -148,13 +153,23 @@ namespace Slack.Clients
 
     public async Task<Slack.DTO.SlackThread> SendPrivateMessageToMembers(CancellationToken cancellationToken, IEnumerable<string> memberIds, string text)
     {
+      return await SendPrivateMessageToMembers(cancellationToken, memberIds, new Message
+      {
+        Text = text
+      });
+    }
+
+    public async Task<Slack.DTO.SlackThread> SendPrivateMessageToMembers(CancellationToken cancellationToken, IEnumerable<string> memberIds, Message message)
+    {
       if (memberIds.Count() <= 1 || memberIds.Count() > 8) {
         return null;
       }
 
       var mpim = await apiClient.Conversations.Open(memberIds, cancellationToken);
 
-      var result = await SendMessageToChannel(cancellationToken, mpim, text);
+      message.Channel = mpim;
+
+      var result = await SendMessageToChannel(cancellationToken, message);
 
       return result;
     }
