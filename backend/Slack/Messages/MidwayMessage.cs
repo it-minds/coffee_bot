@@ -21,39 +21,55 @@ namespace Slack.Messages
     /// <returns></returns>
     public static Message Generate(int deadlineDays)
     {
-      // TODO: check if the deadlineDays is less than 1 then set the text on the buttons to indicate that they missed the round regrettably.
-
-      var message = new Message
+      if (deadlineDays < 1)
       {
-        Blocks = new List<Block>
+        var message = new Message
         {
-          new SectionBlock
-          {
-            Text = new Markdown("Hello, guys! I am checking in to see if you met for a cup of coffee this round.")
-          },
-          new ActionsBlock
-          {
-            Elements = new List<IActionElement>
-            {
-              new Button {
-                Style = ButtonStyle.Primary,
-                Text = new PlainText{
-                  Text = "Yes, We have met!",
-                },
-                Value = "Yes"
-              },
-              new Button {
-                Style = ButtonStyle.Danger,
-                Text = new PlainText {
-                  Text = "No, We haven't met yet."
-                },
-                Value = "No"
+          Blocks = {
+            new SectionBlock {
+              Text = new Markdown {
+                Text = "Hello, guys! I am checking in to see if you met for a cup of coffee this round."
               }
             }
           }
-        }
-      };
-      return message;
+        };
+        return message;
+
+      }
+      else
+      {
+        var message = new Message
+        {
+          Blocks = {
+            new SectionBlock {
+              Text = new Markdown {
+                Text = "Hello, guys! I am checking in to see if you met for a cup of coffee this round."
+              }
+            },
+            new ActionsBlock {
+              Elements = {
+                new Button {
+                  Style = ButtonStyle.Primary,
+                  Text =  new PlainText {
+                    Emoji = false,
+                    Text = "Yes, We have met!",
+                  },
+                  Value = "Yes"
+                },
+                new Button {
+                  Style = ButtonStyle.Danger,
+                  Text = new PlainText {
+                    Emoji = false,
+                    Text = "No, We haven't met yet."
+                  },
+                  Value = "No"
+                }
+              }
+            }
+          }
+        };
+        return message;
+      }
     }
   }
 }
