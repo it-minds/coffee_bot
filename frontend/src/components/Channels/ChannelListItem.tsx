@@ -14,6 +14,7 @@ import {
 import { BsPause } from "@react-icons/all-files/bs/BsPause";
 import { BsPlay } from "@react-icons/all-files/bs/BsPlay";
 import { BsThreeDots } from "@react-icons/all-files/bs/BsThreeDots";
+import EditChannelSettingsTriggerBtn from "components/Channels/EditChannelSettings/EditChannelSettingsTriggerBtn";
 import PopoverMenuButton from "components/Common/PopoverMenuButton";
 import { AuthContext } from "contexts/AuthContext";
 import { ChannelContext } from "contexts/ChannelContext";
@@ -55,14 +56,13 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
                       onClose();
                     }}
                   />
+                  <EditChannelSettingsTriggerBtn channel={channel} />
                 </PopoverBody>
               </PopoverContent>
             </Portal>
           </>
         )}
       </Popover>
-
-      <Popover></Popover>
     </Flex>
   );
 };
