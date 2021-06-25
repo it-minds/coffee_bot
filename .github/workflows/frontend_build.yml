@@ -1,12 +1,6 @@
 name: Full Frontend Build, Format, and Test
 
 on:
-  push:
-    paths:
-      - "frontend/**"
-    branches:
-      - main
-
   pull_request:
     paths:
       - "frontend/**"
@@ -30,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.node-version }}
 
@@ -48,7 +42,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.node-version }}
 
@@ -58,29 +52,29 @@ jobs:
           npm t
 
       - name: Run CodeCov
-        uses: codecov/codecov-action@v1.2.1
+        uses: codecov/codecov-action@v1.5.2
         with:
           working-directory: frontend
 
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
+  # codeql:
+  #   name: CodeQL
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
-        with:
-          working-directory: frontend
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v1
+  #       with:
+  #         working-directory: frontend
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v1
-        with:
-          working-directory: frontend
+  #     - name: Autobuild
+  #       uses: github/codeql-action/autobuild@v1
+  #       with:
+  #         working-directory: frontend
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
-        with:
-          working-directory: frontend
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v1
+  #       with:
+  #         working-directory: frontend

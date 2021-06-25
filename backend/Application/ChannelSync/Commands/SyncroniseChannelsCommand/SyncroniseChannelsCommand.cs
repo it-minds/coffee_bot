@@ -153,6 +153,5 @@ namespace Application.ChannelSync.Commands
         return dict.Values;
       }
     }
-
   }
 }
