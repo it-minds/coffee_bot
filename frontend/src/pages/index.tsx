@@ -1,7 +1,8 @@
+import { Center, Container, Flex, Text } from "@chakra-ui/react";
+import ChannelList from "components/Channels/ChannelList";
+import ColorModeToggler from "components/Common/ColorModeToggler";
 import { AuthContext } from "contexts/AuthContext";
-import { Locale } from "i18n/Locale";
-import { GetStaticProps, NextPage } from "next";
-import { I18nProps } from "next-rosetta";
+import { NextPage } from "next";
 import { useContext } from "react";
 
 const IndexPage: NextPage = () => {
@@ -9,20 +10,16 @@ const IndexPage: NextPage = () => {
 
   // return <Demo />;
   return (
-    <div>
-      <h1>Hi you should be</h1>
-      <pre>{JSON.stringify(activeUser, null, 2)}</pre>
-    </div>
+    <Center>
+      <Container pt="20px" w="6xl" maxW="unset">
+        <Flex>
+          <ColorModeToggler />
+          <Text> User: {activeUser.email}</Text>
+        </Flex>
+        <ChannelList />
+      </Container>
+    </Center>
   );
-};
-
-export const getStaticProps: GetStaticProps<I18nProps<Locale>> = async context => {
-  const locale = context.locale || context.defaultLocale;
-  const { table = {} } = await import(`../i18n/${locale}`);
-
-  return {
-    props: { table }
-  };
 };
 
 export default IndexPage;

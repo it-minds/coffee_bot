@@ -1,9 +1,11 @@
-import "../styles.global.css";
 import "isomorphic-unfetch";
+import "../styles.global.css";
 
 import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
+import { ChannelContext } from "contexts/ChannelContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
+import { useChannelContext } from "hooks/useChannelContext";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
 import { withApplicationInsights } from "next-applicationinsights";
@@ -26,6 +28,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
   // usePWA(); //! OPT IN
 
   const auth = useAuth(skipauth);
+  const channelContext = useChannelContext();
 
   useEffect(() => {
     if (!__N_SSG) {
@@ -110,7 +113,9 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
             <>
               <AuthContext.Provider value={auth}>
                 {/* <SignalRContext.Provider value={{ connection }}> */}
-                <Component {...pageProps} />
+                <ChannelContext.Provider value={channelContext}>
+                  <Component {...pageProps} />
+                </ChannelContext.Provider>
                 {/* </SignalRContext.Provider> */}
               </AuthContext.Provider>
             </>

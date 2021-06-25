@@ -1,4 +1,5 @@
 
+using Application.ChannelSetting;
 using AutoMapper;
 using Domain.Entities;
 using System;
@@ -23,16 +24,15 @@ namespace Application.UnitTests.Common.Mappings
       _configuration.AssertConfigurationIsValid();
     }
 
-    // [Theory(Skip = "No auto mappings yet")]
-    // //[InlineData(typeof(ExampleChild), typeof(ExampleChildDto))]
-    // //[InlineData(typeof(ExampleParent), typeof(ExampleParentDto))]
-    // //[InlineData(typeof(ExampleChild), typeof(ExampleChildDto))]
-    // public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
-    // {
-    //   var instance = Activator.CreateInstance(source);
+    [Theory]
+    [InlineData(typeof(ChannelSettings), typeof(ChannelSettingsDto))]
+    [InlineData(typeof(ChannelSettings), typeof(ChannelSettingsIdDto))]
+    public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
+    {
+      var instance = Activator.CreateInstance(source);
 
-    //   _mapper.Map(instance, source, destination);
-    // }
+      _mapper.Map(instance, source, destination);
+    }
 
   }
 }
