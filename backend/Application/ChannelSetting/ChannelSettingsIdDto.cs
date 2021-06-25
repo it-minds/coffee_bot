@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Application.Common.Mappings;
+using AutoMapper;
+using Domain.Entities;
 
 namespace Application.ChannelSetting
 {
@@ -12,5 +10,12 @@ namespace Application.ChannelSetting
     public string SlackChannelId { get; set; }
     public string SlackChannelName { get; set; }
     public bool Paused { get; set; }
+
+
+    public void Mapping(Profile profile) {
+      profile.CreateMap<ChannelSettings, ChannelSettingsIdDto>()
+        .IncludeBase<ChannelSettings, ChannelSettingsDto>()
+        .ForMember(x => x.Paused, opts => opts.Ignore());
+    }
   }
 }
