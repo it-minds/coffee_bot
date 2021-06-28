@@ -65,7 +65,7 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "fetch-mock": "^9.11.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^27.0.4",
+    "jest": "^27.0.5",
     "jest-dom": "^4.0.0",
     "jest-fetch-mock": "^3.0.3",
     "prettier": "^2.3.1",
