@@ -31,10 +31,12 @@ namespace Application.ChannelSetting.Commands.UpdateChannelPaused
 
       public async Task<Unit> Handle(UpdateChannelPauseCommand request, CancellationToken cancellationToken)
       {
+        var userId = default(string) == request.Input.SlackUserId ? _currentUserService.UserSlackId : request.Input.SlackUserId;
+
         var channelMember = await _context.ChannelMembers
-          .Where(e => e.SlackUserId == request.Input.SlackUserId
-                      && e.ChannelSettingsId == request.Input.ChannelId)
+          .Where(e => e.SlackUserId == userId && e.ChannelSettingsId == request.Input.ChannelId)
           .FirstOrDefaultAsync(cancellationToken);
+
         if (channelMember == null) throw new NotFoundException(nameof(ChannelMember), request.Input);
 
         channelMember.OnPause = request.Input.Paused;

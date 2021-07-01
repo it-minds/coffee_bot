@@ -1,14 +1,23 @@
 using Application.Common;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SlackAuth.Query.GetAuthUrl;
 using SlackAuth.Query.GetUserFromCallback;
 using System.Threading.Tasks;
 using User.Query.CheckCurrentUser;
+using Web.Options;
 
 namespace Web.Controllers
 {
   public class AuthController : ApiControllerBase
   {
+    private readonly RedirectOptions redirectOptions;
+
+    public AuthController(IOptions<RedirectOptions> options)
+    {
+      redirectOptions = options.Value;
+    }
+
     [HttpPut]
     public async Task<ActionResult<AuthUser>> CheckAuth()
     {
@@ -30,7 +39,7 @@ namespace Web.Controllers
         Code = code
       });
 
-      return Redirect("http://localhost:3000/logincallback?token="+token); // TODO firgure out if we are going to use env variable
+      return Redirect(redirectOptions.URL + token);
     }
   }
 }

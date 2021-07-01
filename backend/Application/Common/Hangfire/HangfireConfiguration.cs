@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Hangfire.SqlServer;
 using Rounds.Commands.RoundFinisherCommand;
 using Rounds.Commands.RoundInitiatorCommand;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Application
 {
@@ -33,24 +35,24 @@ namespace Application
       return services;
     }
 
-    public static IMediator SetupHangfireJobs(this IMediator mediator)
+    public static IMediator SetupHangfireJobs(this IMediator mediator, IWebHostEnvironment env)
     {
       mediator.RecurringJob(
         new SyncronizeChannelsCommand { },
         "Syncronize Channels",
-        Cron.Hourly
+        Cron.Hourly()
       );
 
       mediator.RecurringJob(
         new RoundFinisherCommand { },
         "Round Finisher",
-        Cron.Never // TODO setup time interval when fully implemented
+        env.IsDevelopment() ? Cron.Never() : "0 12-17 * * *"
       );
 
       mediator.RecurringJob(
         new RoundInitiatorCommand { },
         "Round Initiator",
-        Cron.Never // TODO setup time interval when fully implemented
+        env.IsDevelopment() ? Cron.Never() : "0 8-12 * * *"
       );
 
       return mediator;

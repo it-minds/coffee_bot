@@ -44,10 +44,9 @@ namespace Rounds.Commands.RoundFinisherCommand
           var msg = BuildChannelMessage(round, meetupPercent);
 
           await slackClient.SendMessageToChannel(cancellationToken, round.SlackChannelId, msg);
-
         }
-        await applicationDbContext.SaveChangesAsync(cancellationToken);
 
+        await applicationDbContext.SaveChangesAsync(cancellationToken);
 
         return 1;
       }
@@ -58,14 +57,16 @@ namespace Rounds.Commands.RoundFinisherCommand
 
         sb
           .AppendLine("Curtain call ladies and gentlefolk. <!channel>.")
-          .Append("Your success has been measured and I give you a solid 10! (for effort)")
-          .Append("Your total meetup percent was: ").Append(Decimal.Round(meetupPercent)).Append("%");
+          .AppendLine("Your success has been measured and I give you a solid 10! (for effort)")
+          .Append("Your total meetup percent was: ")
+          .Append(Decimal.Round(meetupPercent).ToString())
+          .AppendLine("%");
 
         if (meetupPercent < 100m) {
-          sb.Append("Next time, let's try for 100% shall we?");
+          sb.AppendLine("Next time, let's try for 100% shall we?");
         }
 
-        sb.Append("Information regarding your next round TBA. Have a wonderful day :heart:");
+        sb.AppendLine("Information regarding your next round TBA. Have a wonderful day :heart:");
 
         return sb.ToString();
       }

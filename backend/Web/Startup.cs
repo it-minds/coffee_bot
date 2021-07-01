@@ -26,6 +26,7 @@ using Microsoft.IdentityModel.Tokens;
 using Application.Common.Options;
 using Web.Options;
 using Microsoft.EntityFrameworkCore;
+using Application.Common.Hangfire;
 
 namespace Web
 {
@@ -47,6 +48,7 @@ namespace Web
       services.Configure<SlackOptions>(Configuration.GetSection(SlackOptions.SlackOptionsToken));
       services.Configure<TokenOptions>(Configuration.GetSection(TokenOptions.Tokens));
       services.Configure<CorsOptions>(Configuration.GetSection(CorsOptions.Cors));
+      services.Configure<RedirectOptions>(Configuration.GetSection(RedirectOptions.Redirect));
 
       var corsOptions = Configuration.GetSection(CorsOptions.Cors).Get<CorsOptions>();
       services.AddCors(options =>
@@ -161,7 +163,10 @@ namespace Web
       app.UseAuthentication();
       app.UseAuthorization();
 
-      app.UseHangfireDashboard();
+      app.UseHangfireDashboard("/hangfire", new DashboardOptions
+      {
+        Authorization = new [] { new HangfireAuthorizationFilter() }
+      });
 
       app.UseEndpoints(endpoints =>
       {
@@ -173,7 +178,7 @@ namespace Web
         endpoints.MapHangfireDashboard();
       });
 
-      mediator.SetupHangfireJobs();
+      mediator.SetupHangfireJobs(env);
     }
   }
 }
