@@ -31,7 +31,7 @@ namespace Application.ChannelSetting.Commands.UpdateChannelPaused
 
       public async Task<Unit> Handle(UpdateChannelPauseCommand request, CancellationToken cancellationToken)
       {
-        var userId = default(string) == request.Input.SlackUserId ? _currentUserService.UserSlackId : request.Input.SlackUserId;
+        var userId = default(string) == request.Input.SlackUserId ? request.Input.SlackUserId : _currentUserService.UserSlackId ;
 
         var channelMember = await _context.ChannelMembers
           .Where(e => e.SlackUserId == userId && e.ChannelSettingsId == request.Input.ChannelId)

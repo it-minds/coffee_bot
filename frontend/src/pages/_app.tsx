@@ -3,12 +3,9 @@ import "../styles.global.css";
 
 import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
-import { ChannelContext } from "contexts/ChannelContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
-import { useChannelContext } from "hooks/useChannelContext";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
-import { withApplicationInsights } from "next-applicationinsights";
 import { I18nProvider } from "next-rosetta";
 import React, { ReactElement, useEffect } from "react";
 import EnvSettings from "types/EnvSettings";
@@ -28,7 +25,6 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
   // usePWA(); //! OPT IN
 
   const auth = useAuth(skipauth);
-  const channelContext = useChannelContext();
 
   useEffect(() => {
     if (!__N_SSG) {
@@ -113,9 +109,8 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
             <>
               <AuthContext.Provider value={auth}>
                 {/* <SignalRContext.Provider value={{ connection }}> */}
-                <ChannelContext.Provider value={channelContext}>
-                  <Component {...pageProps} />
-                </ChannelContext.Provider>
+                <Component {...pageProps} />
+
                 {/* </SignalRContext.Provider> */}
               </AuthContext.Provider>
             </>
@@ -126,9 +121,9 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
   );
 };
 
-export default withApplicationInsights({
-  instrumentationKey: "07b2bb65-4d30-4c57-b88d-14872abd7676",
-  isEnabled: true //process.env.NODE_ENV === 'production'
-})(MyApp as any);
+// export default withApplicationInsights({
+//   instrumentationKey: "07b2bb65-4d30-4c57-b88d-14872abd7676",
+//   isEnabled: true //process.env.NODE_ENV === 'production'
+// })(MyApp as any);
 
-// export default MyApp;
+export default MyApp;

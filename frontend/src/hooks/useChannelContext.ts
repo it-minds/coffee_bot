@@ -1,4 +1,5 @@
-import { Dispatch, useCallback, useEffect, useReducer } from "react";
+import { AuthContext } from "contexts/AuthContext";
+import { Dispatch, useCallback, useContext, useEffect, useReducer } from "react";
 import ListReducer, { AllListActions, ListReducerActionType } from "react-list-reducer";
 import { genChannelClient } from "services/backend/apiClients";
 import {
@@ -17,6 +18,8 @@ type ChannelHook = {
   updateChannelSettings: (id: number, input: IChannelSettingsDto) => Promise<void>;
 };
 export const useChannelContext = (): ChannelHook => {
+  const { activeUser } = useContext(AuthContext);
+
   const [channels, dispatchChannels] = useReducer(ListReducer<IChannelSettingsIdDto>("id"), []);
 
   const fetchChannels = useCallback(async () => {
@@ -57,8 +60,8 @@ export const useChannelContext = (): ChannelHook => {
   }, []);
 
   useEffect(() => {
-    fetchChannels();
-  }, []);
+    if (activeUser !== null) fetchChannels();
+  }, [activeUser]);
 
   return { fetchChannels, channels, dispatchChannels, updateChannelPaused, updateChannelSettings };
 };
