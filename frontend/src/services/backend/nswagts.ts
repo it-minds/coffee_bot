@@ -823,7 +823,6 @@ export interface IUpdateChannelPauseCommand {
 }
 
 export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
-    slackUserId?: string | null;
     channelId?: number;
     paused?: boolean;
 
@@ -838,7 +837,6 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
 
     init(_data?: any) {
         if (_data) {
-            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
             this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
             this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
         }
@@ -853,7 +851,6 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         return data; 
@@ -861,7 +858,6 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
 }
 
 export interface IUpdateChannelPauseInput {
-    slackUserId?: string | null;
     channelId?: number;
     paused?: boolean;
 }
