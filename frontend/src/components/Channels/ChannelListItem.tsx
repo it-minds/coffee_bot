@@ -29,8 +29,8 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
       <Spacer />
       <Switch
         size="sm"
-        checked={!channel.paused}
-        onClick={() => {
+        isChecked={!channel.paused}
+        onChange={() => {
           updateChannelPaused(
             new UpdateChannelPauseInput({
               channelId: channel.id,
