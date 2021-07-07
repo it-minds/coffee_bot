@@ -445,7 +445,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
 }
 
 export interface ISlashClient {
-    tEST(body: any): Promise<boolean>;
+    tEST(payload?: string | null | undefined): Promise<boolean>;
 }
 
 export class SlashClient extends ClientBase implements ISlashClient {
@@ -459,17 +459,18 @@ export class SlashClient extends ClientBase implements ISlashClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    tEST(body: any): Promise<boolean> {
+    tEST(payload?: string | null | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/api/Slash/coffee-group-done";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (payload !== null && payload !== undefined)
+            content_.append("Payload", payload.toString());
 
         let options_ = <RequestInit>{
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };

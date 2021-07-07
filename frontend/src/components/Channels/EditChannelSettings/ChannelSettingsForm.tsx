@@ -13,27 +13,25 @@ import {
   Switch
 } from "@chakra-ui/react";
 import React, { FC, useCallback, useEffect, useState } from "react";
-import { ChannelSettingsDto, DayOfWeek } from "services/backend/nswagts";
+import { DayOfWeek, IChannelSettingsDto } from "services/backend/nswagts";
 
 type Props = {
-  submitCallback: (metaData: ChannelSettingsDto) => Promise<void>;
-  MetaData?: ChannelSettingsDto;
+  submitCallback: (metaData: IChannelSettingsDto) => Promise<void>;
+  channel?: IChannelSettingsDto;
 };
 
-const ChannelSettingsForm: FC<Props> = ({ submitCallback, MetaData }) => {
+const ChannelSettingsForm: FC<Props> = ({ submitCallback, channel }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [localFormData, setLocalFormData] = useState<ChannelSettingsDto>(
-    new ChannelSettingsDto({
-      groupSize: 2,
-      startsDay: DayOfWeek.Monday,
-      weekRepeat: 1,
-      durationInDays: 1,
-      individualMessage: false
-    })
-  );
+  const [localFormData, setLocalFormData] = useState<IChannelSettingsDto>({
+    groupSize: 2,
+    startsDay: DayOfWeek.Monday,
+    weekRepeat: 1,
+    durationInDays: 1,
+    individualMessage: false
+  });
   useEffect(() => {
-    if (MetaData) {
-      setLocalFormData(MetaData);
+    if (channel) {
+      setLocalFormData(channel);
     }
   }, []);
 
@@ -47,18 +45,12 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, MetaData }) => {
     [localFormData, submitCallback]
   );
 
-  const updateLocalForm = useCallback((value: unknown, key: keyof ChannelSettingsDto) => {
+  const updateLocalForm = useCallback((value: unknown, key: keyof IChannelSettingsDto) => {
     setLocalFormData(form => {
       (form[key] as unknown) = value;
-      return new ChannelSettingsDto(form);
+      return { ...form };
     });
   }, []);
-
-  useEffect(() => {
-    if (localFormData) {
-      console.log(localFormData);
-    }
-  }, [localFormData]);
 
   return (
     <Flex w="full" align="center" justifyContent="center">

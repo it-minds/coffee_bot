@@ -9,10 +9,12 @@ namespace Domain.Entities
     public string SlackMessageId { get; set; }
 
     public bool HasMet { get; set; }
+    public int NotificationCount { get; set; }
 
     public string PhotoUrl { get; set; }
 
     public int CoffeeRoundId { get; set; }
+
     public CoffeeRound CoffeeRound { get; set; }
 
     public ICollection<CoffeeRoundGroupMember> CoffeeRoundGroupMembers { get; set; }

@@ -44,7 +44,7 @@ const EditChannelSettingsTriggerBtn: FC<Props> = ({ channel }) => {
 
     [updateChannelSettings]
   );
-  if (!channel) return null;
+
   return (
     <>
       <PopoverMenuButton btnText="Edit channel settings" onClickMethod={onOpen} />
@@ -55,18 +55,7 @@ const EditChannelSettingsTriggerBtn: FC<Props> = ({ channel }) => {
           <ModalCloseButton />
           <Divider />
           <ModalBody>
-            <ChannelSettingsForm
-              MetaData={
-                new ChannelSettingsDto({
-                  durationInDays: channel.durationInDays,
-                  weekRepeat: channel.weekRepeat,
-                  startsDay: channel.startsDay,
-                  individualMessage: channel.individualMessage,
-                  groupSize: channel.groupSize
-                })
-              }
-              submitCallback={submitSettings}
-            />
+            <ChannelSettingsForm channel={channel} submitCallback={submitSettings} />
           </ModalBody>
           <Divider />
           <ModalFooter>

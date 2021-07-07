@@ -19,7 +19,7 @@ const IndexPage: NextPage = () => {
           <Flex justify="center" align="center">
             <ColorModeToggler />
             <Spacer />
-            <Text> User: {activeUser.email}</Text>
+            <Text>User: {activeUser.email}</Text>
           </Flex>
           <ChannelList />
         </Container>

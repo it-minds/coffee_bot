@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Slack.Interfaces;
 using Slack.Options;
 using SlackNet;
+using SlackNet.Blocks;
 using SlackNet.WebApi;
 
 namespace Slack.Clients
@@ -173,5 +174,24 @@ namespace Slack.Clients
 
       return result;
     }
+
+    public async Task<bool> UpdateMessage(string channelId, string msgTsToUpdate, CancellationToken cancellationToken)
+    {
+      var messageUpdate = new MessageUpdate
+      {
+        Ts = msgTsToUpdate,
+        ChannelId = channelId,
+        Blocks = new List<Block> {
+          new SectionBlock {
+            Text = new Markdown("Thank you!")
+          }
+        }
+      };
+      var result = await apiClient.Chat.Update(messageUpdate);
+
+      return true;
+    }
   }
 }
+
+// https://itminds.slack.com/archives/C027PEX6BEV/p1625657564000400

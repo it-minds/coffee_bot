@@ -8,6 +8,7 @@ using Rounds.Commands.RoundFinisherCommand;
 using Rounds.Commands.RoundInitiatorCommand;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Rounds.Commands.RoundMidwayCheckupCommand;
 
 namespace Application
 {
@@ -54,6 +55,13 @@ namespace Application
         "Round Initiator",
         env.IsDevelopment() ? Cron.Never() : "0 8-12 * * *"
       );
+
+      mediator.RecurringJob(
+        new RoundMidwayCheckupCommand { },
+        "Round Midway",
+        env.IsDevelopment() ? Cron.Never() : "0 11 * * *"
+      );
+
 
       return mediator;
     }

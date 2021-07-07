@@ -71,11 +71,6 @@ namespace Rounds.Commands.RoundInitiatorCommand
       {
         var groupMessage = BuildGroupMessage(settings, round, group);
 
-        if (settings.IndividualMessage)
-        {
-          var pm = await slackClient.SendPrivateMessageToMembers(cancellationToken, group, groupMessage);
-        }
-
         var roundGroup = new CoffeeRoundGroup
         {
           CoffeeRound = round,
@@ -84,6 +79,13 @@ namespace Rounds.Commands.RoundInitiatorCommand
             SlackMemberId = x
           }).ToList()
         };
+
+        if (settings.IndividualMessage)
+        {
+          var pm = await slackClient.SendPrivateMessageToMembers(cancellationToken, group, groupMessage);
+          roundGroup.SlackMessageId = pm.ChannelId;
+        }
+
         applicationDbContext.CoffeeRoundGroups.Add(roundGroup);
 
         return roundGroup;

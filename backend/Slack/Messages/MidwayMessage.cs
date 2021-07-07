@@ -25,7 +25,7 @@ namespace Slack.Messages
       {
         Blocks = {
           new SectionBlock {
-            Text = {
+            Text = new Markdown {
               Type = "mrkdwn",
               Text = "Hello, guys! I am checking in to see if you met for a cup of coffee this round."
             }
@@ -34,7 +34,7 @@ namespace Slack.Messages
             Elements = {
               new Button {
                 Style = ButtonStyle.Primary,
-                Text = {
+                Text = new PlainText {
                   Emoji= false,
                   Text = "Yes, We have met!",
                 },
@@ -42,7 +42,7 @@ namespace Slack.Messages
               },
               new Button {
                 Style = ButtonStyle.Danger,
-                Text = {
+                Text = new PlainText {
                   Emoji= false,
                   Text = "No, We haven't met yet."
                 },

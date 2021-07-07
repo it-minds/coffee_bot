@@ -40,21 +40,17 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
         }}
       />
       <Popover placement="right">
-        {({ onClose }) => (
-          <>
-            <PopoverTrigger>
-              <IconButton icon={<BsThreeDots />} aria-label="menu"></IconButton>
-            </PopoverTrigger>
-            <Portal>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverBody p="0">
-                  <EditChannelSettingsTriggerBtn channel={channel} />
-                </PopoverBody>
-              </PopoverContent>
-            </Portal>
-          </>
-        )}
+        <PopoverTrigger>
+          <IconButton icon={<BsThreeDots />} aria-label="menu"></IconButton>
+        </PopoverTrigger>
+        <Portal>
+          <PopoverContent>
+            <PopoverArrow />
+            <PopoverBody p="0">
+              <EditChannelSettingsTriggerBtn channel={channel} />
+            </PopoverBody>
+          </PopoverContent>
+        </Portal>
       </Popover>
     </Flex>
   );
