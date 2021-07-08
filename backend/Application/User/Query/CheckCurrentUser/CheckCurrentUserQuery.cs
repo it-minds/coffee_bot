@@ -26,7 +26,8 @@ namespace User.Query.CheckCurrentUser
         return new AuthUser
         {
           Email = currentUserService.UserEmail,
-          SlackUserId = currentUserService.UserSlackId
+          SlackUserId = currentUserService.UserSlackId,
+          SlackToken = currentUserService.SlackToken
         };
       }
     }

@@ -24,6 +24,7 @@ namespace Web.Services
       var claims = new List<Claim>();
       claims.Add(new Claim(ClaimTypes.NameIdentifier, user.SlackUserId));
       claims.Add(new Claim(ClaimTypes.Email, user.Email));
+      claims.Add(new Claim(ClaimTypes.UserData, user.SlackToken));
 
       var key = Encoding.ASCII.GetBytes(_options.Secret);
       var tokenHandler = new JwtSecurityTokenHandler();

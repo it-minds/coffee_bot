@@ -29,6 +29,7 @@ namespace SlackAuth.Query.GetUserFromCallback
         var user = new AuthUser {
           Email = slackUser.Email,
           SlackUserId = slackUser.Id,
+          SlackToken = token
         };
 
         var apptoken = tokenService.CreateToken(user);

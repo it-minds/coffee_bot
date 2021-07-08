@@ -448,6 +448,66 @@ export class EventClient extends ClientBase implements IEventClient {
     }
 }
 
+export interface IGalleryClient {
+    getAll(channelId?: number | undefined): Promise<StandardGroupDto[]>;
+}
+
+export class GalleryClient extends ClientBase implements IGalleryClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getAll(channelId?: number | undefined): Promise<StandardGroupDto[]> {
+        let url_ = this.baseUrl + "/api/Gallery/all?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetAll(_response));
+        });
+    }
+
+    protected processGetAll(response: Response): Promise<StandardGroupDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(StandardGroupDto.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<StandardGroupDto[]>(<any>null);
+    }
+}
+
 export interface IHealthClient {
     getBackendHealth(): Promise<boolean>;
 }
@@ -557,8 +617,65 @@ export class SlashClient extends ClientBase implements ISlashClient {
     }
 }
 
+export interface IStatsClient {
+    getMemberStats(): Promise<StatsDto[]>;
+}
+
+export class StatsClient extends ClientBase implements IStatsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getMemberStats(): Promise<StatsDto[]> {
+        let url_ = this.baseUrl + "/api/Stats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMemberStats(_response));
+        });
+    }
+
+    protected processGetMemberStats(response: Response): Promise<StatsDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(StatsDto.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<StatsDto[]>(<any>null);
+    }
+}
+
 export class AuthUser implements IAuthUser {
     slackUserId?: string | null;
+    slackToken?: string | null;
     email?: string | null;
 
     constructor(data?: IAuthUser) {
@@ -573,6 +690,7 @@ export class AuthUser implements IAuthUser {
     init(_data?: any) {
         if (_data) {
             this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
+            this.slackToken = _data["slackToken"] !== undefined ? _data["slackToken"] : <any>null;
             this.email = _data["email"] !== undefined ? _data["email"] : <any>null;
         }
     }
@@ -587,6 +705,7 @@ export class AuthUser implements IAuthUser {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
+        data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
         data["email"] = this.email !== undefined ? this.email : <any>null;
         return data; 
     }
@@ -594,6 +713,7 @@ export class AuthUser implements IAuthUser {
 
 export interface IAuthUser {
     slackUserId?: string | null;
+    slackToken?: string | null;
     email?: string | null;
 }
 
@@ -1055,6 +1175,62 @@ export interface IAuthorization {
     is_enterprise_install?: boolean;
 }
 
+export class StandardGroupDto implements IStandardGroupDto {
+    id?: number;
+    hasMet?: boolean;
+    photoUrl?: string | null;
+    members?: string[] | null;
+
+    constructor(data?: IStandardGroupDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
+            this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
+            if (Array.isArray(_data["members"])) {
+                this.members = [] as any;
+                for (let item of _data["members"])
+                    this.members!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): StandardGroupDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StandardGroupDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
+        data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
+        if (Array.isArray(this.members)) {
+            data["members"] = [];
+            for (let item of this.members)
+                data["members"].push(item);
+        }
+        return data; 
+    }
+}
+
+export interface IStandardGroupDto {
+    id?: number;
+    hasMet?: boolean;
+    photoUrl?: string | null;
+    members?: string[] | null;
+}
+
 export class BlockResponse implements IBlockResponse {
     response_type?: string | null;
     text?: string | null;
@@ -1101,6 +1277,54 @@ export interface IBlockResponse {
     text?: string | null;
     replace_original?: boolean;
     delete_original?: boolean;
+}
+
+export class StatsDto implements IStatsDto {
+    slackMemberId?: string | null;
+    meepupPercent?: number;
+    photoPercent?: number;
+    totalParticipation?: number;
+
+    constructor(data?: IStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.slackMemberId = _data["slackMemberId"] !== undefined ? _data["slackMemberId"] : <any>null;
+            this.meepupPercent = _data["meepupPercent"] !== undefined ? _data["meepupPercent"] : <any>null;
+            this.photoPercent = _data["photoPercent"] !== undefined ? _data["photoPercent"] : <any>null;
+            this.totalParticipation = _data["totalParticipation"] !== undefined ? _data["totalParticipation"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): StatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["slackMemberId"] = this.slackMemberId !== undefined ? this.slackMemberId : <any>null;
+        data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
+        data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
+        data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
+        return data; 
+    }
+}
+
+export interface IStatsDto {
+    slackMemberId?: string | null;
+    meepupPercent?: number;
+    photoPercent?: number;
+    totalParticipation?: number;
 }
 
 export enum CommandErrorCode {

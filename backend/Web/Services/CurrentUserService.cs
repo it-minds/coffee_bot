@@ -15,5 +15,6 @@ namespace Web.Services
 
     public string UserEmail => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
     public string UserSlackId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+    public string SlackToken => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.UserData);
   }
 }

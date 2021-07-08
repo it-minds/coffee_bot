@@ -45,6 +45,8 @@ namespace Application.ImagePost.Commands.ImagePostCommand
 
         var result = await slackClient.Client().Chat.PostEphemeral(request.Event.UserId, message, cancellationToken);
 
+        await applicationDbContext.SaveChangesAsync(cancellationToken);
+
         return 0;
       }
     }
