@@ -51,6 +51,7 @@ namespace Web
       services.Configure<RedirectOptions>(Configuration.GetSection(RedirectOptions.Redirect));
 
       var corsOptions = Configuration.GetSection(CorsOptions.Cors).Get<CorsOptions>();
+
       services.AddCors(options =>
       {
         options.AddPolicy("AllowSecure",
@@ -106,7 +107,8 @@ namespace Web
 
       services.AddHangfire(connString: Configuration.GetConnectionString("DefaultConnection"));
 
-      var key = Encoding.ASCII.GetBytes("VERY_SECRET_SECRET");
+      var tokenOptions = Configuration.GetSection(TokenOptions.Tokens).Get<TokenOptions>();
+      var key = Encoding.ASCII.GetBytes(tokenOptions.Secret);
       services.AddAuthentication(x =>
         {
           x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
