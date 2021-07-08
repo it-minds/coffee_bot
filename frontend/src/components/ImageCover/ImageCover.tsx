@@ -12,10 +12,10 @@ import {
   VStack
 } from "@chakra-ui/react";
 import React, { FC } from "react";
-import { StandardGroupDto } from "services/backend/nswagts";
+import { ExtendedImageDto } from "types/ExtendedImageDto";
 
 type Props = {
-  image: StandardGroupDto;
+  image: ExtendedImageDto;
   onClose: () => void;
 };
 
@@ -28,7 +28,7 @@ const ImageCover: FC<Props> = ({ image, onClose }) => {
         <ModalCloseButton />
         <ModalBody>
           <VStack>
-            <Image src={image.photoUrl}></Image>
+            <Image src={image.publicSrc}></Image>
             <Text as="b">Members:</Text>
             <Text>{image.members.join(" & ")}</Text>
           </VStack>

@@ -1,4 +1,4 @@
-import { Container, Flex, Heading, Image } from "@chakra-ui/react";
+import { Container, Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -8,17 +8,14 @@ import React, { useContext, useReducer, useState } from "react";
 import ListReducer, { ListReducerActionType } from "react-list-reducer";
 import { genGalleryClient } from "services/backend/apiClients";
 import { StandardGroupDto } from "services/backend/nswagts";
-
-type ExtendedDto = StandardGroupDto & {
-  publicSrc: string;
-};
+import { ExtendedImageDto } from "types/ExtendedImageDto";
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
 
-  const [activeImage, setActiveImage] = useState<StandardGroupDto>(null);
-  const [images, setImages] = useReducer(ListReducer<ExtendedDto>("id"), []);
+  const [activeImage, setActiveImage] = useState<ExtendedImageDto>(null);
+  const [images, setImages] = useReducer(ListReducer<ExtendedImageDto>("id"), []);
 
   useEffectAsync(async () => {
     if (activeUser && query.channelId) {
@@ -28,7 +25,7 @@ const IndexPage: NextPage = () => {
 
       setImages({
         type: ListReducerActionType.Reset,
-        data: allImages as ExtendedDto[]
+        data: allImages as ExtendedImageDto[]
       });
 
       await Promise.all(
@@ -43,10 +40,10 @@ const IndexPage: NextPage = () => {
               const urlCreator = window.URL || window.webkitURL;
               const src = urlCreator.createObjectURL(blob);
 
-              (image as ExtendedDto).publicSrc = src;
+              (image as ExtendedImageDto).publicSrc = src;
               setImages({
                 type: ListReducerActionType.Update,
-                data: image as ExtendedDto
+                data: image as ExtendedImageDto
               });
               return image;
             })
@@ -63,18 +60,22 @@ const IndexPage: NextPage = () => {
         <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
       )}
       <Flex pt="4" wrap="wrap" justifyContent="center">
-        {images.map(image => (
-          <Image
-            _hover={{
-              cursor: "pointer",
-              borderSize: "2px"
-            }}
-            maxH="300px"
-            key={image.id}
-            src={image.publicSrc}
-            onClick={() => setActiveImage(image)}
-          />
-        ))}
+        {images.map(image =>
+          image.publicSrc ? (
+            <Image
+              _hover={{
+                cursor: "pointer",
+                borderSize: "2px"
+              }}
+              maxH="300px"
+              key={image.id}
+              src={image.publicSrc}
+              onClick={() => setActiveImage(image)}
+            />
+          ) : (
+            <Skeleton key={image.id} height="300px" width="300px" />
+          )
+        )}
       </Flex>
     </Container>
   );
