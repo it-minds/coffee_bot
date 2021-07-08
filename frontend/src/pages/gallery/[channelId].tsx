@@ -4,16 +4,21 @@ import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useReducer, useState } from "react";
+import ListReducer, { ListReducerActionType } from "react-list-reducer";
 import { genGalleryClient } from "services/backend/apiClients";
 import { StandardGroupDto } from "services/backend/nswagts";
+
+type ExtendedDto = StandardGroupDto & {
+  publicSrc: string;
+};
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
 
   const [activeImage, setActiveImage] = useState<StandardGroupDto>(null);
-  const [images, setImages] = useState<StandardGroupDto[]>([]);
+  const [images, setImages] = useReducer(ListReducer<ExtendedDto>("id"), []);
 
   useEffectAsync(async () => {
     if (activeUser && query.channelId) {
@@ -21,21 +26,32 @@ const IndexPage: NextPage = () => {
       const client = await genGalleryClient();
       const allImages: StandardGroupDto[] = await client.getAll(channelId).catch(() => []);
 
-      const result = await Promise.all(
+      setImages({
+        type: ListReducerActionType.Reset,
+        data: allImages as ExtendedDto[]
+      });
+
+      await Promise.all(
         allImages.map(image =>
-          fetch("/api/slackBlob?photoUrl=" + image.photoUrl + "&token=" + activeUser.slackToken)
+          fetch("/api/slackBlob?photoUrl=" + image.photoUrl, {
+            headers: {
+              Authorization: "Bearer " + activeUser.slackToken
+            }
+          })
             .then(res => res.blob())
             .then(blob => {
               const urlCreator = window.URL || window.webkitURL;
               const src = urlCreator.createObjectURL(blob);
 
-              image.photoUrl = src;
+              (image as ExtendedDto).publicSrc = src;
+              setImages({
+                type: ListReducerActionType.Update,
+                data: image as ExtendedDto
+              });
               return image;
             })
         )
       );
-
-      setImages(result);
     }
   }, [activeUser, query]);
 
@@ -55,7 +71,7 @@ const IndexPage: NextPage = () => {
             }}
             maxH="300px"
             key={image.id}
-            src={image.photoUrl}
+            src={image.publicSrc}
             onClick={() => setActiveImage(image)}
           />
         ))}
