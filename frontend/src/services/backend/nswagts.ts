@@ -392,6 +392,62 @@ export class ChannelClient extends ClientBase implements IChannelClient {
     }
 }
 
+export interface IEventClient {
+    allEventSubscriber(body: EventInput): Promise<string>;
+}
+
+export class EventClient extends ClientBase implements IEventClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    allEventSubscriber(body: EventInput): Promise<string> {
+        let url_ = this.baseUrl + "/api/Event";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processAllEventSubscriber(_response));
+        });
+    }
+
+    protected processAllEventSubscriber(response: Response): Promise<string> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<string>(<any>null);
+    }
+}
+
 export interface IHealthClient {
     getBackendHealth(): Promise<boolean>;
 }
@@ -445,7 +501,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
 }
 
 export interface ISlashClient {
-    tEST(payload?: string | null | undefined): Promise<boolean>;
+    blockResponse(payload?: string | null | undefined): Promise<BlockResponse>;
 }
 
 export class SlashClient extends ClientBase implements ISlashClient {
@@ -459,7 +515,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    tEST(payload?: string | null | undefined): Promise<boolean> {
+    blockResponse(payload?: string | null | undefined): Promise<BlockResponse> {
         let url_ = this.baseUrl + "/api/Slash/coffee-group-done";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -478,18 +534,18 @@ export class SlashClient extends ClientBase implements ISlashClient {
         return this.transformOptions(options_).then(transformedOptions_ => {
             return this.http.fetch(url_, transformedOptions_);
         }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processTEST(_response));
+            return this.transformResult(url_, _response, (_response: Response) => this.processBlockResponse(_response));
         });
     }
 
-    protected processTEST(response: Response): Promise<boolean> {
+    protected processBlockResponse(response: Response): Promise<BlockResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = BlockResponse.fromJS(resultData200);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -497,145 +553,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<boolean>(<any>null);
-    }
-}
-
-export interface ITestClient {
-    channelSync(command: SyncronizeChannelsCommand): Promise<boolean>;
-    newChannelMessager(command: NewChannelMessagerCommand): Promise<boolean>;
-    roundInitiator(command: RoundInitiatorCommand): Promise<boolean>;
-}
-
-export class TestClient extends ClientBase implements ITestClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        super(configuration);
-        this.http = http ? http : <any>window;
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
-    }
-
-    channelSync(command: SyncronizeChannelsCommand): Promise<boolean> {
-        let url_ = this.baseUrl + "/api/Test/channel-sync";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(command);
-
-        let options_ = <RequestInit>{
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processChannelSync(_response));
-        });
-    }
-
-    protected processChannelSync(response: Response): Promise<boolean> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<boolean>(<any>null);
-    }
-
-    newChannelMessager(command: NewChannelMessagerCommand): Promise<boolean> {
-        let url_ = this.baseUrl + "/api/Test/new-channel-msg";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(command);
-
-        let options_ = <RequestInit>{
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processNewChannelMessager(_response));
-        });
-    }
-
-    protected processNewChannelMessager(response: Response): Promise<boolean> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<boolean>(<any>null);
-    }
-
-    roundInitiator(command: RoundInitiatorCommand): Promise<boolean> {
-        let url_ = this.baseUrl + "/api/Test/round-init";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(command);
-
-        let options_ = <RequestInit>{
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processRoundInitiator(_response));
-        });
-    }
-
-    protected processRoundInitiator(response: Response): Promise<boolean> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<boolean>(<any>null);
+        return Promise.resolve<BlockResponse>(<any>null);
     }
 }
 
@@ -900,40 +818,159 @@ export interface IUpdateChannelSettingsCommand {
     settings?: IChannelSettingsDto | null;
 }
 
-export class SyncronizeChannelsCommand implements ISyncronizeChannelsCommand {
+export class EventInput implements IEventInput {
+    token?: string | null;
+    challenge?: string | null;
+    team_id?: string | null;
+    api_app_id?: string | null;
+    event?: Event | null;
+    type?: string | null;
+    event_id?: string | null;
+    event_time?: number;
+    authorizations?: Authorization[] | null;
+    is_ext_shared_channel?: boolean;
+    event_context?: string | null;
 
-    constructor(data?: ISyncronizeChannelsCommand) {
+    constructor(data?: IEventInput) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event; 
+            if (data.authorizations) {
+                this.authorizations = [];
+                for (let i = 0; i < data.authorizations.length; i++) {
+                    let item = data.authorizations[i];
+                    this.authorizations[i] = item && !(<any>item).toJSON ? new Authorization(item) : <Authorization>item;
+                }
+            }
         }
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.token = _data["token"] !== undefined ? _data["token"] : <any>null;
+            this.challenge = _data["challenge"] !== undefined ? _data["challenge"] : <any>null;
+            this.team_id = _data["team_id"] !== undefined ? _data["team_id"] : <any>null;
+            this.api_app_id = _data["api_app_id"] !== undefined ? _data["api_app_id"] : <any>null;
+            this.event = _data["event"] ? Event.fromJS(_data["event"]) : <any>null;
+            this.type = _data["type"] !== undefined ? _data["type"] : <any>null;
+            this.event_id = _data["event_id"] !== undefined ? _data["event_id"] : <any>null;
+            this.event_time = _data["event_time"] !== undefined ? _data["event_time"] : <any>null;
+            if (Array.isArray(_data["authorizations"])) {
+                this.authorizations = [] as any;
+                for (let item of _data["authorizations"])
+                    this.authorizations!.push(Authorization.fromJS(item));
+            }
+            this.is_ext_shared_channel = _data["is_ext_shared_channel"] !== undefined ? _data["is_ext_shared_channel"] : <any>null;
+            this.event_context = _data["event_context"] !== undefined ? _data["event_context"] : <any>null;
+        }
     }
 
-    static fromJS(data: any): SyncronizeChannelsCommand {
+    static fromJS(data: any): EventInput {
         data = typeof data === 'object' ? data : {};
-        let result = new SyncronizeChannelsCommand();
+        let result = new EventInput();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["token"] = this.token !== undefined ? this.token : <any>null;
+        data["challenge"] = this.challenge !== undefined ? this.challenge : <any>null;
+        data["team_id"] = this.team_id !== undefined ? this.team_id : <any>null;
+        data["api_app_id"] = this.api_app_id !== undefined ? this.api_app_id : <any>null;
+        data["event"] = this.event ? this.event.toJSON() : <any>null;
+        data["type"] = this.type !== undefined ? this.type : <any>null;
+        data["event_id"] = this.event_id !== undefined ? this.event_id : <any>null;
+        data["event_time"] = this.event_time !== undefined ? this.event_time : <any>null;
+        if (Array.isArray(this.authorizations)) {
+            data["authorizations"] = [];
+            for (let item of this.authorizations)
+                data["authorizations"].push(item.toJSON());
+        }
+        data["is_ext_shared_channel"] = this.is_ext_shared_channel !== undefined ? this.is_ext_shared_channel : <any>null;
+        data["event_context"] = this.event_context !== undefined ? this.event_context : <any>null;
         return data; 
     }
 }
 
-export interface ISyncronizeChannelsCommand {
+export interface IEventInput {
+    token?: string | null;
+    challenge?: string | null;
+    team_id?: string | null;
+    api_app_id?: string | null;
+    event?: IEvent | null;
+    type?: string | null;
+    event_id?: string | null;
+    event_time?: number;
+    authorizations?: IAuthorization[] | null;
+    is_ext_shared_channel?: boolean;
+    event_context?: string | null;
 }
 
-export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
-    slackChannelId?: string | null;
+export class Event implements IEvent {
+    type?: string | null;
+    channel_id?: string | null;
+    file_id?: string | null;
+    user_id?: string | null;
+    file?: File | null;
+    event_ts?: string | null;
 
-    constructor(data?: INewChannelMessagerCommand) {
+    constructor(data?: IEvent) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file; 
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.type = _data["type"] !== undefined ? _data["type"] : <any>null;
+            this.channel_id = _data["channel_id"] !== undefined ? _data["channel_id"] : <any>null;
+            this.file_id = _data["file_id"] !== undefined ? _data["file_id"] : <any>null;
+            this.user_id = _data["user_id"] !== undefined ? _data["user_id"] : <any>null;
+            this.file = _data["file"] ? File.fromJS(_data["file"]) : <any>null;
+            this.event_ts = _data["event_ts"] !== undefined ? _data["event_ts"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): Event {
+        data = typeof data === 'object' ? data : {};
+        let result = new Event();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["type"] = this.type !== undefined ? this.type : <any>null;
+        data["channel_id"] = this.channel_id !== undefined ? this.channel_id : <any>null;
+        data["file_id"] = this.file_id !== undefined ? this.file_id : <any>null;
+        data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
+        data["file"] = this.file ? this.file.toJSON() : <any>null;
+        data["event_ts"] = this.event_ts !== undefined ? this.event_ts : <any>null;
+        return data; 
+    }
+}
+
+export interface IEvent {
+    type?: string | null;
+    channel_id?: string | null;
+    file_id?: string | null;
+    user_id?: string | null;
+    file?: IFile | null;
+    event_ts?: string | null;
+}
+
+export class File implements IFile {
+    id?: string | null;
+
+    constructor(data?: IFile) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -944,31 +981,36 @@ export class NewChannelMessagerCommand implements INewChannelMessagerCommand {
 
     init(_data?: any) {
         if (_data) {
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
         }
     }
 
-    static fromJS(data: any): NewChannelMessagerCommand {
+    static fromJS(data: any): File {
         data = typeof data === 'object' ? data : {};
-        let result = new NewChannelMessagerCommand();
+        let result = new File();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["id"] = this.id !== undefined ? this.id : <any>null;
         return data; 
     }
 }
 
-export interface INewChannelMessagerCommand {
-    slackChannelId?: string | null;
+export interface IFile {
+    id?: string | null;
 }
 
-export class RoundInitiatorCommand implements IRoundInitiatorCommand {
+export class Authorization implements IAuthorization {
+    enterprise_id?: any | null;
+    team_id?: string | null;
+    user_id?: string | null;
+    is_bot?: boolean;
+    is_enterprise_install?: boolean;
 
-    constructor(data?: IRoundInitiatorCommand) {
+    constructor(data?: IAuthorization) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -978,22 +1020,87 @@ export class RoundInitiatorCommand implements IRoundInitiatorCommand {
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.enterprise_id = _data["enterprise_id"] !== undefined ? _data["enterprise_id"] : <any>null;
+            this.team_id = _data["team_id"] !== undefined ? _data["team_id"] : <any>null;
+            this.user_id = _data["user_id"] !== undefined ? _data["user_id"] : <any>null;
+            this.is_bot = _data["is_bot"] !== undefined ? _data["is_bot"] : <any>null;
+            this.is_enterprise_install = _data["is_enterprise_install"] !== undefined ? _data["is_enterprise_install"] : <any>null;
+        }
     }
 
-    static fromJS(data: any): RoundInitiatorCommand {
+    static fromJS(data: any): Authorization {
         data = typeof data === 'object' ? data : {};
-        let result = new RoundInitiatorCommand();
+        let result = new Authorization();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["enterprise_id"] = this.enterprise_id !== undefined ? this.enterprise_id : <any>null;
+        data["team_id"] = this.team_id !== undefined ? this.team_id : <any>null;
+        data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
+        data["is_bot"] = this.is_bot !== undefined ? this.is_bot : <any>null;
+        data["is_enterprise_install"] = this.is_enterprise_install !== undefined ? this.is_enterprise_install : <any>null;
         return data; 
     }
 }
 
-export interface IRoundInitiatorCommand {
+export interface IAuthorization {
+    enterprise_id?: any | null;
+    team_id?: string | null;
+    user_id?: string | null;
+    is_bot?: boolean;
+    is_enterprise_install?: boolean;
+}
+
+export class BlockResponse implements IBlockResponse {
+    response_type?: string | null;
+    text?: string | null;
+    replace_original?: boolean;
+    delete_original?: boolean;
+
+    constructor(data?: IBlockResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.response_type = _data["response_type"] !== undefined ? _data["response_type"] : <any>null;
+            this.text = _data["text"] !== undefined ? _data["text"] : <any>null;
+            this.replace_original = _data["replace_original"] !== undefined ? _data["replace_original"] : <any>null;
+            this.delete_original = _data["delete_original"] !== undefined ? _data["delete_original"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): BlockResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new BlockResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["response_type"] = this.response_type !== undefined ? this.response_type : <any>null;
+        data["text"] = this.text !== undefined ? this.text : <any>null;
+        data["replace_original"] = this.replace_original !== undefined ? this.replace_original : <any>null;
+        data["delete_original"] = this.delete_original !== undefined ? this.delete_original : <any>null;
+        return data; 
+    }
+}
+
+export interface IBlockResponse {
+    response_type?: string | null;
+    text?: string | null;
+    replace_original?: boolean;
+    delete_original?: boolean;
 }
 
 export enum CommandErrorCode {

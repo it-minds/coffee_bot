@@ -8,11 +8,12 @@ using Newtonsoft.Json;
 using Slack.DTO;
 using Slack.Interfaces;
 
-namespace Application.BlockResponses.StatusBlockResponseCommand
+namespace Application.BlockResponses
 {
   public class StatusBlockResponseCommand : IRequest<int>
   {
     public string Payload { get; set; }
+
     protected SlashInput PayloadParsed { get => JsonConvert.DeserializeObject<SlashInput>(Payload); }
 
     protected string Value { get => PayloadParsed.Actions[0].Value; }
@@ -37,7 +38,6 @@ namespace Application.BlockResponses.StatusBlockResponseCommand
 
         if (result != null) {
           result.HasMet = request.Value == "Yes";
-
         }
 
         await slackClient.UpdateMessage(request.ChannelId, request.PayloadParsed.Message.Ts, cancellationToken);
@@ -47,6 +47,5 @@ namespace Application.BlockResponses.StatusBlockResponseCommand
         return 1;
       }
     }
-
   }
 }

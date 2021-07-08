@@ -58,7 +58,7 @@ namespace Slack.DTO
     public string Type { get; set; }
 
     [JsonProperty("text")]
-    public string Text2 { get; set; }
+    public string Content { get; set; }
 
     [JsonProperty("verbatim")]
     public bool Verbatim { get; set; }
@@ -100,7 +100,7 @@ namespace Slack.DTO
     public List<Element> Elements { get; set; }
   }
 
-  public class Message2
+  public class OriginalMessage
   {
     [JsonProperty("bot_id")]
     public string BotId { get; set; }
@@ -191,7 +191,7 @@ namespace Slack.DTO
     public Channel Channel { get; set; }
 
     [JsonProperty("message")]
-    public Message2 Message { get; set; }
+    public OriginalMessage Message { get; set; }
 
     [JsonProperty("state")]
     public State State { get; set; }

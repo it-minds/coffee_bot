@@ -26,6 +26,8 @@ namespace Slack.Clients
         .GetApiClient();
     }
 
+    public ISlackApiClient Client() { return this.apiClient;}
+
     public async Task<string> GetBotId(CancellationToken cancellationToken) {
       var response = await apiClient.Auth.Test(cancellationToken: cancellationToken);
 

@@ -9,6 +9,8 @@ namespace Slack.Interfaces
   public interface ISlackClient
   {
 
+    SlackNet.ISlackApiClient Client();
+
     Task<IEnumerable<Conversation>> GetAllMyChannels(CancellationToken cancellationToken);
 
     Task<SlackThread> SendMessageInThread(CancellationToken cancellationToken, Conversation conversation, string text, SlackThread thread);

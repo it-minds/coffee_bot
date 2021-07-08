@@ -3,23 +3,22 @@ using SlackNet.WebApi;
 
 namespace Slack.Messages
 {
-  public static class MidwayMessage
+  public static class EmphemeralPhotoCheckMessage
   {
     /// <summary>
-    /// Generates a message meant for the halfway point or end of the active round.
+    /// Generates a message meant for when an image is posted in the channel.
     ///
     /// WARNING: This message does not contain a conversation id, you need to se it yourself
     /// <code>
-    ///  var message = MidwayMessage.Generate(4);
+    ///  var message = EmphemeralPhotoCheckMessage.Generate();
     ///  message.Channel = "MY_CHANNEL_ID";
     /// </code>
     ///
     /// </summary>
     /// <param name="deadlineDays"></param>
     /// <returns></returns>
-    public static Message Generate(int deadlineDays)
+    public static Message Generate()
     {
-      // TODO: check if the deadlineDays is less than 1 then set the text on the buttons to indicate that they missed the round regrettably.
 
       var message = new Message
       {
@@ -27,17 +26,17 @@ namespace Slack.Messages
           new SectionBlock {
             Text = new Markdown {
               Type = "mrkdwn",
-              Text = "Hello, guys! I am checking in to see if you met for a cup of coffee this round."
+              Text = "Hey! I noticed you posted an image. Is this your group selfie?"
             }
           },
           new ActionsBlock {
-            BlockId = ActionTypes.MidWay,
+            BlockId = ActionTypes.EmphemeralPhoto,
             Elements = {
               new Button {
                 Style = ButtonStyle.Primary,
                 Text = new PlainText {
                   Emoji= false,
-                  Text = "Yes, We have met!",
+                  Text = "Yes",
                 },
                 Value = "Yes"
               },
@@ -45,7 +44,7 @@ namespace Slack.Messages
                 Style = ButtonStyle.Danger,
                 Text = new PlainText {
                   Emoji= false,
-                  Text = "No, We haven't met yet."
+                  Text = "No"
                 },
                 Value = "No"
               }
