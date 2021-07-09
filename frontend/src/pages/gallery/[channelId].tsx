@@ -40,6 +40,8 @@ const IndexPage: NextPage = () => {
               const urlCreator = window.URL || window.webkitURL;
               const src = urlCreator.createObjectURL(blob);
 
+              console.log("image loaded, blobsrc:", src);
+
               (image as ExtendedImageDto).publicSrc = src;
               setImages({
                 type: ListReducerActionType.Update,
