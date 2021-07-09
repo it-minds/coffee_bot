@@ -42,9 +42,9 @@ namespace Application.BlockResponses
         var group = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRound)
           .Include(x => x.CoffeeRoundGroupMembers)
-          .Where(x => x.CoffeeRound.SlackChannelId == request.ChannelId && x.CoffeeRoundGroupMembers.Any(
-            y => y.SlackMemberId == request.UserId
-          ) && x.CoffeeRound.Active)
+          .Where(x => x.CoffeeRound.SlackChannelId == request.ChannelId &&
+            x.CoffeeRoundGroupMembers.Any(y => y.SlackMemberId == request.UserId) &&
+            x.CoffeeRound.Active)
           .FirstOrDefaultAsync();
 
         if (group != null) {
@@ -62,7 +62,6 @@ namespace Application.BlockResponses
 
           } else if (request.Value == "No")
           {
-            group.PhotoUrl = "";
           }
         }
 

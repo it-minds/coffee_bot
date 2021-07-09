@@ -39,7 +39,7 @@ namespace Rounds.Commands.RoundFinisherCommand
         {
           round.Active = false;
 
-          var meetupPercent = round.CoffeeRoundGroups.Where(x => x.HasMet).Count() / round.CoffeeRoundGroups.Count() * 100;
+          var meetupPercent = round.CoffeeRoundGroups.Count() > 0 ? round.CoffeeRoundGroups.Where(x => x.HasMet).Count() / round.CoffeeRoundGroups.Count() * 100 : 0;
 
           var msg = BuildChannelMessage(round, meetupPercent);
 

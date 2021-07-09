@@ -25,6 +25,7 @@ namespace Application.Common
 
     public async Task DownloadAndSaveImage(string filePath, string newName)
     {
+      var uri = new Uri(filePath);
       var clientHandler = new HttpClientHandler
       {
           UseCookies = false,
@@ -33,7 +34,7 @@ namespace Application.Common
       var request = new HttpRequestMessage
       {
           Method = HttpMethod.Get,
-          RequestUri = new Uri(filePath),
+          RequestUri = uri,
           Headers =
           {
               { "Authorization", "Bearer " + options.BotToken },
@@ -42,12 +43,8 @@ namespace Application.Common
       using (var response = await client.SendAsync(request))
       {
           response.EnsureSuccessStatusCode();
-
           var body = await response.Content.ReadAsByteArrayAsync();
-
-
           await File.WriteAllBytesAsync("wwwroot/images/coffeegroups/"+ newName , body);
-
       }
     }
   }
