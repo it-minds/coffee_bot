@@ -1178,6 +1178,7 @@ export interface IAuthorization {
 export class StandardGroupDto implements IStandardGroupDto {
     id?: number;
     hasMet?: boolean;
+    hasPhoto?: boolean;
     photoUrl?: string | null;
     members?: string[] | null;
 
@@ -1194,6 +1195,7 @@ export class StandardGroupDto implements IStandardGroupDto {
         if (_data) {
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
             this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
+            this.hasPhoto = _data["hasPhoto"] !== undefined ? _data["hasPhoto"] : <any>null;
             this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
             if (Array.isArray(_data["members"])) {
                 this.members = [] as any;
@@ -1214,6 +1216,7 @@ export class StandardGroupDto implements IStandardGroupDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
         data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
+        data["hasPhoto"] = this.hasPhoto !== undefined ? this.hasPhoto : <any>null;
         data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
         if (Array.isArray(this.members)) {
             data["members"] = [];
@@ -1227,6 +1230,7 @@ export class StandardGroupDto implements IStandardGroupDto {
 export interface IStandardGroupDto {
     id?: number;
     hasMet?: boolean;
+    hasPhoto?: boolean;
     photoUrl?: string | null;
     members?: string[] | null;
 }

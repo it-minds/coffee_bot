@@ -43,9 +43,9 @@ namespace Application.ImagePost.Commands.ImagePostCommand
         var message = EmphemeralPhotoCheckMessage.Generate();
         message.Channel = request.Event.ChannelId;
 
-        var result = await slackClient.Client().Chat.PostEphemeral(request.Event.UserId, message, cancellationToken);
-
         await applicationDbContext.SaveChangesAsync(cancellationToken);
+
+        var result = await slackClient.Client().Chat.PostEphemeral(request.Event.UserId, message, cancellationToken);
 
         return 0;
       }

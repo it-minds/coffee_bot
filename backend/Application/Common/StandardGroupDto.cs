@@ -10,6 +10,7 @@ namespace Application.Common
   {
     public int Id { get; set; }
     public bool HasMet { get; set; }
+    public bool HasPhoto { get; set; }
     public string PhotoUrl { get; set; }
 
     public List<string> Members { get; set; }

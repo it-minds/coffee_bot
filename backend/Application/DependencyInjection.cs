@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.Common.Behaviours;
 using AutoMapper;
 using MediatR;
@@ -21,7 +22,7 @@ namespace Application
       services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
       services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
 
-
+      services.AddScoped<DownloadImage>();
       services.AddScoped<ISlackClient, BotClient>();
       services.AddScoped<ISlackOAuthClient, OAuthClient>();
 

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Common;
 using Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -26,11 +28,13 @@ namespace Application.BlockResponses
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly ISlackClient slackClient;
+      private readonly DownloadImage downloadImage;
 
-      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient)
+      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage)
       {
         this.applicationDbContext = applicationDbContext;
         this.slackClient = slackClient;
+        this.downloadImage = downloadImage;
       }
 
       public async Task<BlockResponse> Handle(EmphPhotoBlockResponseCommand request, CancellationToken cancellationToken)
@@ -40,13 +44,22 @@ namespace Application.BlockResponses
           .Include(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.CoffeeRound.SlackChannelId == request.ChannelId && x.CoffeeRoundGroupMembers.Any(
             y => y.SlackMemberId == request.UserId
-          ))
+          ) && x.CoffeeRound.Active)
           .FirstOrDefaultAsync();
 
         if (group != null) {
           if (request.Value == "Yes")
           {
             group.HasMet = true;
+            group.HasPhoto = true;
+
+            var newName = "" + group.Id + Path.GetExtension(group.PhotoUrl).ToLower();
+
+            downloadImage.Enqueue(
+              group.PhotoUrl, newName
+            );
+            group.PhotoUrl = newName;
+
           } else if (request.Value == "No")
           {
             group.PhotoUrl = "";

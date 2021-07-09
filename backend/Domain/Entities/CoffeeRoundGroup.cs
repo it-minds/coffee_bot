@@ -9,6 +9,7 @@ namespace Domain.Entities
     public string SlackMessageId { get; set; }
 
     public bool HasMet { get; set; }
+    public bool HasPhoto { get; set; }
     public int NotificationCount { get; set; }
 
     public string PhotoUrl { get; set; }

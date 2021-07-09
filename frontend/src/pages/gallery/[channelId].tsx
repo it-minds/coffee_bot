@@ -9,6 +9,7 @@ import ListReducer, { ListReducerActionType } from "react-list-reducer";
 import { genGalleryClient } from "services/backend/apiClients";
 import { StandardGroupDto } from "services/backend/nswagts";
 import { ExtendedImageDto } from "types/ExtendedImageDto";
+import isomorphicEnvSettings from "utils/envSettings";
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
@@ -28,29 +29,41 @@ const IndexPage: NextPage = () => {
         data: allImages as ExtendedImageDto[]
       });
 
-      await Promise.all(
-        allImages.map(image =>
-          fetch("/api/slackBlob?photoUrl=" + image.photoUrl, {
-            headers: {
-              Authorization: "Bearer " + activeUser.slackToken
-            }
-          })
-            .then(res => res.blob())
-            .then(blob => {
-              const urlCreator = window.URL || window.webkitURL;
-              const src = urlCreator.createObjectURL(blob);
+      const envSettings = isomorphicEnvSettings();
 
-              console.log("image loaded, blobsrc:", src);
+      allImages
+        .filter(x => x.hasPhoto)
+        .forEach((image: ExtendedImageDto) => {
+          image.publicSrc = envSettings.backendUrl + "/images/coffeegroups/" + image.photoUrl;
+          setImages({
+            type: ListReducerActionType.Update,
+            data: image
+          });
+        });
 
-              (image as ExtendedImageDto).publicSrc = src;
-              setImages({
-                type: ListReducerActionType.Update,
-                data: image as ExtendedImageDto
-              });
-              return image;
-            })
-        )
-      );
+      // await Promise.all(
+      //   allImages.map(image =>
+      //     fetch("/api/slackBlob?photoUrl=" + image.photoUrl, {
+      //       headers: {
+      //         Authorization: "Bearer " + activeUser.slackToken
+      //       }
+      //     })
+      //       .then(res => res.blob())
+      //       .then(blob => {
+      //         const urlCreator = window.URL || window.webkitURL;
+      //         const src = urlCreator.createObjectURL(blob);
+
+      //         console.log("image loaded, blobsrc:", src);
+
+      //         (image as ExtendedImageDto).publicSrc = src;
+      //         setImages({
+      //           type: ListReducerActionType.Update,
+      //           data: image as ExtendedImageDto
+      //         });
+      //         return image;
+      //       })
+      //   )
+      // );
     }
   }, [activeUser, query]);
 
