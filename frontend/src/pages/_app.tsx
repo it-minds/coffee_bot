@@ -1,13 +1,14 @@
 import "isomorphic-unfetch";
 import "../styles.global.css";
 
-import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
+import { Button, Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
 import { I18nProvider } from "next-rosetta";
 import React, { ReactElement, useEffect } from "react";
+import { useCallback } from "react";
 import EnvSettings from "types/EnvSettings";
 import isomorphicEnvSettings, { setEnvSettings } from "utils/envSettings";
 import { logger } from "utils/logger";
@@ -48,7 +49,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
     }
   }, []);
 
-  useEffect(() => {
+  const click = useCallback(() => {
     const envSettings = isomorphicEnvSettings();
 
     if (auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth) {
@@ -95,7 +96,13 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
       </noscript>
       <I18nProvider table={pageProps.table}>
         <ChakraProvider theme={theme}>
-          {auth.authStage != AuthStage.AUTHENTICATED && router.pathname != skipauth ? (
+          {auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth ? (
+            <Center>
+              <Button onClick={click} colorScheme="blue">
+                Click me to login
+              </Button>
+            </Center>
+          ) : auth.authStage == AuthStage.CHECKING && router.pathname != skipauth ? (
             <Center>
               <Spinner
                 thickness="4px"
