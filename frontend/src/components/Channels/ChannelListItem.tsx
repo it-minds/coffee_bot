@@ -10,7 +10,9 @@ import {
   Portal,
   Spacer,
   Switch,
-  Text
+  Td,
+  Text,
+  Tr
 } from "@chakra-ui/react";
 import { BsThreeDots } from "@react-icons/all-files/bs/BsThreeDots";
 import EditChannelSettingsTriggerBtn from "components/Channels/EditChannelSettings/EditChannelSettingsTriggerBtn";
@@ -28,53 +30,58 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
 
   if (!channel) return null;
   return (
-    <Flex rounded="lg" w="m" h="40px" justify="center" align="center" borderWidth={2} m="10px">
-      <Text m="3">{channel.slackChannelName}</Text>
-      <Spacer />
-      <Switch
-        size="sm"
-        isChecked={!channel.paused}
-        onChange={() => {
-          updateChannelPaused(
-            new UpdateChannelPauseInput({
-              channelId: channel.id,
-              paused: !channel.paused
-            })
-          );
-        }}
-      />
-      <Popover placement="right">
-        <PopoverTrigger>
-          <IconButton icon={<BsThreeDots />} aria-label="menu"></IconButton>
-        </PopoverTrigger>
-        <Portal>
-          <PopoverContent>
-            <PopoverArrow />
-            <PopoverBody p="0">
-              <EditChannelSettingsTriggerBtn channel={channel} />
-              <Button
-                justifyContent="left"
-                isFullWidth={true}
-                size="md"
-                borderRadius={0}
-                variant="ghost"
-                onClick={() => router.push("gallery/[channelId]", "gallery/" + channel.id)}>
-                Gallery
-              </Button>
-              <Button
-                justifyContent="left"
-                isFullWidth={true}
-                size="md"
-                borderRadius={0}
-                variant="ghost"
-                onClick={() => router.push("stats/[channelId]", "stats/" + channel.id)}>
-                Stats
-              </Button>
-            </PopoverBody>
-          </PopoverContent>
-        </Portal>
-      </Popover>
-    </Flex>
+    <Tr rounded="lg" p={0} justify="center" align="center" m="10px">
+      <Td pt={1} pb={1} m="3">
+        #{channel.slackChannelName}
+      </Td>
+      <Td pt={1} pb={1} textAlign="center">
+        <Switch
+          size="md"
+          isChecked={!channel.paused}
+          onChange={() => {
+            updateChannelPaused(
+              new UpdateChannelPauseInput({
+                channelId: channel.id,
+                paused: !channel.paused
+              })
+            );
+          }}
+        />
+      </Td>
+      <Td pt={1} pb={1} isNumeric>
+        <Popover placement="right">
+          <PopoverTrigger>
+            <IconButton colorScheme="blue" icon={<BsThreeDots />} aria-label="menu"></IconButton>
+          </PopoverTrigger>
+          <Portal>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverBody p="0">
+                <EditChannelSettingsTriggerBtn channel={channel} />
+                <Button
+                  justifyContent="left"
+                  isFullWidth={true}
+                  size="md"
+                  borderRadius={0}
+                  variant="ghost"
+                  onClick={() => router.push("gallery/[channelId]", "gallery/" + channel.id)}>
+                  Gallery
+                </Button>
+                <Button
+                  justifyContent="left"
+                  isFullWidth={true}
+                  size="md"
+                  borderRadius={0}
+                  variant="ghost"
+                  onClick={() => router.push("stats/[channelId]", "stats/" + channel.id)}>
+                  Stats
+                </Button>
+              </PopoverBody>
+            </PopoverContent>
+          </Portal>
+        </Popover>
+      </Td>
+    </Tr>
   );
 };
 export default ChannelListItem;
