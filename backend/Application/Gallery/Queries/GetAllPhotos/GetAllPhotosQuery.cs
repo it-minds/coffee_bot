@@ -32,6 +32,7 @@ namespace Application.Gallery.Queries.GetAllPhotos
           .Include(x => x.CoffeeRound)
           .Include(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.HasPhoto && x.CoffeeRound.ChannelId == request.ChannelId && x.PhotoUrl != null && x.PhotoUrl != "")
+          .OrderByDescending(x => x.FinishedAt)
           .ProjectTo<StandardGroupDto>(mapper.ConfigurationProvider)
           .ToListAsync(cancellationToken);
 

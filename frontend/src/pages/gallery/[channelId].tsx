@@ -1,10 +1,12 @@
+import "ts-array-ext/groupBy";
+
 import { Container, Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
-import React, { useContext, useReducer, useState } from "react";
+import React, { Fragment, useContext, useReducer, useState } from "react";
 import ListReducer, { ListReducerActionType } from "react-list-reducer";
 import { genGalleryClient } from "services/backend/apiClients";
 import { StandardGroupDto } from "services/backend/nswagts";
@@ -40,30 +42,6 @@ const IndexPage: NextPage = () => {
             data: image
           });
         });
-
-      // await Promise.all(
-      //   allImages.map(image =>
-      //     fetch("/api/slackBlob?photoUrl=" + image.photoUrl, {
-      //       headers: {
-      //         Authorization: "Bearer " + activeUser.slackToken
-      //       }
-      //     })
-      //       .then(res => res.blob())
-      //       .then(blob => {
-      //         const urlCreator = window.URL || window.webkitURL;
-      //         const src = urlCreator.createObjectURL(blob);
-
-      //         console.log("image loaded, blobsrc:", src);
-
-      //         (image as ExtendedImageDto).publicSrc = src;
-      //         setImages({
-      //           type: ListReducerActionType.Update,
-      //           data: image as ExtendedImageDto
-      //         });
-      //         return image;
-      //       })
-      //   )
-      // );
     }
   }, [activeUser, query]);
 
@@ -74,24 +52,33 @@ const IndexPage: NextPage = () => {
       {activeImage !== null && (
         <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
       )}
-      <Flex pt="4" wrap="wrap" justifyContent="center">
-        {images.map(image =>
-          image.publicSrc ? (
-            <Image
-              _hover={{
-                cursor: "pointer",
-                borderSize: "2px"
-              }}
-              maxH="300px"
-              key={image.id}
-              src={image.publicSrc}
-              onClick={() => setActiveImage(image)}
-            />
-          ) : (
-            <Skeleton key={image.id} height="300px" width="300px" />
-          )
-        )}
-      </Flex>
+      {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970)).map(
+        ([year, images]) => (
+          <Fragment key={year}>
+            <Heading size="md" textAlign="center">
+              -{year}-
+            </Heading>
+            <Flex pt="4" wrap="wrap" justifyContent="center">
+              {images.map(image =>
+                image.publicSrc ? (
+                  <Image
+                    _hover={{
+                      cursor: "pointer",
+                      borderSize: "2px"
+                    }}
+                    maxH="300px"
+                    key={image.id}
+                    src={image.publicSrc}
+                    onClick={() => setActiveImage(image)}
+                  />
+                ) : (
+                  <Skeleton key={image.id} height="300px" width="300px" />
+                )
+              )}
+            </Flex>
+          </Fragment>
+        )
+      )}
     </Container>
   );
 };

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -59,6 +60,7 @@ namespace Application.BlockResponses
               group.PhotoUrl, newName
             );
             group.PhotoUrl = newName;
+            group.FinishedAt = DateTimeOffset.UtcNow;
 
           } else if (request.Value == "No")
           {

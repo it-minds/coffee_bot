@@ -16,5 +16,6 @@ namespace Domain.Entities
     public bool IndividualMessage { get; set; } = false;
 
     public ICollection<ChannelMember> ChannelMembers { get; set; }
+    public ICollection<CoffeeRound> CoffeeRounds { get; set; }
   }
 }

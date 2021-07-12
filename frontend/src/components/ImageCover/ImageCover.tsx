@@ -19,12 +19,14 @@ type Props = {
   onClose: () => void;
 };
 
+const dateFormatter = Intl.DateTimeFormat("en-US", {});
+
 const ImageCover: FC<Props> = ({ image, onClose }) => {
   return (
     <Modal onClose={onClose} size="5xl" isOpen={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Image</ModalHeader>
+        <ModalHeader>{dateFormatter.format(image.finishedAt)}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack>

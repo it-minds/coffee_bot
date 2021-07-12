@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Application.Common.Mappings;
@@ -12,9 +13,9 @@ namespace Application.Common
     public bool HasMet { get; set; }
     public bool HasPhoto { get; set; }
     public string PhotoUrl { get; set; }
+    public DateTimeOffset FinishedAt { get; set; }
 
     public List<string> Members { get; set; }
-
 
     public void Mapping(Profile profile) {
       profile.CreateMap<CoffeeRoundGroup, StandardGroupDto>()

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,12 +33,13 @@ namespace Application.BlockResponses
 
       public async Task<int> Handle(StatusBlockResponseCommand request, CancellationToken cancellationToken)
       {
-        var result = await applicationDbContext.CoffeeRoundGroups
+        var group = await applicationDbContext.CoffeeRoundGroups
           .Where(x => x.SlackMessageId == request.ChannelId)
           .FirstOrDefaultAsync();
 
-        if (result != null) {
-          result.HasMet = request.Value == "Yes";
+        if (group != null) {
+          group.HasMet = request.Value == "Yes";
+          group.FinishedAt = DateTimeOffset.UtcNow;
         }
 
         await slackClient.UpdateMessage(request.ChannelId, request.PayloadParsed.Message.Ts, cancellationToken);

@@ -1180,6 +1180,7 @@ export class StandardGroupDto implements IStandardGroupDto {
     hasMet?: boolean;
     hasPhoto?: boolean;
     photoUrl?: string | null;
+    finishedAt?: Date;
     members?: string[] | null;
 
     constructor(data?: IStandardGroupDto) {
@@ -1197,6 +1198,7 @@ export class StandardGroupDto implements IStandardGroupDto {
             this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
             this.hasPhoto = _data["hasPhoto"] !== undefined ? _data["hasPhoto"] : <any>null;
             this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
+            this.finishedAt = _data["finishedAt"] ? new Date(_data["finishedAt"].toString()) : <any>null;
             if (Array.isArray(_data["members"])) {
                 this.members = [] as any;
                 for (let item of _data["members"])
@@ -1218,6 +1220,7 @@ export class StandardGroupDto implements IStandardGroupDto {
         data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
         data["hasPhoto"] = this.hasPhoto !== undefined ? this.hasPhoto : <any>null;
         data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
+        data["finishedAt"] = this.finishedAt ? this.finishedAt.toISOString() : <any>null;
         if (Array.isArray(this.members)) {
             data["members"] = [];
             for (let item of this.members)
@@ -1232,6 +1235,7 @@ export interface IStandardGroupDto {
     hasMet?: boolean;
     hasPhoto?: boolean;
     photoUrl?: string | null;
+    finishedAt?: Date;
     members?: string[] | null;
 }
 

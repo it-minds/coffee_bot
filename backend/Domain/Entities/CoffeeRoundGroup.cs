@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Domain.Entities
@@ -10,6 +11,7 @@ namespace Domain.Entities
 
     public bool HasMet { get; set; }
     public bool HasPhoto { get; set; }
+    public DateTimeOffset? FinishedAt { get; set; }
     public int NotificationCount { get; set; }
 
     public string PhotoUrl { get; set; }
