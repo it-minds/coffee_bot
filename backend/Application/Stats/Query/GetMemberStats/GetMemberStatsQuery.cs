@@ -29,12 +29,11 @@ namespace Application.Stats.Query.GetMemberStats
         var groups = await applicationDbContext.CoffeeRoundGroupMembers
           .Include(x => x.CoffeeRoundGroup)
           .ProjectTo<MidwayDto>(mapper.ConfigurationProvider)
-          .GroupBy(x => x.SlackMemberId)
           .ToListAsync(cancellationToken);
 
         var result = new List<StatsDto>();
 
-        foreach (var group in groups)
+        foreach (var group in groups.GroupBy(x => x.SlackMemberId))
         {
           var memberId = group.Key;
           var meetupPercent = (group.Count(x => x.HasMet) / (decimal) group.Count()) * 100;

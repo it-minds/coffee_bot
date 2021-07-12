@@ -174,7 +174,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
         var calculatedChunkCount = (int) Math.Floor((decimal) members.Count() / groupSizes);
 
         // Minimum size of any group is half the wanted size.
-        var minSize = Math.Ceiling(groupSizes / 2m);
+        var minSize = Math.Floor(groupSizes / 2m) + 1;
         var lastGroupSizeCalc = members.Count() % groupSizes;
 
         if (lastGroupSizeCalc >= minSize)
