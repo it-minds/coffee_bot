@@ -9,9 +9,11 @@ namespace Web.Controllers
   public class StatsController : ApiControllerBase
   {
     [HttpGet]
-    public async Task<ActionResult<List<StatsDto>>> GetMemberStats()
+    public async Task<ActionResult<List<StatsDto>>> GetMemberStats([FromQuery] int channelId)
     {
-      return await Mediator.Send(new GetMemberStatsQuery{});
+      return await Mediator.Send(new GetMemberStatsQuery{
+        ChannelId = channelId
+      });
     }
   }
 }

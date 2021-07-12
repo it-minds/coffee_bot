@@ -2,6 +2,7 @@ import { Container, Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useCallback } from "react";
 import { genStatsClient } from "services/backend/apiClients";
@@ -16,18 +17,22 @@ const formatter = new Intl.NumberFormat("en-US", {
 
 const IndexPage: NextPage = () => {
   // const { activeUser } = useContext(AuthContext);
-  // const { query } = useRouter();
+  const { query } = useRouter();
 
   const [stats, setStats] = useState<StatsDto[]>([]);
 
   const [sortCb, setSortCB] = useState<(a: StatsDto, b: StatsDto) => number>(() => defaultSort);
 
   useEffectAsync(async () => {
-    const client = await genStatsClient();
-    const allImages: StatsDto[] = await client.getMemberStats().catch(() => []);
+    if (query.channelId) {
+      const channelId = parseInt(query.channelId as string);
 
-    setStats(allImages);
-  }, []);
+      const client = await genStatsClient();
+      const allImages: StatsDto[] = await client.getMemberStats(channelId).catch(() => []);
+
+      setStats(allImages);
+    }
+  }, [query]);
 
   const sort = useCallback((key: keyof StatsDto, direction: "ASC" | "DESC") => {
     if (direction === "ASC") {
@@ -48,7 +53,8 @@ const IndexPage: NextPage = () => {
       <Table variant="striped" colorScheme="gray" size="sm">
         <Thead>
           <Tr>
-            <Th>User</Th>
+            <Th>User Id</Th>
+            <Th>Name</Th>
             <Th isNumeric>
               Meetup %
               <QuerySortBtn queryKey="meepupPercent" sortCb={sort} />
@@ -63,6 +69,7 @@ const IndexPage: NextPage = () => {
           {stats.sort(sortCb).map(stat => (
             <Tr key={stat.slackMemberId}>
               <Td>{stat.slackMemberId}</Td>
+              <Td>{stat.slackMemberName}</Td>
               <Td isNumeric>{formatter.format(stat.meepupPercent)}</Td>
               <Td isNumeric>{formatter.format(stat.photoPercent)}</Td>
             </Tr>

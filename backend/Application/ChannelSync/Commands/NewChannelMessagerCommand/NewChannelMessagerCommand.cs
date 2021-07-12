@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
 
 namespace Application.ChannelSync.Commands
@@ -24,7 +25,7 @@ namespace Application.ChannelSync.Commands
 
       public async Task<int> Handle(NewChannelMessagerCommand request, CancellationToken cancellationToken)
       {
-        var channelSettings = await applicationDbContext.ChannelSettings.FindAsync(request.SlackChannelId); // TODO
+        var channelSettings = await applicationDbContext.ChannelSettings.FirstOrDefaultAsync(x => x.SlackChannelId == request.SlackChannelId);
 
         if (channelSettings == null) return 0;
 

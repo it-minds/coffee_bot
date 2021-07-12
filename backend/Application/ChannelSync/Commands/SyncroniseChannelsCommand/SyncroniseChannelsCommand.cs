@@ -43,14 +43,14 @@ namespace Application.ChannelSync.Commands
 
         SyncRemovedChannels(removedChannels);
         SyncAddedChannels(newChannels);
-        await SyncUpdatedChannels(updatedChannels);
+        await SyncUpdatedChannels(updatedChannels, cancellationToken);
 
         var result = await applicationDbContext.SaveChangesAsync(cancellationToken);
 
         return result;
       }
 
-      private async Task SyncUpdatedChannels(IEnumerable<(ChannelSettings, Slack.DTO.Conversation)> updatedChannels)
+      private async Task SyncUpdatedChannels(IEnumerable<(ChannelSettings, Slack.DTO.Conversation)> updatedChannels, CancellationToken cancellationToken)
       {
         var existingMembers = await applicationDbContext.ChannelMembers.ToListAsync();
 
@@ -58,18 +58,38 @@ namespace Application.ChannelSync.Commands
         {
           settings.SlackChannelName = slackConvo.Name;
 
-          var (removedmembers, _, newMembers) = SegmentJoin(
+          var (removedMembers, updatedMembers, newMembers) = SegmentJoin(
             existingMembers.Where(x => x.ChannelSettingsId == settings.Id),
             slackConvo.MemberIds,
             x => x.SlackUserId,
             x => x
           );
+          applicationDbContext.ChannelMembers.RemoveRange(removedMembers);
 
-          applicationDbContext.ChannelMembers.RemoveRange(removedmembers);
-          applicationDbContext.ChannelMembers.AddRange(newMembers.Select(x => new ChannelMember {
+          var members = updatedMembers.Select(x => x.Item1).ToList();
+          members.AddRange(newMembers.Select(x => new ChannelMember
+          {
             SlackUserId = x,
             ChannelSettingsId = settings.Id
           }));
+
+          var slackInfoMembers = await slackClient.GetUsers(members.Select(x => x.SlackUserId), cancellationToken);
+
+          foreach (var item in members)
+          {
+            var slackInfo = slackInfoMembers.FirstOrDefault(x => x.Id == item.SlackUserId);
+
+            if (slackInfo != null)
+            {
+              item.SlackName = slackInfo.Profile.RealName;
+            }
+
+            if (item.Id > 0) {
+              applicationDbContext.ChannelMembers.Update(item);
+            } else {
+              applicationDbContext.ChannelMembers.Add(item);
+            }
+          }
         }
       }
 

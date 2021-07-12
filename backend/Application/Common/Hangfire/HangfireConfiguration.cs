@@ -41,7 +41,7 @@ namespace Application
       mediator.RecurringJob(
         new SyncronizeChannelsCommand { },
         "Syncronize Channels",
-        Cron.Hourly(minute: 30)
+        env.IsDevelopment() ? Cron.Never() : Cron.Hourly(minute: 30)
       );
 
       mediator.RecurringJob(

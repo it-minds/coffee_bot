@@ -22,6 +22,7 @@ namespace Slack.Interfaces
     Task<SlackThread> SendPrivateMessageToMembers(CancellationToken cancellationToken, IEnumerable<string> memberIds, Message message);
 
     Task<bool> UpdateMessage(string channelId, string msgTsToUpdate, CancellationToken cancellationToken);
+    Task<List<SlackNet.User>> GetUsers(IEnumerable<string> userIds, CancellationToken cancellationToken);
 
   }
 }

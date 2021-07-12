@@ -5,6 +5,7 @@ namespace Domain.Entities
     public int Id { get; set; }
 
     public string SlackUserId { get; set; }
+    public string SlackName { get; set; }
 
     public int ChannelSettingsId { get; set; }
     public ChannelSettings ChannelSettings { get; set; }

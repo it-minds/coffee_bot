@@ -61,6 +61,15 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
                 onClick={() => router.push("gallery/[channelId]", "gallery/" + channel.id)}>
                 Gallery
               </Button>
+              <Button
+                justifyContent="left"
+                isFullWidth={true}
+                size="md"
+                borderRadius={0}
+                variant="ghost"
+                onClick={() => router.push("stats/[channelId]", "stats/" + channel.id)}>
+                Stats
+              </Button>
             </PopoverBody>
           </PopoverContent>
         </Portal>

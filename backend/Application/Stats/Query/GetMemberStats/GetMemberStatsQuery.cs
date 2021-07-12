@@ -12,6 +12,7 @@ namespace Application.Stats.Query.GetMemberStats
 {
   public class GetMemberStatsQuery: IRequest<List<StatsDto>>
   {
+    public int ChannelId { get; set; }
 
     public class GetMemberStatsQueryHandler : IRequestHandler<GetMemberStatsQuery, List<StatsDto>>
     {
@@ -28,8 +29,14 @@ namespace Application.Stats.Query.GetMemberStats
       {
         var groups = await applicationDbContext.CoffeeRoundGroupMembers
           .Include(x => x.CoffeeRoundGroup)
+            .ThenInclude(x => x.CoffeeRound)
+          .Where(x => x.CoffeeRoundGroup.CoffeeRound.ChannelId == request.ChannelId)
           .ProjectTo<MidwayDto>(mapper.ConfigurationProvider)
           .ToListAsync(cancellationToken);
+
+        var channelMembers = await applicationDbContext.ChannelMembers
+          .Where(x => x.ChannelSettingsId == request.ChannelId)
+          .ToListAsync();
 
         var result = new List<StatsDto>();
 
@@ -40,12 +47,15 @@ namespace Application.Stats.Query.GetMemberStats
           var photoPercent = meetupPercent > 0m ? (group.Count(x => x.HasPhoto) / (decimal) group.Count(x => x.HasMet)) * 100 : 0m;
           var totalParticipation = group.Count();
 
+          string name = channelMembers.FirstOrDefault(x => x.SlackUserId == group.Key)?.SlackName ?? "";
+
           var dto = new StatsDto
           {
             SlackMemberId = memberId,
             MeepupPercent = meetupPercent,
             PhotoPercent = photoPercent,
-            TotalParticipation = totalParticipation
+            TotalParticipation = totalParticipation,
+            SlackMemberName = name
           };
           result.Add(dto);
         }

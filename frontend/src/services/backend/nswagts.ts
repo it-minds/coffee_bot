@@ -618,7 +618,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
 }
 
 export interface IStatsClient {
-    getMemberStats(): Promise<StatsDto[]>;
+    getMemberStats(channelId?: number | undefined): Promise<StatsDto[]>;
 }
 
 export class StatsClient extends ClientBase implements IStatsClient {
@@ -632,8 +632,12 @@ export class StatsClient extends ClientBase implements IStatsClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getMemberStats(): Promise<StatsDto[]> {
-        let url_ = this.baseUrl + "/api/Stats";
+    getMemberStats(channelId?: number | undefined): Promise<StatsDto[]> {
+        let url_ = this.baseUrl + "/api/Stats?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1289,6 +1293,7 @@ export interface IBlockResponse {
 
 export class StatsDto implements IStatsDto {
     slackMemberId?: string | null;
+    slackMemberName?: string | null;
     meepupPercent?: number;
     photoPercent?: number;
     totalParticipation?: number;
@@ -1305,6 +1310,7 @@ export class StatsDto implements IStatsDto {
     init(_data?: any) {
         if (_data) {
             this.slackMemberId = _data["slackMemberId"] !== undefined ? _data["slackMemberId"] : <any>null;
+            this.slackMemberName = _data["slackMemberName"] !== undefined ? _data["slackMemberName"] : <any>null;
             this.meepupPercent = _data["meepupPercent"] !== undefined ? _data["meepupPercent"] : <any>null;
             this.photoPercent = _data["photoPercent"] !== undefined ? _data["photoPercent"] : <any>null;
             this.totalParticipation = _data["totalParticipation"] !== undefined ? _data["totalParticipation"] : <any>null;
@@ -1321,6 +1327,7 @@ export class StatsDto implements IStatsDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["slackMemberId"] = this.slackMemberId !== undefined ? this.slackMemberId : <any>null;
+        data["slackMemberName"] = this.slackMemberName !== undefined ? this.slackMemberName : <any>null;
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
@@ -1330,6 +1337,7 @@ export class StatsDto implements IStatsDto {
 
 export interface IStatsDto {
     slackMemberId?: string | null;
+    slackMemberName?: string | null;
     meepupPercent?: number;
     photoPercent?: number;
     totalParticipation?: number;

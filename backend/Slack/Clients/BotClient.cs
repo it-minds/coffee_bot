@@ -193,6 +193,29 @@ namespace Slack.Clients
 
       return true;
     }
+
+    public async Task<List<User>> GetUsers(IEnumerable<string> userIds, CancellationToken cancellationToken)
+    {
+      string cursor = "";
+
+      var users = new List<User>();
+
+      do
+      {
+        var response = await apiClient.Users.List(
+          cancellationToken: cancellationToken,
+          limit: 1000,
+          cursor: cursor
+        );
+
+        users.AddRange(response.Members.Where(x => userIds.Contains(x.Id) ));
+
+        cursor = response.ResponseMetadata.NextCursor ?? "";
+
+      } while (cursor != "" );
+
+      return users;
+    }
   }
 }
 

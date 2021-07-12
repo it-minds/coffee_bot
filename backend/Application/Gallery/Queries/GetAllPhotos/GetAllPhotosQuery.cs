@@ -33,11 +33,18 @@ namespace Application.Gallery.Queries.GetAllPhotos
           .Include(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.HasPhoto && x.CoffeeRound.ChannelId == request.ChannelId && x.PhotoUrl != null && x.PhotoUrl != "")
           .OrderByDescending(x => x.FinishedAt)
-          .ProjectTo<StandardGroupDto>(mapper.ConfigurationProvider)
+          .ProjectTo<StandardGroupDto>(mapper.ConfigurationProvider, 0)
           .ToListAsync(cancellationToken);
 
+        var channelMembers = await applicationDbContext.ChannelMembers
+          .Where(x => x.ChannelSettingsId == request.ChannelId)
+          .ToListAsync();
 
-        var members = applicationDbContext.CoffeeRoundGroupMembers.GroupBy(x => x.SlackMemberId);
+        foreach (var group in groups)
+        {
+          group.Members = group.Members.Select(x => channelMembers.FirstOrDefault(y => y.SlackUserId == x)?.SlackName ?? x)
+            .ToList();
+        }
 
         return groups;
       }
