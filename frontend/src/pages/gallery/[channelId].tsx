@@ -1,4 +1,5 @@
 import "ts-array-ext/groupBy";
+import "ts-array-ext/sortByAttr";
 
 import { Container, Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
 import ImageCover from "components/ImageCover/ImageCover";
@@ -52,8 +53,9 @@ const IndexPage: NextPage = () => {
       {activeImage !== null && (
         <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
       )}
-      {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970)).map(
-        ([year, images]) => (
+      {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970))
+        .sortByAttr(([year]) => year, "DESC")
+        .map(([year, images]) => (
           <Fragment key={year}>
             <Heading size="md" textAlign="center">
               -{year}-
@@ -77,8 +79,7 @@ const IndexPage: NextPage = () => {
               )}
             </Flex>
           </Fragment>
-        )
-      )}
+        ))}
     </Container>
   );
 };
