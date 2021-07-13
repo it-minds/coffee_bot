@@ -12,7 +12,7 @@ defaults:
     working-directory: frontend
 
 env:
-  node-version: 14.x
+  node-version: 14
 
 jobs:
   build:
@@ -24,14 +24,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.node-version }}
+          cache: "npm"
 
-      - name: Validate Frontend
-        run: |
-          npm ci
-          npm run validate
+      - run: npm install
+
+      - run: npm run validate
 
   codecov:
     name: CodeCov
@@ -42,39 +42,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.node-version }}
+          cache: "npm"
 
-      - name: Test Frontend
-        run: |
-          npm ci
-          npm t
+      - run: npm install
+
+      - run: npm test
 
       - name: Run CodeCov
         uses: codecov/codecov-action@v1.5.2
         with:
           working-directory: frontend
-
-  # codeql:
-  #   name: CodeQL
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v2
-
-  #     - name: Initialize CodeQL
-  #       uses: github/codeql-action/init@v1
-  #       with:
-  #         working-directory: frontend
-
-  #     - name: Autobuild
-  #       uses: github/codeql-action/autobuild@v1
-  #       with:
-  #         working-directory: frontend
-
-  #     - name: Perform CodeQL Analysis
-  #       uses: github/codeql-action/analyze@v1
-  #       with:
-  #         working-directory: frontend

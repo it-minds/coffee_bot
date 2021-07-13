@@ -74,20 +74,18 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Set up Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.node-version }}
 
-      - name: Build Frontend
-        run: |
-          npm ci
-          npm run build --if-present
-          npm ci --production
-          rm -rf .next/cache
-          mkdir -p ${{ env.artifact-dir }}
-          zip -r ${{ env.frontend-artifact }} .next next.config.js package.json package-lock.json server.js web.config public node_modules src/i18n
+      - run: npm ci
+      - run: npm run build --if-present
         env:
           NEXT_PUBLIC_APP_VERSION: ${{ github.event.release.tag_name }}.${{ github.run_id }}
+      - run: npm ci --production
+      - run: rm -rf .next/cache
+      - run: mkdir -p ${{ env.artifact-dir }}
+      - run: zip -r ${{ env.frontend-artifact }} .next next.config.js package.json package-lock.json server.js web.config public node_modules src/i18n
 
       - name: Upload Release Asset
         id: upload-release-asset
