@@ -6,6 +6,8 @@ using Application.ChannelSetting.Commands.UpdateChannelSettings;
 using Application.ChannelSetting.Queries.GetMyChannelsSettings;
 using Application.ChannelSync.Commands;
 using Application.Common.Hangfire.MediatR;
+using Application.Rounds.DTO;
+using Application.Rounds.GetChannelRounds;
 using Application.Rounds.GetCurrentRound;
 using Microsoft.AspNetCore.Mvc;
 using Rounds.Commands.RoundInitiatorCommand;
@@ -35,12 +37,22 @@ namespace Web.Controllers
       return NoContent();
     }
 
-    [HttpGet("{id}/ActiveRound")]
+    [HttpGet("{id}/rounds")]
+    public async Task<IEnumerable<RoundSnipDto>> GetRounds([FromRoute] int id)
+    {
+      return await Mediator.Send(new GetChannelRoundsQuery {
+        ChannelId = id
+      });
+    }
+
+    [HttpGet("{id}/rounds/active")]
     public async Task<ActiveRoundDto> GetActiveRound([FromRoute] int id)
     {
       return await Mediator.Send(new GetCurrentRoundQuery {
         ChannelId = id
       });
     }
+
+
   }
 }

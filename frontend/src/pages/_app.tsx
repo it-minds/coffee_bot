@@ -98,7 +98,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
         <ChakraProvider theme={theme}>
           {auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth ? (
             <Center>
-              <Button onClick={click} colorScheme="blue">
+              <Button onClick={click} colorScheme="blue" mt={[2, 4]}>
                 Click me to login
               </Button>
             </Center>

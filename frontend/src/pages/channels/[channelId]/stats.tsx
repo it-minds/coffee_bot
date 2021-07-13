@@ -1,4 +1,5 @@
 import { Container, Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import AppContainer from "components/Common/AppContainer";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
@@ -47,7 +48,7 @@ const IndexPage: NextPage = () => {
   }, []);
 
   return (
-    <Container maxW="7xl">
+    <AppContainer>
       <Heading textAlign="center">Statistics</Heading>
 
       <Table variant="striped" colorScheme="gray" size="sm">
@@ -76,7 +77,7 @@ const IndexPage: NextPage = () => {
           ))}
         </Tbody>
       </Table>
-    </Container>
+    </AppContainer>
   );
 };
 

@@ -35,6 +35,8 @@ const RoundInfo: FC<Props> = ({ round }) => {
   }
   const redColor = useColorModeValue("red.500", "red.700");
   const greenColor = useColorModeValue("green.500", "green.700");
+  const statsBackground = useColorModeValue("blue.200", "blue.900");
+  const imageBackdrop = useColorModeValue("rgb(255,255,255,0.6)", "rgb(0,0,0,0.4)");
 
   const stats = useMemo(() => {
     const meetup = round.groups.filter(x => x.hasMet).length / round.groups.length;
@@ -46,28 +48,30 @@ const RoundInfo: FC<Props> = ({ round }) => {
   }, [round]);
 
   return (
-    <Container maxW="7xl">
+    <>
       <Heading textAlign="center">
         Round {dateTimeFormatter.format(round.startDate)} -{" "}
         {dateTimeFormatter.format(round.endDate)}
       </Heading>
       <Timeline round={round} />
       <StatGroup mt={6} mb={3}>
-        <Stat backgroundColor="blue.900" p={4}>
+        <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Meetup percent:</StatLabel>
           <StatNumber>{percentFormatter.format(stats.meetup * 100)}</StatNumber>
           <StatHelpText>
             <StatArrow type={stats.meetup > round.previousMeetup ? "increase" : "decrease"} />
             {percentFormatter.format(round.previousMeetup * 100)}
+            {"  "}(previous)
           </StatHelpText>
         </Stat>
 
-        <Stat backgroundColor="blue.900" p={4}>
+        <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Photo percent</StatLabel>
           <StatNumber>{percentFormatter.format(stats.photo * 100)}</StatNumber>
           <StatHelpText>
             <StatArrow type={stats.photo > round.previousPhoto ? "increase" : "decrease"} />
             {percentFormatter.format(round.previousPhoto * 100)}
+            {"  "}(previous)
           </StatHelpText>
         </Stat>
       </StatGroup>
@@ -84,14 +88,18 @@ const RoundInfo: FC<Props> = ({ round }) => {
             w="300px"
             p={[2, 3, 4]}>
             {/* <pre>{JSON.stringify(x, null, 2)}</pre> */}
-            <Heading size="md" textAlign="center">
-              Group {i + 1}
-            </Heading>
-            <Text textAlign="center">{x.members.join(", ")}</Text>
+            <Box backgroundColor={imageBackdrop} p={[1, 2]}>
+              <Heading size="md" textAlign="center">
+                Group {i + 1}
+              </Heading>
+              <Text textAlign="center" fontSize="xs">
+                {x.members.join(" & ")}
+              </Text>
+            </Box>
           </Box>
         ))}
       </Wrap>
-    </Container>
+    </>
   );
 };
 

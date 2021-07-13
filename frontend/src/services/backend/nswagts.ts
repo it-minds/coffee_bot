@@ -259,6 +259,7 @@ export interface IChannelClient {
     getMyChannels(): Promise<ChannelSettingsIdDto[]>;
     updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
     updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse>;
+    getRounds(id: number): Promise<RoundSnipDto[]>;
     getActiveRound(id: number): Promise<ActiveRoundDto>;
 }
 
@@ -392,8 +393,51 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
+    getRounds(id: number): Promise<RoundSnipDto[]> {
+        let url_ = this.baseUrl + "/api/Channel/{id}/rounds";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetRounds(_response));
+        });
+    }
+
+    protected processGetRounds(response: Response): Promise<RoundSnipDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(RoundSnipDto.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoundSnipDto[]>(<any>null);
+    }
+
     getActiveRound(id: number): Promise<ActiveRoundDto> {
-        let url_ = this.baseUrl + "/api/Channel/{id}/ActiveRound";
+        let url_ = this.baseUrl + "/api/Channel/{id}/rounds/active";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -597,6 +641,61 @@ export class HealthClient extends ClientBase implements IHealthClient {
             });
         }
         return Promise.resolve<boolean>(<any>null);
+    }
+}
+
+export interface IRoundClient {
+    getRound(id: number): Promise<ActiveRoundDto>;
+}
+
+export class RoundClient extends ClientBase implements IRoundClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getRound(id: number): Promise<ActiveRoundDto> {
+        let url_ = this.baseUrl + "/api/Round/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetRound(_response));
+        });
+    }
+
+    protected processGetRound(response: Response): Promise<ActiveRoundDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ActiveRoundDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ActiveRoundDto>(<any>null);
     }
 }
 
@@ -980,6 +1079,70 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
 
 export interface IUpdateChannelSettingsCommand {
     settings?: IChannelSettingsDto | null;
+}
+
+export class RoundSnipDto implements IRoundSnipDto {
+    id?: number;
+    channelId?: number;
+    slackChannelId?: string | null;
+    active?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    meetupPercentage?: number;
+    photoPercentage?: number;
+
+    constructor(data?: IRoundSnipDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
+            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
+            this.meetupPercentage = _data["meetupPercentage"] !== undefined ? _data["meetupPercentage"] : <any>null;
+            this.photoPercentage = _data["photoPercentage"] !== undefined ? _data["photoPercentage"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): RoundSnipDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoundSnipDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
+        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["active"] = this.active !== undefined ? this.active : <any>null;
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
+        data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
+        data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
+        return data; 
+    }
+}
+
+export interface IRoundSnipDto {
+    id?: number;
+    channelId?: number;
+    slackChannelId?: string | null;
+    active?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    meetupPercentage?: number;
+    photoPercentage?: number;
 }
 
 export class ActiveRoundDto implements IActiveRoundDto {

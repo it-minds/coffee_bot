@@ -1,4 +1,5 @@
 import {
+  Box,
   HStack,
   Slider,
   SliderFilledTrack,
@@ -8,6 +9,7 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
+import { BsClock } from "@react-icons/all-files/bs/BsClock";
 import React, { FC, useMemo } from "react";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
@@ -42,14 +44,16 @@ const Timeline: FC<Props> = ({ round }) => {
         aria-label="slider-ex-1"
         isReadOnly
         defaultValue={progress * 100}
-        colorScheme="yellow"
+        colorScheme="green"
         sx={{
           cursor: "unset"
         }}>
         <SliderTrack>
           <SliderFilledTrack />
         </SliderTrack>
-        <SliderThumb />
+        <SliderThumb boxSize={6} backgroundColor="green.100">
+          <Box color="green.600" as={BsClock}></Box>
+        </SliderThumb>
       </Slider>
     </VStack>
   );

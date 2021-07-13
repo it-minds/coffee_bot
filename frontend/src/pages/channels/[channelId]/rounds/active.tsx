@@ -1,3 +1,4 @@
+import AppContainer from "components/Common/AppContainer";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -32,7 +33,11 @@ const IndexPage: NextPage = () => {
     }
   }, [activeUser, query]);
 
-  return <RoundInfo round={round} />;
+  return (
+    <AppContainer>
+      <RoundInfo round={round} />
+    </AppContainer>
+  );
 };
 
 export default IndexPage;

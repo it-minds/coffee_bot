@@ -2,6 +2,7 @@ import "ts-array-ext/groupBy";
 import "ts-array-ext/sortByAttr";
 
 import { Container, Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
+import AppContainer from "components/Common/AppContainer";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -48,7 +49,7 @@ const IndexPage: NextPage = () => {
 
   // return <Demo />;
   return (
-    <Container maxW="7xl">
+    <AppContainer>
       <Heading textAlign="center">Gallery</Heading>
       {activeImage !== null && (
         <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
@@ -80,7 +81,7 @@ const IndexPage: NextPage = () => {
             </Flex>
           </Fragment>
         ))}
-    </Container>
+    </AppContainer>
   );
 };
 

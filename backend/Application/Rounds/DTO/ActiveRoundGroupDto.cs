@@ -5,7 +5,7 @@ using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Application.Rounds.GetCurrentRound
+namespace Application.Rounds.DTO
 {
   public class ActiveRoundGroupDto : IAutoMap<CoffeeRoundGroup>
   {

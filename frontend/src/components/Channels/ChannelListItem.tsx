@@ -88,11 +88,17 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
                 <MyButton
                   onClick={() =>
                     router.push(
-                      "channels/[channelId]/active-round",
-                      "channels/" + channel.id + "/active-round"
+                      "channels/[channelId]/rounds/active",
+                      "channels/" + channel.id + "/rounds/active"
                     )
                   }>
                   Active Round
+                </MyButton>
+                <MyButton
+                  onClick={() =>
+                    router.push("channels/[channelId]/rounds", "channels/" + channel.id + "/rounds")
+                  }>
+                  Previous Rounds
                 </MyButton>
               </PopoverBody>
             </PopoverContent>

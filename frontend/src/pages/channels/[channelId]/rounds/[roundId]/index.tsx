@@ -1,10 +1,11 @@
+import AppContainer from "components/Common/AppContainer";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
-import { genChannelClient } from "services/backend/apiClients";
+import { genRoundsClient } from "services/backend/apiClients";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import isomorphicEnvSettings from "utils/envSettings";
 
@@ -15,11 +16,11 @@ const IndexPage: NextPage = () => {
   const [round, setRound] = useState<ActiveRoundDto>(null);
 
   useEffectAsync(async () => {
-    if (activeUser && query.channelId) {
-      const channelId = parseInt(query.channelId as string);
+    if (activeUser && query.roundId) {
+      const roundId = parseInt(query.roundId as string);
 
-      const client = await genChannelClient();
-      const result = await client.getActiveRound(channelId);
+      const client = await genRoundsClient();
+      const result = await client.getRound(roundId);
 
       const envSettings = isomorphicEnvSettings();
 
@@ -32,7 +33,11 @@ const IndexPage: NextPage = () => {
     }
   }, [activeUser, query]);
 
-  return <RoundInfo round={round} />;
+  return (
+    <AppContainer>
+      <RoundInfo round={round} />
+    </AppContainer>
+  );
 };
 
 export default IndexPage;
