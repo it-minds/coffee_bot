@@ -990,6 +990,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
     startDate?: Date;
     endDate?: Date;
     groups?: ActiveRoundGroupDto[] | null;
+    previousMeetup?: number | null;
+    previousPhoto?: number | null;
 
     constructor(data?: IActiveRoundDto) {
         if (data) {
@@ -1020,6 +1022,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
                 for (let item of _data["groups"])
                     this.groups!.push(ActiveRoundGroupDto.fromJS(item));
             }
+            this.previousMeetup = _data["previousMeetup"] !== undefined ? _data["previousMeetup"] : <any>null;
+            this.previousPhoto = _data["previousPhoto"] !== undefined ? _data["previousPhoto"] : <any>null;
         }
     }
 
@@ -1043,6 +1047,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
             for (let item of this.groups)
                 data["groups"].push(item.toJSON());
         }
+        data["previousMeetup"] = this.previousMeetup !== undefined ? this.previousMeetup : <any>null;
+        data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
         return data; 
     }
 }
@@ -1055,6 +1061,8 @@ export interface IActiveRoundDto {
     startDate?: Date;
     endDate?: Date;
     groups?: IActiveRoundGroupDto[] | null;
+    previousMeetup?: number | null;
+    previousPhoto?: number | null;
 }
 
 export class ActiveRoundGroupDto implements IActiveRoundGroupDto {

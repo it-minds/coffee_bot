@@ -25,7 +25,6 @@ namespace Slack.Messages
         Blocks = {
           new SectionBlock {
             Text = new Markdown {
-              Type = "mrkdwn",
               Text = "Hey! I noticed you posted an image. Is this your group selfie?"
             }
           },

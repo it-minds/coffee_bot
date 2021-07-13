@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import Timeline from "components/Timeline/Timeline";
 import React, { FC } from "react";
+import { useMemo } from "react";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 import { percentFormatter } from "utils/formatters/percentFormatter";
@@ -25,9 +26,6 @@ interface Props {
 }
 
 const RoundInfo: FC<Props> = ({ round }) => {
-  const redColor = useColorModeValue("red.500", "red.700");
-  const greenColor = useColorModeValue("green.500", "green.700");
-
   if (!round) {
     return (
       <Center>
@@ -35,6 +33,17 @@ const RoundInfo: FC<Props> = ({ round }) => {
       </Center>
     );
   }
+  const redColor = useColorModeValue("red.500", "red.700");
+  const greenColor = useColorModeValue("green.500", "green.700");
+
+  const stats = useMemo(() => {
+    const meetup = round.groups.filter(x => x.hasMet).length / round.groups.length;
+    const photo =
+      round.groups.filter(x => x.hasPhoto).length /
+      (round.groups.filter(x => x.hasMet).length || 1);
+
+    return { meetup, photo };
+  }, [round]);
 
   return (
     <Container maxW="7xl">
@@ -46,28 +55,19 @@ const RoundInfo: FC<Props> = ({ round }) => {
       <StatGroup mt={6} mb={3}>
         <Stat backgroundColor="blue.900" p={4}>
           <StatLabel>Meetup percent:</StatLabel>
-          <StatNumber>
-            {percentFormatter.format(
-              round.groups.filter(x => x.hasMet).length / round.groups.length
-            )}
-          </StatNumber>
+          <StatNumber>{percentFormatter.format(stats.meetup * 100)}</StatNumber>
           <StatHelpText>
-            <StatArrow type="increase" />
-            23.36%
+            <StatArrow type={stats.meetup > round.previousMeetup ? "increase" : "decrease"} />
+            {percentFormatter.format(round.previousMeetup * 100)}
           </StatHelpText>
         </Stat>
 
         <Stat backgroundColor="blue.900" p={4}>
           <StatLabel>Photo percent</StatLabel>
-          <StatNumber>
-            {percentFormatter.format(
-              round.groups.filter(x => x.hasPhoto).length /
-                (round.groups.filter(x => x.hasMet).length || 1)
-            )}
-          </StatNumber>
+          <StatNumber>{percentFormatter.format(stats.photo * 100)}</StatNumber>
           <StatHelpText>
-            <StatArrow type="decrease" />
-            9.05%
+            <StatArrow type={stats.photo > round.previousPhoto ? "increase" : "decrease"} />
+            {percentFormatter.format(round.previousPhoto * 100)}
           </StatHelpText>
         </Stat>
       </StatGroup>

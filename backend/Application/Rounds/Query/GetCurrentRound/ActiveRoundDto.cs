@@ -16,6 +16,9 @@ namespace Application.Rounds.GetCurrentRound
     public DateTimeOffset EndDate { get; set; }
     public IEnumerable<ActiveRoundGroupDto> Groups { get; set; }
 
+    public decimal? PreviousMeetup { get; set; }
+    public decimal? PreviousPhoto { get; set; }
+
     public void Mapping(Profile profile)
     {
       profile.CreateMap<CoffeeRound, ActiveRoundDto>()

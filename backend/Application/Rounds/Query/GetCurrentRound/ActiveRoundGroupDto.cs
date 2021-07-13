@@ -18,7 +18,7 @@ namespace Application.Rounds.GetCurrentRound
     public string PhotoUrl { get; set; }
     public int CoffeeRoundId { get; set; }
 
-    public IEnumerable<string> Members { get; set; }
+    public IList<string> Members { get; set; }
 
     public void Mapping(Profile profile)
     {
