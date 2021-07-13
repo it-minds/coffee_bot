@@ -21,6 +21,18 @@ import { useRouter } from "next/dist/client/router";
 import React, { FC, useContext } from "react";
 import { IChannelSettingsIdDto, UpdateChannelPauseInput } from "services/backend/nswagts";
 
+const MyButton: FC<{ onClick: () => void }> = ({ onClick, children }) => (
+  <Button
+    justifyContent="left"
+    isFullWidth={true}
+    size="md"
+    borderRadius={0}
+    variant="ghost"
+    onClick={onClick}>
+    {children}
+  </Button>
+);
+
 type Props = {
   channel: IChannelSettingsIdDto;
 };
@@ -58,24 +70,30 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
               <PopoverArrow />
               <PopoverBody p="0">
                 <EditChannelSettingsTriggerBtn channel={channel} />
-                <Button
-                  justifyContent="left"
-                  isFullWidth={true}
-                  size="md"
-                  borderRadius={0}
-                  variant="ghost"
-                  onClick={() => router.push("gallery/[channelId]", "gallery/" + channel.id)}>
+                <MyButton
+                  onClick={() =>
+                    router.push(
+                      "channels/[channelId]/gallery",
+                      "channels/" + channel.id + "/gallery"
+                    )
+                  }>
                   Gallery
-                </Button>
-                <Button
-                  justifyContent="left"
-                  isFullWidth={true}
-                  size="md"
-                  borderRadius={0}
-                  variant="ghost"
-                  onClick={() => router.push("stats/[channelId]", "stats/" + channel.id)}>
+                </MyButton>
+                <MyButton
+                  onClick={() =>
+                    router.push("channels/[channelId]/stats", "channels/" + channel.id + "/stats")
+                  }>
                   Stats
-                </Button>
+                </MyButton>
+                <MyButton
+                  onClick={() =>
+                    router.push(
+                      "channels/[channelId]/active-round",
+                      "channels/" + channel.id + "/active-round"
+                    )
+                  }>
+                  Active Round
+                </MyButton>
               </PopoverBody>
             </PopoverContent>
           </Portal>

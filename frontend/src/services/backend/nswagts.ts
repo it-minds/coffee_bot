@@ -259,6 +259,7 @@ export interface IChannelClient {
     getMyChannels(): Promise<ChannelSettingsIdDto[]>;
     updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
     updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse>;
+    getActiveRound(id: number): Promise<ActiveRoundDto>;
 }
 
 export class ChannelClient extends ClientBase implements IChannelClient {
@@ -389,6 +390,45 @@ export class ChannelClient extends ClientBase implements IChannelClient {
             });
         }
         return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    getActiveRound(id: number): Promise<ActiveRoundDto> {
+        let url_ = this.baseUrl + "/api/Channel/{id}/ActiveRound";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetActiveRound(_response));
+        });
+    }
+
+    protected processGetActiveRound(response: Response): Promise<ActiveRoundDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ActiveRoundDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ActiveRoundDto>(<any>null);
     }
 }
 
@@ -940,6 +980,157 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
 
 export interface IUpdateChannelSettingsCommand {
     settings?: IChannelSettingsDto | null;
+}
+
+export class ActiveRoundDto implements IActiveRoundDto {
+    id?: number;
+    channelId?: number;
+    slackChannelId?: string | null;
+    active?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    groups?: ActiveRoundGroupDto[] | null;
+
+    constructor(data?: IActiveRoundDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            if (data.groups) {
+                this.groups = [];
+                for (let i = 0; i < data.groups.length; i++) {
+                    let item = data.groups[i];
+                    this.groups[i] = item && !(<any>item).toJSON ? new ActiveRoundGroupDto(item) : <ActiveRoundGroupDto>item;
+                }
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
+            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
+            if (Array.isArray(_data["groups"])) {
+                this.groups = [] as any;
+                for (let item of _data["groups"])
+                    this.groups!.push(ActiveRoundGroupDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ActiveRoundDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ActiveRoundDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
+        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["active"] = this.active !== undefined ? this.active : <any>null;
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
+        if (Array.isArray(this.groups)) {
+            data["groups"] = [];
+            for (let item of this.groups)
+                data["groups"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IActiveRoundDto {
+    id?: number;
+    channelId?: number;
+    slackChannelId?: string | null;
+    active?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    groups?: IActiveRoundGroupDto[] | null;
+}
+
+export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
+    id?: number;
+    slackMessageId?: string | null;
+    hasMet?: boolean;
+    hasPhoto?: boolean;
+    finishedAt?: Date | null;
+    notificationCount?: number;
+    photoUrl?: string | null;
+    coffeeRoundId?: number;
+    members?: string[] | null;
+
+    constructor(data?: IActiveRoundGroupDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.slackMessageId = _data["slackMessageId"] !== undefined ? _data["slackMessageId"] : <any>null;
+            this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
+            this.hasPhoto = _data["hasPhoto"] !== undefined ? _data["hasPhoto"] : <any>null;
+            this.finishedAt = _data["finishedAt"] ? new Date(_data["finishedAt"].toString()) : <any>null;
+            this.notificationCount = _data["notificationCount"] !== undefined ? _data["notificationCount"] : <any>null;
+            this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
+            this.coffeeRoundId = _data["coffeeRoundId"] !== undefined ? _data["coffeeRoundId"] : <any>null;
+            if (Array.isArray(_data["members"])) {
+                this.members = [] as any;
+                for (let item of _data["members"])
+                    this.members!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ActiveRoundGroupDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ActiveRoundGroupDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["slackMessageId"] = this.slackMessageId !== undefined ? this.slackMessageId : <any>null;
+        data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
+        data["hasPhoto"] = this.hasPhoto !== undefined ? this.hasPhoto : <any>null;
+        data["finishedAt"] = this.finishedAt ? this.finishedAt.toISOString() : <any>null;
+        data["notificationCount"] = this.notificationCount !== undefined ? this.notificationCount : <any>null;
+        data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
+        data["coffeeRoundId"] = this.coffeeRoundId !== undefined ? this.coffeeRoundId : <any>null;
+        if (Array.isArray(this.members)) {
+            data["members"] = [];
+            for (let item of this.members)
+                data["members"].push(item);
+        }
+        return data; 
+    }
+}
+
+export interface IActiveRoundGroupDto {
+    id?: number;
+    slackMessageId?: string | null;
+    hasMet?: boolean;
+    hasPhoto?: boolean;
+    finishedAt?: Date | null;
+    notificationCount?: number;
+    photoUrl?: string | null;
+    coffeeRoundId?: number;
+    members?: string[] | null;
 }
 
 export class EventInput implements IEventInput {
