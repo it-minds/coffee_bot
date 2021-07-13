@@ -13,20 +13,19 @@ import {
 } from "@chakra-ui/react";
 import React, { FC } from "react";
 import { ExtendedImageDto } from "types/ExtendedImageDto";
+import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 
 type Props = {
   image: ExtendedImageDto;
   onClose: () => void;
 };
 
-const dateFormatter = Intl.DateTimeFormat("en-US", {});
-
 const ImageCover: FC<Props> = ({ image, onClose }) => {
   return (
     <Modal onClose={onClose} size="5xl" isOpen={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{dateFormatter.format(image.finishedAt)}</ModalHeader>
+        <ModalHeader>{dateTimeFormatter.format(image.finishedAt)}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack>
