@@ -23,6 +23,8 @@ namespace Application.Rounds.GetCurrentRound
     {
       profile.CreateMap<CoffeeRound, ActiveRoundDto>()
         .ForMember(x => x.Groups, opts => opts.MapFrom(y => y.CoffeeRoundGroups))
+        .ForMember(x => x.PreviousMeetup, opts => opts.Ignore())
+        .ForMember(x => x.PreviousPhoto, opts => opts.Ignore())
       ;
     }
   }
