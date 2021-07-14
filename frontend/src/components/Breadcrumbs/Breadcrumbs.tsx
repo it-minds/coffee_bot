@@ -31,6 +31,8 @@ const Breadcrumbs: FC = () => {
   });
 
   const crumbs = useMemo(() => {
+    if (breadcrumbs.length < 1) return [];
+
     const middleCount = breadcrumbs.length - maxCount;
 
     return middleCount < 1
