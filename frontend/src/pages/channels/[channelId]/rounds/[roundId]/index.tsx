@@ -43,6 +43,8 @@ const IndexPage: NextPage = () => {
 
   useEffectAsync(async () => {
     if (activeUser && query.roundId) {
+      setRound(null);
+
       const roundId = parseInt(query.roundId as string);
 
       const client = await genRoundsClient();
