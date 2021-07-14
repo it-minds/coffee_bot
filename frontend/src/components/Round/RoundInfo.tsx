@@ -1,8 +1,8 @@
 import {
   Box,
   Center,
-  Container,
   Heading,
+  SimpleGrid,
   Spinner,
   Stat,
   StatArrow,
@@ -11,8 +11,7 @@ import {
   StatLabel,
   StatNumber,
   Text,
-  useColorModeValue,
-  Wrap
+  useColorModeValue
 } from "@chakra-ui/react";
 import Timeline from "components/Timeline/Timeline";
 import React, { FC } from "react";
@@ -49,9 +48,8 @@ const RoundInfo: FC<Props> = ({ round }) => {
 
   return (
     <>
-      <Heading textAlign="center">
-        Round {dateTimeFormatter.format(round.startDate)} -{" "}
-        {dateTimeFormatter.format(round.endDate)}
+      <Heading textAlign="center" fontSize={["2xl", "3xl", "4xl"]}>
+        {dateTimeFormatter.format(round.startDate)} - {dateTimeFormatter.format(round.endDate)}
       </Heading>
       <Timeline round={round} />
       <StatGroup mt={6} mb={3}>
@@ -77,15 +75,21 @@ const RoundInfo: FC<Props> = ({ round }) => {
       </StatGroup>
 
       <Heading size="lg">Groups</Heading>
-      <Wrap spacing={[2, 6]} mt={4}>
+      <SimpleGrid
+        spacingX={["0px", "15px", "30px"]}
+        spacingY={["15px", "15px", "30px"]}
+        mt={4}
+        columns={[1, 2, 3, 4]}
+        justifyItems="space-around">
         {round.groups.map((x, i) => (
           <Box
             key={x.id}
             backgroundColor={x.hasMet ? greenColor : redColor}
             backgroundImage={x.hasPhoto ? (x as any).publicSrc : ""}
             backgroundPosition="top"
-            h="300px"
-            w="300px"
+            minH="250px"
+            maxH="300px"
+            minW="200px"
             p={[2, 3, 4]}>
             {/* <pre>{JSON.stringify(x, null, 2)}</pre> */}
             <Box backgroundColor={imageBackdrop} p={[1, 2]}>
@@ -98,7 +102,7 @@ const RoundInfo: FC<Props> = ({ round }) => {
             </Box>
           </Box>
         ))}
-      </Wrap>
+      </SimpleGrid>
     </>
   );
 };
