@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Common.Linq;
 using Application.Rounds.DTO;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -29,11 +30,11 @@ namespace Application.Rounds.GetChannelRounds
       public async Task<IEnumerable<RoundSnipDto>> Handle(GetChannelRoundsQuery request, CancellationToken cancellationToken)
       {
         var rounds = await applicationDbContext.CoffeeRounds
+          .Include(x => x.CoffeeRoundGroups)
           .Where(x => x.ChannelId == request.ChannelId)
-          .ProjectTo<RoundSnipDto>(mapper.ConfigurationProvider)
           .ToListAsync();
 
-        return rounds;
+        return rounds.Select(round => mapper.Map<RoundSnipDto>(round));
       }
     }
   }

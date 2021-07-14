@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Application.Common.Linq;
 using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Entities;
@@ -23,8 +24,8 @@ namespace Application.Rounds.DTO
     public void Mapping(Profile profile)
     {
       profile.CreateMap<CoffeeRound, RoundSnipDto>()
-        .ForMember(x => x.MeetupPercentage, opts => opts.MapFrom(y => (decimal) y.CoffeeRoundGroups.Count(group => group.HasMet) / y.CoffeeRoundGroups.Count() ))
-        .ForMember(x => x.PhotoPercentage, opts => opts.MapFrom(y => y.CoffeeRoundGroups.Count(group => group.HasMet) > 0 ? (decimal) y.CoffeeRoundGroups.Count(group => group.HasPhoto) / y.CoffeeRoundGroups.Count(group => group.HasMet) : 0m))
+        .ForMember(x => x.MeetupPercentage, opts => opts.MapFrom(round => round.CoffeeRoundGroups.Percent(group => group.HasMet)))
+        .ForMember(x => x.PhotoPercentage, opts => opts.MapFrom(round => round.CoffeeRoundGroups.Percent(group => group.HasPhoto,group => group.HasMet)))
       ;
     }
   }

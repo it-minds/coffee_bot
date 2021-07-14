@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Common.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -43,8 +44,8 @@ namespace Application.Stats.Query.GetMemberStats
         foreach (var group in groups.GroupBy(x => x.SlackMemberId))
         {
           var memberId = group.Key;
-          var meetupPercent = (group.Count(x => x.HasMet) / (decimal) group.Count()) * 100;
-          var photoPercent = meetupPercent > 0m ? (group.Count(x => x.HasPhoto) / (decimal) group.Count(x => x.HasMet)) * 100 : 0m;
+          var meetupPercent = group.Percent(x => x.HasMet);
+          var photoPercent = group.Percent(x => x.HasPhoto, x => x.HasMet);
           var totalParticipation = group.Count();
 
           string name = channelMembers.FirstOrDefault(x => x.SlackUserId == group.Key)?.SlackName ?? "";

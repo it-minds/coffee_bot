@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Common.Linq;
 using Application.Rounds.DTO;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -39,8 +40,8 @@ namespace Application.Rounds.GetCurrentRound
           .FirstOrDefaultAsync();
 
         if (lastRound != null) {
-          round.PreviousMeetup = (decimal)lastRound.CoffeeRoundGroups.Count(x => x.HasMet) / lastRound.CoffeeRoundGroups.Count();
-          round.PreviousPhoto = round.PreviousMeetup > 0 ? (decimal) lastRound.CoffeeRoundGroups.Count(x => x.HasPhoto) / lastRound.CoffeeRoundGroups.Count( x => x.HasMet) : 0m ;
+          round.PreviousMeetup = lastRound.CoffeeRoundGroups.Percent(x => x.HasMet);
+          round.PreviousPhoto = lastRound.CoffeeRoundGroups.Percent(x => x.HasPhoto, x => x.HasMet);
         }
 
         var members = await applicationDbContext.ChannelMembers

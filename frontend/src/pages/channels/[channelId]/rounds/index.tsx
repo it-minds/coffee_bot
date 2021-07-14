@@ -47,9 +47,9 @@ const IndexPage: NextPage = () => {
           Round: {dateTimeFormatter.format(round.startDate)} -{" "}
           {dateTimeFormatter.format(round.endDate)}
           <br />
-          Meetup: {percentFormatter.format(round.meetupPercentage * 100)}
+          Meetup: {percentFormatter.format(round.meetupPercentage)}
           <br />
-          Photo: {percentFormatter.format(round.photoPercentage * 100)}
+          Photo: {percentFormatter.format(round.photoPercentage)}
         </Box>
       ))}
     </AppContainer>

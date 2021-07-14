@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Common.Linq;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ namespace Rounds.Commands.RoundFinisherCommand
         {
           round.Active = false;
 
-          var meetupPercent = round.CoffeeRoundGroups.Count() > 0 ? round.CoffeeRoundGroups.Where(x => x.HasMet).Count() / round.CoffeeRoundGroups.Count() * 100 : 0;
+          var meetupPercent = round.CoffeeRoundGroups.Percent(x => x.HasMet);
 
           var msg = BuildChannelMessage(round, meetupPercent);
 
