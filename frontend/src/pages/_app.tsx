@@ -56,7 +56,6 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
     if (auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth) {
       openSignInWindow(envSettings.backendUrl + "/api/auth/login", "login", e => {
         if (typeof e.data == "string") {
-          console.log(e.source);
           try {
             const pairs = (e.data as string).substring(1).split("&");
 
@@ -67,7 +66,6 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
               const pair = pairs[i].split("=");
               const key = decodeURIComponent(pair[0]);
               const value = decodeURIComponent(pair[1]);
-              console.log(key, value);
 
               if (key == "token") auth.login(value);
             }

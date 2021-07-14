@@ -30,7 +30,7 @@ const IndexPage: NextPage = () => {
       asPath: `/channels/${query.channelId}/rounds`
     },
     {
-      name: "stats",
+      name: "gallery",
       path: "/channels/[channelId]/gallery",
       asPath: `/channels/${query.channelId}/gallery`
     }
