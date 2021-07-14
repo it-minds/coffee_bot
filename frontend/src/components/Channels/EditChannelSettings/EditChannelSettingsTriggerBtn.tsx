@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Divider,
   Modal,
@@ -12,7 +13,6 @@ import {
   useToast
 } from "@chakra-ui/react";
 import ChannelSettingsForm from "components/Channels/EditChannelSettings/ChannelSettingsForm";
-import PopoverMenuButton from "components/Common/PopoverMenuButton";
 import { ChannelContext } from "contexts/ChannelContext";
 import { FC, useCallback, useContext } from "react";
 import { IChannelSettingsDto, IChannelSettingsIdDto } from "services/backend/nswagts";
@@ -21,7 +21,7 @@ type Props = {
   channel: IChannelSettingsIdDto;
 };
 
-const EditChannelSettingsTriggerBtn: FC<Props> = ({ channel }) => {
+const EditChannelSettingsTriggerBtn: FC<Props> = ({ channel, children }) => {
   const { onClose, onOpen, isOpen } = useDisclosure();
   const { updateChannelSettings } = useContext(ChannelContext);
   const toast = useToast();
@@ -43,7 +43,7 @@ const EditChannelSettingsTriggerBtn: FC<Props> = ({ channel }) => {
 
   return (
     <>
-      <PopoverMenuButton btnText="Edit channel settings" onClickMethod={onOpen} />
+      <Box onClick={onOpen}>{children}</Box>
       <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="3xl">
         <ModalOverlay />
         <ModalContent>

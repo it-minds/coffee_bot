@@ -7,19 +7,23 @@ import {
   SliderTrack,
   Spacer,
   Text,
+  Tooltip,
   VStack
 } from "@chakra-ui/react";
 import { BsClock } from "@react-icons/all-files/bs/BsClock";
-import React, { FC, useMemo } from "react";
+import useInterval from "hooks/useInterval";
+import React, { FC, useState } from "react";
+import { useCallback } from "react";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
+import { percentFormatter } from "utils/formatters/percentFormatter";
 
 interface Props {
   round: ActiveRoundDto;
 }
 
 const Timeline: FC<Props> = ({ round }) => {
-  const progress = useMemo(() => {
+  const getProgress = useCallback(() => {
     if (!round) return 0;
 
     const now = Date.now();
@@ -29,6 +33,14 @@ const Timeline: FC<Props> = ({ round }) => {
 
     return (nowBaseStart * 100) / endBaseStat;
   }, [round]);
+
+  const [progress, setProgress] = useState<number>(getProgress);
+
+  useInterval(() => {
+    const progress = getProgress();
+    console.log("updating timeline", progress);
+    setProgress(progress);
+  }, 5000);
 
   if (progress < 0 || progress > 100) return null;
 
@@ -43,15 +55,17 @@ const Timeline: FC<Props> = ({ round }) => {
       <Slider
         aria-label="slider-ex-1"
         isReadOnly
-        defaultValue={progress}
+        value={progress}
         colorScheme="green"
         cursor="unset">
         <SliderTrack>
           <SliderFilledTrack />
         </SliderTrack>
-        <SliderThumb boxSize={6} backgroundColor="green.100">
-          <Box color="green.600" as={BsClock}></Box>
-        </SliderThumb>
+        <Tooltip hasArrow label={percentFormatter.format(progress)} fontSize="md" placement="top">
+          <SliderThumb boxSize={6} backgroundColor="green.100">
+            <Box color="green.600" as={BsClock}></Box>
+          </SliderThumb>
+        </Tooltip>
       </Slider>
     </VStack>
   );

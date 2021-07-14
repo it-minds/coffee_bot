@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -31,6 +31,9 @@ const IndexPage: NextPage = () => {
     }
   ]);
 
+  const activeColor = useColorModeValue("green.200", "green.600");
+  const normalColor = useColorModeValue("blue.100", "blue.700");
+
   const [rounds, setRounds] = useState<RoundSnipDto[]>([]);
 
   useEffectAsync(async () => {
@@ -58,7 +61,7 @@ const IndexPage: NextPage = () => {
           m={2}
           p={2}
           cursor="pointer"
-          backgroundColor={round.active ? "green.700" : "blue.700"}>
+          backgroundColor={round.active ? activeColor : normalColor}>
           Round: {dateTimeFormatter.format(round.startDate)} -{" "}
           {dateTimeFormatter.format(round.endDate)}
           <br />

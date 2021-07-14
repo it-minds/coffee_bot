@@ -2,6 +2,7 @@ import {
   Box,
   Heading,
   HStack,
+  Icon,
   SimpleGrid,
   Stat,
   StatArrow,
@@ -12,6 +13,7 @@ import {
   Text,
   useColorModeValue
 } from "@chakra-ui/react";
+import { CgMathEqual } from "@react-icons/all-files/cg/CgMathEqual";
 import { MdArrowBack } from "@react-icons/all-files/md/MdArrowBack";
 import { MdArrowForward } from "@react-icons/all-files/md/MdArrowForward";
 import PureIconsButton from "components/Common/PureIconButton";
@@ -34,6 +36,7 @@ const RoundInfo: FC<Props> = ({ round }) => {
   const redColor = useColorModeValue("red.500", "red.700");
   const greenColor = useColorModeValue("green.500", "green.700");
   const statsBackground = useColorModeValue("blue.200", "blue.900");
+  const eqColor = useColorModeValue("yellow.400", "yellow.400");
   const imageBackdrop = useColorModeValue("rgb(255,255,255,0.6)", "rgb(0,0,0,0.4)");
 
   const stats = useMemo(() => {
@@ -89,22 +92,28 @@ const RoundInfo: FC<Props> = ({ round }) => {
       <StatGroup mt={6} mb={3}>
         <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Meetup percent:</StatLabel>
-          <StatNumber>{percentFormatter.format(stats.meetup)}</StatNumber>
-          <StatHelpText>
-            <StatArrow type={stats.meetup > round.previousMeetup ? "increase" : "decrease"} />
-            {percentFormatter.format(round.previousMeetup)}
-            {"  "}(previous)
-          </StatHelpText>
+          <StatNumber>
+            {stats.meetup == round.previousMeetup ? (
+              <Icon w={3.5} color={eqColor} as={CgMathEqual} />
+            ) : (
+              <StatArrow type={stats.meetup > round.previousMeetup ? "increase" : "decrease"} />
+            )}
+            {percentFormatter.format(stats.meetup)}
+          </StatNumber>
+          <StatHelpText>previous: {percentFormatter.format(round.previousMeetup)}</StatHelpText>
         </Stat>
 
         <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Photo percent</StatLabel>
-          <StatNumber>{percentFormatter.format(stats.photo)}</StatNumber>
-          <StatHelpText>
-            <StatArrow type={stats.photo > round.previousPhoto ? "increase" : "decrease"} />
-            {percentFormatter.format(round.previousPhoto)}
-            {"  "}(previous)
-          </StatHelpText>
+          <StatNumber>
+            {stats.photo == round.previousPhoto ? (
+              <Icon w={3.5} color={eqColor} as={CgMathEqual} />
+            ) : (
+              <StatArrow type={stats.photo > round.previousPhoto ? "increase" : "decrease"} />
+            )}
+            {percentFormatter.format(stats.photo)}
+          </StatNumber>
+          <StatHelpText>previous: {percentFormatter.format(round.previousPhoto)}</StatHelpText>
         </Stat>
       </StatGroup>
 

@@ -1,4 +1,4 @@
-import { Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Heading, Table, Tbody, Td, Th, Thead, Tr, useBreakpointValue } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -37,6 +37,11 @@ const IndexPage: NextPage = () => {
     }
   ]);
 
+  const showId = useBreakpointValue({
+    base: false,
+    md: true
+  });
+
   const [stats, setStats] = useState<StatsDto[]>([]);
 
   const [sortCb, setSortCB] = useState<(a: StatsDto, b: StatsDto) => number>(() => defaultSort);
@@ -71,7 +76,7 @@ const IndexPage: NextPage = () => {
       <Table variant="striped" colorScheme="gray" size="sm">
         <Thead>
           <Tr>
-            <Th>User Id</Th>
+            {showId && <Th>User Id</Th>}
             <Th>Name</Th>
             <Th isNumeric>
               Meetup %
@@ -86,7 +91,7 @@ const IndexPage: NextPage = () => {
         <Tbody>
           {stats.sort(sortCb).map(stat => (
             <Tr key={stat.slackMemberId}>
-              <Td>{stat.slackMemberId}</Td>
+              {showId && <Td>{stat.slackMemberId}</Td>}
               <Td>{stat.slackMemberName}</Td>
               <Td isNumeric>{formatter.format(stat.meepupPercent)}</Td>
               <Td isNumeric>{formatter.format(stat.photoPercent)}</Td>

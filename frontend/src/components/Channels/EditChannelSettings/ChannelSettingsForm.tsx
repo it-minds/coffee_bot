@@ -122,7 +122,7 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channel }) => {
               size="lg"
             />
           </FormControl>
-          <Button colorScheme="blue" isLoading={isLoading} width="100px" mt={6} type="submit">
+          <Button colorScheme="green" isLoading={isLoading} mt={6} type="submit">
             Submit
           </Button>
         </form>
