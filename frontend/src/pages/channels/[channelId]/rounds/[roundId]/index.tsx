@@ -1,3 +1,4 @@
+import { Center, Spinner } from "@chakra-ui/react";
 import AppContainer from "components/Common/AppContainer";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
@@ -35,7 +36,13 @@ const IndexPage: NextPage = () => {
 
   return (
     <AppContainer>
-      <RoundInfo round={round} />
+      {round ? (
+        <RoundInfo round={round} />
+      ) : (
+        <Center>
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+        </Center>
+      )}
     </AppContainer>
   );
 };

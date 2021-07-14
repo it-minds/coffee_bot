@@ -18,6 +18,7 @@ import { MdArrowBack } from "@react-icons/all-files/md/MdArrowBack";
 import { MdArrowForward } from "@react-icons/all-files/md/MdArrowForward";
 import PureIconsButton from "components/Common/PureIconButton";
 import Timeline from "components/Timeline/Timeline";
+import { useEffectAsync } from "hooks/useEffectAsync";
 import { useRouter } from "next/dist/client/router";
 import React, { FC } from "react";
 import { useEffect } from "react";
@@ -31,13 +32,6 @@ interface Props {
 }
 
 const RoundInfo: FC<Props> = ({ round }) => {
-  if (!round) {
-    return (
-      <Center>
-        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-      </Center>
-    );
-  }
   const router = useRouter();
 
   const redColor = useColorModeValue("red.500", "red.700");
@@ -54,16 +48,16 @@ const RoundInfo: FC<Props> = ({ round }) => {
     return { meetup, photo };
   }, [round]);
 
-  useEffect(() => {
-    if (round.previousId != null)
-      router.prefetch(
-        "/channels/[channelId]/rounds/[roundId]",
-        `/channels/${router.query.channelId}/rounds/${round.previousId}`
-      );
+  useEffectAsync(async () => {
     if (round.nextId != null)
-      router.prefetch(
+      await router.prefetch(
         "/channels/[channelId]/rounds/[roundId]",
         `/channels/${router.query.channelId}/rounds/${round.nextId}`
+      );
+    if (round.previousId != null)
+      await router.prefetch(
+        "/channels/[channelId]/rounds/[roundId]",
+        `/channels/${router.query.channelId}/rounds/${round.previousId}`
       );
   }, []);
 
