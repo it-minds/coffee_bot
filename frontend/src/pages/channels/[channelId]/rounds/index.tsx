@@ -1,20 +1,35 @@
 import { Box } from "@chakra-ui/react";
-import AppContainer from "components/Common/AppContainer";
-import RoundInfo from "components/Round/RoundInfo";
+import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
 import { genChannelClient } from "services/backend/apiClients";
-import { ActiveRoundDto, RoundSnipDto } from "services/backend/nswagts";
-import isomorphicEnvSettings from "utils/envSettings";
+import { RoundSnipDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 import { percentFormatter } from "utils/formatters/percentFormatter";
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const router = useRouter();
+
+  useBreadcrumbs([
+    {
+      name: "home",
+      path: "/"
+    },
+    {
+      name: "channel " + router.query.channelId,
+      path: "/channels/[channelId]/rounds",
+      asPath: `/channels/${router.query.channelId}/rounds`
+    },
+    {
+      name: "rounds",
+      path: "/channels/[channelId]/rounds",
+      asPath: `/channels/${router.query.channelId}/rounds`
+    }
+  ]);
 
   const [rounds, setRounds] = useState<RoundSnipDto[]>([]);
 
@@ -30,7 +45,7 @@ const IndexPage: NextPage = () => {
   }, [activeUser, router.query]);
 
   return (
-    <AppContainer>
+    <>
       {rounds.map(round => (
         <Box
           key={round.id}
@@ -52,7 +67,7 @@ const IndexPage: NextPage = () => {
           Photo: {percentFormatter.format(round.photoPercentage)}
         </Box>
       ))}
-    </AppContainer>
+    </>
   );
 };
 

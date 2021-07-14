@@ -18,7 +18,7 @@ module.exports = {
     amd: true,
     node: true
   },
-  plugins: ["simple-import-sort"],
+  plugins: ["simple-import-sort", "unused-imports"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -35,6 +35,7 @@ module.exports = {
     "react/prop-types": "off",
     // "@typescript-eslint/explicit-function-return-type": "off",
     "simple-import-sort/imports": "error",
+    "unused-imports/no-unused-imports": "error",
     "jsx-a11y/anchor-is-valid": [
       "error",
       {

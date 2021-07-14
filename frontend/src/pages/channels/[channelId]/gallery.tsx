@@ -1,8 +1,8 @@
 import "ts-array-ext/groupBy";
 import "ts-array-ext/sortByAttr";
 
-import { Container, Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
-import AppContainer from "components/Common/AppContainer";
+import { Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
+import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -18,6 +18,23 @@ import isomorphicEnvSettings from "utils/envSettings";
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
+
+  useBreadcrumbs([
+    {
+      name: "home",
+      path: "/"
+    },
+    {
+      name: "channel " + query.channelId,
+      path: "/channels/[channelId]/rounds",
+      asPath: `/channels/${query.channelId}/rounds`
+    },
+    {
+      name: "stats",
+      path: "/channels/[channelId]/gallery",
+      asPath: `/channels/${query.channelId}/gallery`
+    }
+  ]);
 
   const [activeImage, setActiveImage] = useState<ExtendedImageDto>(null);
   const [images, setImages] = useReducer(ListReducer<ExtendedImageDto>("id"), []);
@@ -49,7 +66,7 @@ const IndexPage: NextPage = () => {
 
   // return <Demo />;
   return (
-    <AppContainer>
+    <>
       <Heading textAlign="center">Gallery</Heading>
       {activeImage !== null && (
         <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
@@ -81,7 +98,7 @@ const IndexPage: NextPage = () => {
             </Flex>
           </Fragment>
         ))}
-    </AppContainer>
+    </>
   );
 };
 

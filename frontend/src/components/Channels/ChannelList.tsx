@@ -1,16 +1,4 @@
-import {
-  Box,
-  Center,
-  Flex,
-  Heading,
-  HStack,
-  Table,
-  Tbody,
-  Text,
-  Th,
-  Thead,
-  Tr
-} from "@chakra-ui/react";
+import { Center, Flex, Heading, Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
 import { ChannelContext } from "contexts/ChannelContext";
 import React, { FC, useContext } from "react";
 import { ChannelSettingsIdDto } from "services/backend/nswagts";

@@ -2,6 +2,7 @@ import "isomorphic-unfetch";
 import "../styles.global.css";
 
 import { Button, Center, ChakraProvider, Spinner } from "@chakra-ui/react";
+import AppContainer from "components/Common/AppContainer";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
@@ -115,8 +116,14 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
           ) : (
             <>
               <AuthContext.Provider value={auth}>
-                {/* <SignalRContext.Provider value={{ connection }}> */}
-                <Component {...pageProps} />
+                {router.pathname != skipauth ? (
+                  <AppContainer>
+                    {/* <SignalRContext.Provider value={{ connection }}> */}
+                    <Component {...pageProps} />
+                  </AppContainer>
+                ) : (
+                  <Component {...pageProps} />
+                )}
 
                 {/* </SignalRContext.Provider> */}
               </AuthContext.Provider>

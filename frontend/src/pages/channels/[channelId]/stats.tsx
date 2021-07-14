@@ -1,5 +1,5 @@
-import { Container, Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
-import AppContainer from "components/Common/AppContainer";
+import { Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { NextPage } from "next";
@@ -19,6 +19,23 @@ const formatter = new Intl.NumberFormat("en-US", {
 const IndexPage: NextPage = () => {
   // const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
+
+  useBreadcrumbs([
+    {
+      name: "home",
+      path: "/"
+    },
+    {
+      name: "channel " + query.channelId,
+      path: "/channels/[channelId]/rounds",
+      asPath: `/channels/${query.channelId}/rounds`
+    },
+    {
+      name: "stats",
+      path: "/channels/[channelId]/stats",
+      asPath: `/channels/${query.channelId}/stats`
+    }
+  ]);
 
   const [stats, setStats] = useState<StatsDto[]>([]);
 
@@ -48,7 +65,7 @@ const IndexPage: NextPage = () => {
   }, []);
 
   return (
-    <AppContainer>
+    <>
       <Heading textAlign="center">Statistics</Heading>
 
       <Table variant="striped" colorScheme="gray" size="sm">
@@ -77,7 +94,7 @@ const IndexPage: NextPage = () => {
           ))}
         </Tbody>
       </Table>
-    </AppContainer>
+    </>
   );
 };
 

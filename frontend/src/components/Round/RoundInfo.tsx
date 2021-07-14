@@ -1,10 +1,8 @@
 import {
   Box,
-  Center,
   Heading,
   HStack,
   SimpleGrid,
-  Spinner,
   Stat,
   StatArrow,
   StatGroup,
@@ -21,7 +19,6 @@ import Timeline from "components/Timeline/Timeline";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useRouter } from "next/dist/client/router";
 import React, { FC } from "react";
-import { useEffect } from "react";
 import { useMemo } from "react";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";

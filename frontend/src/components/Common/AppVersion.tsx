@@ -1,11 +1,15 @@
 import { Center, Code, useToast, VisuallyHidden } from "@chakra-ui/react";
+import { AuthContext } from "contexts/AuthContext";
 import { useRouter } from "next/router";
+import { useContext } from "react";
 import { FC, useCallback, useMemo, useRef } from "react";
 
 const AppVersion: FC = () => {
   const copyInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const router = useRouter();
+
+  const { activeUser } = useContext(AuthContext);
 
   const copy = useCallback(() => {
     copyInput.current.select();
@@ -17,7 +21,7 @@ const AppVersion: FC = () => {
       title: "Client info copied!",
       description: "Your application and client information has been copied to your clipboard.",
       status: "info",
-      duration: 4000,
+      duration: 3000,
       isClosable: true
     });
   }, []);
@@ -28,17 +32,23 @@ const AppVersion: FC = () => {
     for (const i in navigator) _navigator[i] = navigator[i as keyof Navigator];
     for (const i in screen) _screen[i] = screen[i as keyof Screen];
     return JSON.stringify({
-      _navigator,
-      _screen,
-      _router: { ...router, components: undefined },
-      _version: process.env.NEXT_PUBLIC_APP_VERSION,
-      _user: {} // TODO implement getting the user from a hook
+      version: process.env.NEXT_PUBLIC_APP_VERSION,
+      router: { ...router, components: undefined },
+      navigator: _navigator,
+      screen: _screen,
+      user: activeUser
     });
-  }, [router]);
+  }, [router, activeUser]);
 
   return (
     <Center>
-      <Code colorScheme="black" variant="subtle" cursor="pointer" userSelect="none" onClick={copy}>
+      <Code
+        colorScheme="black"
+        variant="subtle"
+        cursor="pointer"
+        userSelect="none"
+        onClick={copy}
+        opacity={0.3}>
         App Version: {process.env.NEXT_PUBLIC_APP_VERSION}
       </Code>
       <VisuallyHidden>

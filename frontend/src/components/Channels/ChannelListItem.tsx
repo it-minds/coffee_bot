@@ -1,6 +1,5 @@
 import {
   Button,
-  Flex,
   IconButton,
   Popover,
   PopoverArrow,
@@ -8,10 +7,8 @@ import {
   PopoverContent,
   PopoverTrigger,
   Portal,
-  Spacer,
   Switch,
   Td,
-  Text,
   Tr
 } from "@chakra-ui/react";
 import { BsThreeDots } from "@react-icons/all-files/bs/BsThreeDots";

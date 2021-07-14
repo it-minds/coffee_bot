@@ -15,11 +15,7 @@ import ChannelSettingsForm from "components/Channels/EditChannelSettings/Channel
 import PopoverMenuButton from "components/Common/PopoverMenuButton";
 import { ChannelContext } from "contexts/ChannelContext";
 import { FC, useCallback, useContext } from "react";
-import {
-  ChannelSettingsDto,
-  IChannelSettingsDto,
-  IChannelSettingsIdDto
-} from "services/backend/nswagts";
+import { IChannelSettingsDto, IChannelSettingsIdDto } from "services/backend/nswagts";
 
 type Props = {
   channel: IChannelSettingsIdDto;

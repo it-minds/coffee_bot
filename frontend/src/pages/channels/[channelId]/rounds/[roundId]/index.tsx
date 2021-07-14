@@ -1,5 +1,5 @@
 import { Center, Spinner } from "@chakra-ui/react";
-import AppContainer from "components/Common/AppContainer";
+import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -13,6 +13,31 @@ import isomorphicEnvSettings from "utils/envSettings";
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
+
+  useBreadcrumbs(
+    [
+      {
+        name: "home",
+        path: "/"
+      },
+      {
+        name: "channel " + query.channelId,
+        path: "/channels/[channelId]/rounds",
+        asPath: `/channels/${query.channelId}/rounds`
+      },
+      {
+        name: "rounds",
+        path: "/channels/[channelId]/rounds",
+        asPath: `/channels/${query.channelId}/rounds`
+      },
+      {
+        name: query.roundId as string,
+        path: "/channels/[channelId]/rounds/[roundId]",
+        asPath: `/channels/${query.channelId}/rounds/${query.roundId}`
+      }
+    ],
+    [query]
+  );
 
   const [round, setRound] = useState<ActiveRoundDto>(null);
 
@@ -35,7 +60,7 @@ const IndexPage: NextPage = () => {
   }, [activeUser, query]);
 
   return (
-    <AppContainer>
+    <>
       {round ? (
         <RoundInfo round={round} />
       ) : (
@@ -43,7 +68,7 @@ const IndexPage: NextPage = () => {
           <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
         </Center>
       )}
-    </AppContainer>
+    </>
   );
 };
 
