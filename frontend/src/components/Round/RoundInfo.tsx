@@ -89,9 +89,9 @@ const RoundInfo: FC<Props> = ({ round }) => {
         />
       </HStack>
       <Timeline round={round} />
-      <StatGroup mt={6} mb={3}>
-        <Stat backgroundColor={statsBackground} p={4}>
-          <StatLabel>Meetup percent:</StatLabel>
+      <StatGroup mt={6} mb={3} backgroundColor={statsBackground}>
+        <Stat p={4}>
+          <StatLabel>Meetup rate</StatLabel>
           <StatNumber>
             {stats.meetup == round.previousMeetup ? (
               <Icon w={3.5} color={eqColor} as={CgMathEqual} />
@@ -103,8 +103,8 @@ const RoundInfo: FC<Props> = ({ round }) => {
           <StatHelpText>previous: {percentFormatter.format(round.previousMeetup)}</StatHelpText>
         </Stat>
 
-        <Stat backgroundColor={statsBackground} p={4}>
-          <StatLabel>Photo percent</StatLabel>
+        <Stat p={4}>
+          <StatLabel>Photo rate</StatLabel>
           <StatNumber>
             {stats.photo == round.previousPhoto ? (
               <Icon w={3.5} color={eqColor} as={CgMathEqual} />

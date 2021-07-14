@@ -25,19 +25,22 @@ const Breadcrumbs: FC = () => {
   const maxCount = useBreakpointValue({
     base: 2,
     sm: 3,
-    md: 4,
+    md: 5,
     lg: 6,
     xl: 8
   });
 
-  const hasMiddle = useMemo(() => breadcrumbs.length > maxCount, [breadcrumbs, maxCount]);
+  const crumbs = useMemo(() => {
+    const middleCount = breadcrumbs.length - maxCount;
+
+    return middleCount < 1
+      ? breadcrumbs
+      : [breadcrumbs[0], middle, ...breadcrumbs.filter((_, i) => i > middleCount)];
+  }, [breadcrumbs, maxCount]);
 
   return (
-    <HStack divider={<Divider />} mr={[1, 2, 4]} ml={[1, 2, 4]}>
-      {(hasMiddle
-        ? [breadcrumbs[0], middle, breadcrumbs[breadcrumbs.length - 1]]
-        : breadcrumbs
-      ).map<ReactNode>(x => (
+    <HStack divider={<Divider />} mr={[1, 2, 4]} ml={4}>
+      {crumbs.map<ReactNode>(x => (
         <Text cursor="pointer" key={x.name} onClick={() => x.path && router.push(x.path, x.asPath)}>
           {x.name}
         </Text>

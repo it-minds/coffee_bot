@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useContext } from "react";
 import { FC, useCallback, useMemo, useRef } from "react";
 
-const AppVersion: FC = () => {
+const AppVersion: FC = ({ children }) => {
   const copyInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const router = useRouter();
@@ -43,13 +43,15 @@ const AppVersion: FC = () => {
   return (
     <>
       <Code
-        colorScheme="black"
+        colorScheme="gray"
         variant="subtle"
         cursor="pointer"
         userSelect="none"
         onClick={copy}
-        opacity={0.3}>
-        App Version: {process.env.NEXT_PUBLIC_APP_VERSION}
+        p={1}
+        opacity={0.5}
+        textAlign="right">
+        {children}
       </Code>
       <VisuallyHidden>
         <input ref={copyInput} value={value} readOnly />
