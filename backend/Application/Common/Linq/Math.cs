@@ -6,11 +6,11 @@ namespace Application.Common.Linq
 {
   public static class Math
   {
-    public static decimal Percent<T>(this IEnumerable<T> source, Func<T, bool> dividenPredicate, Func<T, bool> divisorPredicate) =>
-      source.Count(x => divisorPredicate(x)) == 0 ? 0m : (100m * source.Count(x => dividenPredicate(x) )) / source.Count(x => divisorPredicate(x));
+    public static decimal Percent<T>(this IEnumerable<T> source, Func<T, bool> dividendPredicate) =>
+      source.Count() == 0 ? 0m : (100m * source.Count(dividendPredicate)) / source.Count();
+      // source.Percent(dividendPredicate, _ignore => true);
 
-    public static decimal Percent<T>(this IEnumerable<T> source, Func<T, bool> dividenPredicate ) =>
-      source.Count() == 0 ? 0m : (100m * source.Count(x => dividenPredicate(x))) / source.Count();
-
+    public static decimal Percent<T>(this IEnumerable<T> source, Func<T, bool> dividendPredicate, Func<T, bool> divisorPredicate) =>
+      source.Count(divisorPredicate) == 0 ? 0m : (100m * source.Count(dividendPredicate)) / source.Count(divisorPredicate);
   }
 }
