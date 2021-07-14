@@ -1,4 +1,4 @@
-import { Center, Code, useToast, VisuallyHidden } from "@chakra-ui/react";
+import { Code, useToast, VisuallyHidden } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { useRouter } from "next/router";
 import { useContext } from "react";
@@ -41,7 +41,7 @@ const AppVersion: FC = () => {
   }, [router, activeUser]);
 
   return (
-    <Center>
+    <>
       <Code
         colorScheme="black"
         variant="subtle"
@@ -54,7 +54,7 @@ const AppVersion: FC = () => {
       <VisuallyHidden>
         <input ref={copyInput} value={value} readOnly />
       </VisuallyHidden>
-    </Center>
+    </>
   );
 };
 

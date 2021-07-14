@@ -36,13 +36,13 @@ const Timeline: FC<Props> = ({ round }) => {
 
   const [progress, setProgress] = useState<number>(getProgress);
 
+  if (progress < 0 || progress > 100) return null;
+
   useInterval(() => {
     const progress = getProgress();
     console.log("updating timeline", progress);
     setProgress(progress);
   }, 5000);
-
-  if (progress < 0 || progress > 100) return null;
 
   return (
     <VStack textAlign="left">

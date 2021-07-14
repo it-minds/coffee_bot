@@ -130,6 +130,7 @@ const RoundInfo: FC<Props> = ({ round }) => {
             backgroundColor={x.hasMet ? greenColor : redColor}
             backgroundImage={x.hasPhoto ? (x as any).publicSrc : ""}
             backgroundPosition="top"
+            backgroundSize="cover"
             minH="250px"
             maxH="300px"
             minW="200px"
