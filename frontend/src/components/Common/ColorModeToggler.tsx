@@ -11,6 +11,7 @@ const ColorModeToggler: FC = () => {
       onClick={toggleColorMode}
       aria-label="light / dark toggle"
       colorScheme="gray"
+      size="sm"
       icon={colorMode === "light" ? <FaMoon color="Black" /> : <FaSun color="white" />}
     />
   );

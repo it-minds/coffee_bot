@@ -2,6 +2,7 @@ import {
   Box,
   Center,
   Heading,
+  HStack,
   SimpleGrid,
   Spinner,
   Stat,
@@ -13,8 +14,13 @@ import {
   Text,
   useColorModeValue
 } from "@chakra-ui/react";
+import { MdArrowBack } from "@react-icons/all-files/md/MdArrowBack";
+import { MdArrowForward } from "@react-icons/all-files/md/MdArrowForward";
+import PureIconsButton from "components/Common/PureIconButton";
 import Timeline from "components/Timeline/Timeline";
+import { useRouter } from "next/dist/client/router";
 import React, { FC } from "react";
+import { useEffect } from "react";
 import { useMemo } from "react";
 import { ActiveRoundDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
@@ -32,43 +38,80 @@ const RoundInfo: FC<Props> = ({ round }) => {
       </Center>
     );
   }
+  const router = useRouter();
+
   const redColor = useColorModeValue("red.500", "red.700");
   const greenColor = useColorModeValue("green.500", "green.700");
   const statsBackground = useColorModeValue("blue.200", "blue.900");
   const imageBackdrop = useColorModeValue("rgb(255,255,255,0.6)", "rgb(0,0,0,0.4)");
 
   const stats = useMemo(() => {
-    const meetup = round.groups.filter(x => x.hasMet).length / round.groups.length;
+    const meetup = (round.groups.filter(x => x.hasMet).length * 100) / round.groups.length;
     const photo =
-      round.groups.filter(x => x.hasPhoto).length /
+      (round.groups.filter(x => x.hasPhoto).length * 100) /
       (round.groups.filter(x => x.hasMet).length || 1);
 
     return { meetup, photo };
   }, [round]);
 
+  useEffect(() => {
+    if (round.previousId != null)
+      router.prefetch(
+        "/channels/[channelId]/rounds/[roundId]",
+        `/channels/${router.query.channelId}/rounds/${round.previousId}`
+      );
+    if (round.nextId != null)
+      router.prefetch(
+        "/channels/[channelId]/rounds/[roundId]",
+        `/channels/${router.query.channelId}/rounds/${round.nextId}`
+      );
+  }, []);
+
   return (
     <>
-      <Heading textAlign="center" fontSize={["2xl", "3xl", "4xl"]}>
-        {dateTimeFormatter.format(round.startDate)} - {dateTimeFormatter.format(round.endDate)}
-      </Heading>
+      <HStack justifyContent="space-around">
+        <PureIconsButton
+          icon={MdArrowBack}
+          onClick={() =>
+            router.push(
+              "/channels/[channelId]/rounds/[roundId]",
+              `/channels/${router.query.channelId}/rounds/${round.previousId}`
+            )
+          }
+          isDisable={round.previousId == null}
+        />
+        <Heading fontSize={["2xl", "3xl", "4xl"]}>
+          {dateTimeFormatter.format(round.startDate)} - {dateTimeFormatter.format(round.endDate)}
+        </Heading>
+        <PureIconsButton
+          icon={MdArrowForward}
+          onClick={() =>
+            router.push(
+              "/channels/[channelId]/rounds/[roundId]",
+              `/channels/${router.query.channelId}/rounds/${round.nextId}`
+            )
+          }
+          isDisable={round.nextId == null}
+        />
+      </HStack>
       <Timeline round={round} />
       <StatGroup mt={6} mb={3}>
         <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Meetup percent:</StatLabel>
-          <StatNumber>{percentFormatter.format(stats.meetup * 100)}</StatNumber>
+          <StatNumber>{percentFormatter.format(stats.meetup)}</StatNumber>
           <StatHelpText>
             <StatArrow type={stats.meetup > round.previousMeetup ? "increase" : "decrease"} />
-            {percentFormatter.format(round.previousMeetup * 100)}
+            {percentFormatter.format(round.previousMeetup)}
             {"  "}(previous)
           </StatHelpText>
         </Stat>
 
         <Stat backgroundColor={statsBackground} p={4}>
           <StatLabel>Photo percent</StatLabel>
-          <StatNumber>{percentFormatter.format(stats.photo * 100)}</StatNumber>
+          <StatNumber>{percentFormatter.format(stats.photo)}</StatNumber>
           <StatHelpText>
             <StatArrow type={stats.photo > round.previousPhoto ? "increase" : "decrease"} />
-            {percentFormatter.format(round.previousPhoto * 100)}
+            {percentFormatter.format(round.previousPhoto)}
             {"  "}(previous)
           </StatHelpText>
         </Stat>

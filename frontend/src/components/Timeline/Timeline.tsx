@@ -27,7 +27,7 @@ const Timeline: FC<Props> = ({ round }) => {
     const nowBaseStart = now - round.startDate.getTime();
     const endBaseStat = round.endDate.getTime() - round.startDate.getTime();
 
-    return nowBaseStart / endBaseStat;
+    return (nowBaseStart * 100) / endBaseStat;
   }, [round]);
 
   if (progress < 0 || progress > 100) return null;
@@ -43,11 +43,9 @@ const Timeline: FC<Props> = ({ round }) => {
       <Slider
         aria-label="slider-ex-1"
         isReadOnly
-        defaultValue={progress * 100}
+        defaultValue={progress}
         colorScheme="green"
-        sx={{
-          cursor: "unset"
-        }}>
+        cursor="unset">
         <SliderTrack>
           <SliderFilledTrack />
         </SliderTrack>

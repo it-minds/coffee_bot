@@ -1155,6 +1155,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
     groups?: ActiveRoundGroupDto[] | null;
     previousMeetup?: number | null;
     previousPhoto?: number | null;
+    previousId?: number | null;
+    nextId?: number | null;
 
     constructor(data?: IActiveRoundDto) {
         if (data) {
@@ -1187,6 +1189,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
             }
             this.previousMeetup = _data["previousMeetup"] !== undefined ? _data["previousMeetup"] : <any>null;
             this.previousPhoto = _data["previousPhoto"] !== undefined ? _data["previousPhoto"] : <any>null;
+            this.previousId = _data["previousId"] !== undefined ? _data["previousId"] : <any>null;
+            this.nextId = _data["nextId"] !== undefined ? _data["nextId"] : <any>null;
         }
     }
 
@@ -1212,6 +1216,8 @@ export class ActiveRoundDto implements IActiveRoundDto {
         }
         data["previousMeetup"] = this.previousMeetup !== undefined ? this.previousMeetup : <any>null;
         data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
+        data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
+        data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
         return data; 
     }
 }
@@ -1226,6 +1232,8 @@ export interface IActiveRoundDto {
     groups?: IActiveRoundGroupDto[] | null;
     previousMeetup?: number | null;
     previousPhoto?: number | null;
+    previousId?: number | null;
+    nextId?: number | null;
 }
 
 export class ActiveRoundGroupDto implements IActiveRoundGroupDto {

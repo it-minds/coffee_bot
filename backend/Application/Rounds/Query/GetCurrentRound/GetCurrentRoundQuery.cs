@@ -42,6 +42,7 @@ namespace Application.Rounds.GetCurrentRound
         if (lastRound != null) {
           round.PreviousMeetup = lastRound.CoffeeRoundGroups.Percent(x => x.HasMet);
           round.PreviousPhoto = lastRound.CoffeeRoundGroups.Percent(x => x.HasPhoto, x => x.HasMet);
+          round.PreviousId = lastRound.Id;
         }
 
         var members = await applicationDbContext.ChannelMembers
