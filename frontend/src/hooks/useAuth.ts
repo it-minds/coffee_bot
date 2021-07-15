@@ -2,8 +2,8 @@
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
-import { genAuthenticationClient } from "services/backend/apiClients";
-import { AuthUser } from "services/backend/nswagts";
+import { api } from "services/backend/api";
+import { AuthClient, AuthUser } from "services/backend/nswagts";
 
 import { useEffectAsync } from "./useEffectAsync";
 
@@ -18,6 +18,7 @@ type AuthHook<T> = {
   login: (s: string) => Promise<boolean>;
   logout: () => void;
   activeUser: T | null;
+  checkAuth: () => Promise<void>;
 };
 
 export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
@@ -26,19 +27,20 @@ export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
   const [activeUser, setActiveUser] = useState<AuthUser>(null);
   const router = useRouter();
 
-  useEffectAsync(async () => {
+  const checkAuth = useCallback(async () => {
     if (router.pathname == authSkip) return;
+    setAuthStage(AuthStage.CHECKING);
 
-    const client = await genAuthenticationClient();
+    const client: AuthClient = await api(AuthClient);
     const user: AuthUser = await client.checkAuth().catch(() => null);
 
     setActiveUser(user);
-
     setAuthStage(user ? AuthStage.AUTHENTICATED : AuthStage.UNAUTHENTICATED);
-  }, [authCounter]);
+  }, []);
+
+  useEffectAsync(checkAuth, [authCounter]);
 
   const login = useCallback(async (token: string) => {
-    setAuthStage(AuthStage.CHECKING);
     // setCookie(token);
     setAuthToken(token);
     setAuthCounter(c => c + 1);
@@ -46,14 +48,13 @@ export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
   }, []);
 
   const logout = useCallback(() => {
-    setAuthStage(AuthStage.CHECKING);
     // deleteCookie();
     setAuthToken("");
     setAuthCounter(c => c + 1);
-    router.push("/");
+    // router.push("/");
   }, []);
 
-  return { authStage, login, logout, activeUser };
+  return { authStage, login, logout, activeUser, checkAuth };
 };
 
 export const getAuthToken = (context?: GetServerSidePropsContext): string => {
@@ -75,19 +76,19 @@ export const setAuthToken = (token: string, context?: GetServerSidePropsContext)
   return;
 };
 
-const genSetCookie = (token: string) => {
-  const d = new Date();
-  d.setTime(d.getTime() + 14 * 24 * 60 * 60 * 1000); //14 days
+// const genSetCookie = (token: string) => {
+//   const d = new Date();
+//   d.setTime(d.getTime() + 14 * 24 * 60 * 60 * 1000); //14 days
 
-  return `${
-    process.env.NEXT_PUBLIC_AUTH_NAME
-  }=${token}; expires=${d.toUTCString()}; path=/; SameSite=Strict`;
-};
+//   return `${
+//     process.env.NEXT_PUBLIC_AUTH_NAME
+//   }=${token}; expires=${d.toUTCString()}; path=/; SameSite=Strict`;
+// };
 
-const setCookie = (token: string) => {
-  document.cookie = genSetCookie(token);
-};
+// const setCookie = (token: string) => {
+//   document.cookie = genSetCookie(token);
+// };
 
-const deleteCookie = () => {
-  document.cookie = `${process.env.NEXT_PUBLIC_AUTH_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-};
+// const deleteCookie = () => {
+//   document.cookie = `${process.env.NEXT_PUBLIC_AUTH_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+// };

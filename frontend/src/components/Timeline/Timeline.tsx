@@ -40,7 +40,7 @@ const Timeline: FC<Props> = ({ round }) => {
 
   useInterval(() => {
     const progress = getProgress();
-    console.log("updating timeline", progress);
+    console.debug("updating timeline", progress);
     setProgress(progress);
   }, 5000);
 

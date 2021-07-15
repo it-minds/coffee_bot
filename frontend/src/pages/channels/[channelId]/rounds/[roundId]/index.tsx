@@ -3,11 +3,11 @@ import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNswagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
-import { genRoundsClient } from "services/backend/apiClients";
-import { ActiveRoundDto } from "services/backend/nswagts";
+import { ActiveRoundDto, IRoundClient, RoundClient } from "services/backend/nswagts";
 import isomorphicEnvSettings from "utils/envSettings";
 
 const IndexPage: NextPage = () => {
@@ -41,24 +41,25 @@ const IndexPage: NextPage = () => {
 
   const [round, setRound] = useState<ActiveRoundDto>(null);
 
+  const { genClient } = useNSwagClient<IRoundClient>(RoundClient);
+
   useEffectAsync(async () => {
-    if (activeUser && query.roundId) {
-      setRound(null);
+    if (!activeUser || !query.roundId) return;
 
-      const roundId = parseInt(query.roundId as string);
+    setRound(null);
 
-      const client = await genRoundsClient();
-      const result = await client.getRound(roundId);
+    const roundId = parseInt(query.roundId as string);
 
-      const envSettings = isomorphicEnvSettings();
+    const client = await genClient();
+    const result = await client.getRound(roundId);
 
-      result.groups.forEach(group => {
-        (group as any).publicSrc =
-          envSettings.backendUrl + "/images/coffeegroups/" + group.photoUrl;
-      });
+    const envSettings = isomorphicEnvSettings();
 
-      setRound(result);
-    }
+    result.groups.forEach(group => {
+      (group as any).publicSrc = envSettings.backendUrl + "/images/coffeegroups/" + group.photoUrl;
+    });
+
+    setRound(result);
   }, [activeUser, query]);
 
   return (

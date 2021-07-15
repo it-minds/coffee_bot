@@ -81,7 +81,7 @@
       "generateResponseClasses": true,
       "responseClass": "SwaggerResponse",
       "protectedMethods": [],
-      "configurationClass": "AuthBase",
+      "configurationClass": "ClientConfiguration",
       "useTransformOptionsMethod": true,
       "useTransformResultMethod": true,
       "generateDtoTypes": true,

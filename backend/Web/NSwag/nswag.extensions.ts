@@ -1,29 +1,25 @@
 /* istanbul ignore file */
-export class AuthBase {
-  private accessToken: string;
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
-  }
 
-  transformHttpRequestOptions(options: RequestInit): Promise<RequestInit> {
-    if (options.headers && this.accessToken) {
-      (<Record<string, string>>options.headers).Authorization =
-        "Bearer " + this.accessToken;
-      return Promise.resolve(options);
-    }
-    return Promise.resolve(options);
-  }
+/**
+ * Used during client configuration.
+ */
+export class ClientConfiguration {
+  constructor(public accessToken: string) {}
 }
 
+/**
+ * Any public method are meant to be used after the individual client has been initialized
+ */
 export class ClientBase {
-  constructor(private AuthBase: AuthBase) {}
-
+  constructor(private clientConfiguration: ClientConfiguration) {}
   private cacheableResponse = false;
   private cacheStrategy: "CacheFirst" | "NetworkFirst" = "NetworkFirst";
   private cacheAllowStatuses: number[] = [200];
   private cacheableOptions: RequestInit = null;
+  private responseCallbackMap: Record<number, () => void | Promise<void>> =
+    null;
 
-  setCacheableResponse(
+  public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
     cacheAllowStatuses: ClientBase["cacheAllowStatuses"] = [200]
   ) {
@@ -32,16 +28,41 @@ export class ClientBase {
     this.cacheAllowStatuses = cacheAllowStatuses;
   }
 
-  async transformOptions(options: RequestInit): Promise<RequestInit> {
-    const result = await (this.AuthBase
-      ? this.AuthBase.transformHttpRequestOptions(options)
-      : Promise.resolve(options));
+  public setStatusCallbackMap(
+    responseCallbackMap: ClientBase["responseCallbackMap"]
+  ) {
+    this.responseCallbackMap = responseCallbackMap;
+  }
 
-    if (this.cacheableResponse) {
-      this.cacheableOptions = result;
+  protected async transformOptions(options: RequestInit): Promise<RequestInit> {
+    if (options.headers && this.clientConfiguration.accessToken) {
+      (options.headers as Record<string, string>)["Authorization"] =
+        "Bearer " + this.clientConfiguration.accessToken;
     }
 
-    return result;
+    if (this.cacheableResponse) {
+      this.cacheableOptions = options;
+    }
+
+    return options;
+  }
+
+  protected async transformResult(
+    url: string,
+    networkResponse: Response,
+    cb: (response: Response) => Promise<any>
+  ) {
+    const response = await this.checkCache(url, networkResponse);
+    const hasBeenHandled = await this.checkStatusCallback(response);
+
+    if (hasBeenHandled) {
+      return cb(response).catch((err) => {
+        console.error("nswag status had been handled", response.status);
+        console.error(err);
+        return null;
+      });
+    }
+    return cb(response);
   }
 
   private async cacheResponse(
@@ -55,11 +76,7 @@ export class ClientBase {
     return cloned;
   }
 
-  async transformResult(
-    url: string,
-    networkResponse: Response,
-    cb: (response: Response) => any
-  ) {
+  private async checkCache(url: string, networkResponse: Response) {
     let response: Response = networkResponse;
     if (process.browser && this.cacheableResponse) {
       console.debug("NswagTs transformResult cacheableResponse executing...");
@@ -113,6 +130,22 @@ export class ClientBase {
       }
     }
     this.cacheableResponse = false;
-    return cb(response);
+    return response;
+  }
+
+  private async checkStatusCallback(response: Response): Promise<boolean> {
+    if (this.responseCallbackMap == null) return false;
+
+    if (
+      Object.keys(this.responseCallbackMap).includes(response.status.toString())
+    ) {
+      const db = this.responseCallbackMap[response.status];
+
+      await db();
+
+      return true;
+    }
+
+    return false;
   }
 }

@@ -6,12 +6,12 @@ import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNswagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { Fragment, useContext, useReducer, useState } from "react";
 import ListReducer, { ListReducerActionType } from "react-list-reducer";
-import { genGalleryClient } from "services/backend/apiClients";
-import { StandardGroupDto } from "services/backend/nswagts";
+import { GalleryClient, StandardGroupDto } from "services/backend/nswagts";
 import { ExtendedImageDto } from "types/ExtendedImageDto";
 import isomorphicEnvSettings from "utils/envSettings";
 
@@ -38,30 +38,32 @@ const IndexPage: NextPage = () => {
 
   const [activeImage, setActiveImage] = useState<ExtendedImageDto>(null);
   const [images, setImages] = useReducer(ListReducer<ExtendedImageDto>("id"), []);
+  const { genClient } = useNSwagClient<GalleryClient>(GalleryClient);
 
   useEffectAsync(async () => {
-    if (activeUser && query.channelId) {
-      const channelId = parseInt(query.channelId as string);
-      const client = await genGalleryClient();
-      const allImages: StandardGroupDto[] = await client.getAll(channelId).catch(() => []);
+    if (!activeUser || !query.channelId) return;
 
-      setImages({
-        type: ListReducerActionType.Reset,
-        data: allImages as ExtendedImageDto[]
-      });
+    const channelId = parseInt(query.channelId as string);
 
-      const envSettings = isomorphicEnvSettings();
+    const client = await genClient();
+    const allImages: StandardGroupDto[] = await client.getAll(channelId).catch(() => []);
 
-      allImages
-        .filter(x => x.hasPhoto)
-        .forEach((image: ExtendedImageDto) => {
-          image.publicSrc = envSettings.backendUrl + "/images/coffeegroups/" + image.photoUrl;
-          setImages({
-            type: ListReducerActionType.Update,
-            data: image
-          });
+    setImages({
+      type: ListReducerActionType.Reset,
+      data: allImages as ExtendedImageDto[]
+    });
+
+    const envSettings = isomorphicEnvSettings();
+
+    allImages
+      .filter(x => x.hasPhoto)
+      .forEach((image: ExtendedImageDto) => {
+        image.publicSrc = envSettings.backendUrl + "/images/coffeegroups/" + image.photoUrl;
+        setImages({
+          type: ListReducerActionType.Update,
+          data: image
         });
-    }
+      });
   }, [activeUser, query]);
 
   // return <Demo />;

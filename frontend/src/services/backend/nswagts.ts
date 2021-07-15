@@ -7,31 +7,20 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-export class AuthBase {
-  private accessToken: string;
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
-  }
-
-  transformHttpRequestOptions(options: RequestInit): Promise<RequestInit> {
-    if (options.headers && this.accessToken) {
-      (<Record<string, string>>options.headers).Authorization =
-        "Bearer " + this.accessToken;
-      return Promise.resolve(options);
-    }
-    return Promise.resolve(options);
-  }
+export class ClientConfiguration {
+  constructor(public accessToken: string) {}
 }
 
 export class ClientBase {
-  constructor(private AuthBase: AuthBase) {}
-
+  constructor(private clientConfiguration: ClientConfiguration) {}
   private cacheableResponse = false;
   private cacheStrategy: "CacheFirst" | "NetworkFirst" = "NetworkFirst";
   private cacheAllowStatuses: number[] = [200];
   private cacheableOptions: RequestInit = null;
+  private responseCallbackMap: Record<number, () => void | Promise<void>> =
+    null;
 
-  setCacheableResponse(
+  public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
     cacheAllowStatuses: ClientBase["cacheAllowStatuses"] = [200]
   ) {
@@ -40,16 +29,41 @@ export class ClientBase {
     this.cacheAllowStatuses = cacheAllowStatuses;
   }
 
-  async transformOptions(options: RequestInit): Promise<RequestInit> {
-    const result = await (this.AuthBase
-      ? this.AuthBase.transformHttpRequestOptions(options)
-      : Promise.resolve(options));
+  public setStatusCallbackMap(
+    responseCallbackMap: ClientBase["responseCallbackMap"]
+  ) {
+    this.responseCallbackMap = responseCallbackMap;
+  }
 
-    if (this.cacheableResponse) {
-      this.cacheableOptions = result;
+  protected async transformOptions(options: RequestInit): Promise<RequestInit> {
+    if (options.headers && this.clientConfiguration.accessToken) {
+      (options.headers as Record<string, string>)["Authorization"] =
+        "Bearer " + this.clientConfiguration.accessToken;
     }
 
-    return result;
+    if (this.cacheableResponse) {
+      this.cacheableOptions = options;
+    }
+
+    return options;
+  }
+
+  protected async transformResult(
+    url: string,
+    networkResponse: Response,
+    cb: (response: Response) => Promise<any>
+  ) {
+    const response = await this.checkCache(url, networkResponse);
+    const hasBeenHandled = await this.checkStatusCallback(response);
+
+    if (hasBeenHandled) {
+      return cb(response).catch(err => {
+        console.error("nswag status had been handled", response.status)
+        console.error(err)
+        return null;
+      });
+    }
+    return cb(response);
   }
 
   private async cacheResponse(
@@ -63,11 +77,7 @@ export class ClientBase {
     return cloned;
   }
 
-  async transformResult(
-    url: string,
-    networkResponse: Response,
-    cb: (response: Response) => any
-  ) {
+  private async checkCache(url: string, networkResponse: Response) {
     let response: Response = networkResponse;
     if (process.browser && this.cacheableResponse) {
       console.debug("NswagTs transformResult cacheableResponse executing...");
@@ -121,7 +131,23 @@ export class ClientBase {
       }
     }
     this.cacheableResponse = false;
-    return cb(response);
+    return response;
+  }
+
+  private async checkStatusCallback(response: Response) : Promise<boolean> {
+    if (this.responseCallbackMap == null) return false;
+
+    if (
+      Object.keys(this.responseCallbackMap).includes(response.status.toString())
+    ) {
+      const db = this.responseCallbackMap[response.status];
+
+      await db();
+
+      return true;
+    }
+
+    return false;
   }
 }
 
@@ -136,7 +162,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -268,7 +294,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -485,7 +511,7 @@ export class EventClient extends ClientBase implements IEventClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -541,7 +567,7 @@ export class GalleryClient extends ClientBase implements IGalleryClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -601,7 +627,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -653,7 +679,7 @@ export class RoundClient extends ClientBase implements IRoundClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -708,7 +734,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -765,7 +791,7 @@ export class StatsClient extends ClientBase implements IStatsClient {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: AuthBase, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
@@ -850,7 +876,7 @@ export class AuthUser implements IAuthUser {
         data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
         data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
         data["email"] = this.email !== undefined ? this.email : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -900,7 +926,7 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
         data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
         data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
         data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -946,7 +972,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
-        return data; 
+        return data;
     }
 }
 
@@ -976,7 +1002,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
+            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input;
         }
     }
 
@@ -996,7 +1022,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1035,7 +1061,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         data = typeof data === 'object' ? data : {};
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1053,7 +1079,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
+            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings;
         }
     }
 
@@ -1073,7 +1099,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1130,7 +1156,7 @@ export class RoundSnipDto implements IRoundSnipDto {
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
         data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
         data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1218,7 +1244,7 @@ export class ActiveRoundDto implements IActiveRoundDto {
         data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
         data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
         data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1296,7 +1322,7 @@ export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data; 
+        return data;
     }
 }
 
@@ -1331,7 +1357,7 @@ export class EventInput implements IEventInput {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event; 
+            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event;
             if (data.authorizations) {
                 this.authorizations = [];
                 for (let i = 0; i < data.authorizations.length; i++) {
@@ -1386,7 +1412,7 @@ export class EventInput implements IEventInput {
         }
         data["is_ext_shared_channel"] = this.is_ext_shared_channel !== undefined ? this.is_ext_shared_channel : <any>null;
         data["event_context"] = this.event_context !== undefined ? this.event_context : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1418,7 +1444,7 @@ export class Event implements IEvent {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file; 
+            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file;
         }
     }
 
@@ -1448,7 +1474,7 @@ export class Event implements IEvent {
         data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
         data["file"] = this.file ? this.file.toJSON() : <any>null;
         data["event_ts"] = this.event_ts !== undefined ? this.event_ts : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1489,7 +1515,7 @@ export class File implements IFile {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1537,7 +1563,7 @@ export class Authorization implements IAuthorization {
         data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
         data["is_bot"] = this.is_bot !== undefined ? this.is_bot : <any>null;
         data["is_enterprise_install"] = this.is_enterprise_install !== undefined ? this.is_enterprise_install : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1600,7 +1626,7 @@ export class StandardGroupDto implements IStandardGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data; 
+        return data;
     }
 }
 
@@ -1650,7 +1676,7 @@ export class BlockResponse implements IBlockResponse {
         data["text"] = this.text !== undefined ? this.text : <any>null;
         data["replace_original"] = this.replace_original !== undefined ? this.replace_original : <any>null;
         data["delete_original"] = this.delete_original !== undefined ? this.delete_original : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1701,7 +1727,7 @@ export class StatsDto implements IStatsDto {
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1786,3 +1812,11 @@ function throwException(message: string, status: number, response: string, heade
 }
 
 /* istanbul ignore file */
+
+/**
+ * Used during client configuration.
+ */
+
+/**
+ * Any public method are meant to be used after the individual client has been initialized
+ */

@@ -2,11 +2,11 @@ import { Box, useColorModeValue } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNswagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
-import { genChannelClient } from "services/backend/apiClients";
-import { RoundSnipDto } from "services/backend/nswagts";
+import { ChannelClient, IChannelClient, RoundSnipDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 import { percentFormatter } from "utils/formatters/percentFormatter";
 
@@ -36,15 +36,16 @@ const IndexPage: NextPage = () => {
 
   const [rounds, setRounds] = useState<RoundSnipDto[]>([]);
 
+  const { genClient } = useNSwagClient<IChannelClient>(ChannelClient);
+
   useEffectAsync(async () => {
-    if (activeUser && router.query.channelId) {
-      const channelId = parseInt(router.query.channelId as string);
+    if (!activeUser || !router.query.channelId) return;
+    const channelId = parseInt(router.query.channelId as string);
 
-      const client = await genChannelClient();
-      const result = await client.getRounds(channelId);
+    const client = await genClient();
+    const result = await client.getRounds(channelId);
 
-      setRounds(result);
-    }
+    setRounds(result);
   }, [activeUser, router.query]);
 
   return (

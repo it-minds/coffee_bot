@@ -2,12 +2,12 @@ import { Heading, Table, Tbody, Td, Th, Thead, Tr, useBreakpointValue } from "@c
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNswagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useCallback } from "react";
-import { genStatsClient } from "services/backend/apiClients";
-import { StatsDto } from "services/backend/nswagts";
+import { IStatsClient, StatsClient, StatsDto } from "services/backend/nswagts";
 
 const defaultSort = (a: StatsDto, b: StatsDto) => a.slackMemberId.localeCompare(b.slackMemberId);
 
@@ -46,15 +46,16 @@ const IndexPage: NextPage = () => {
 
   const [sortCb, setSortCB] = useState<(a: StatsDto, b: StatsDto) => number>(() => defaultSort);
 
+  const { genClient } = useNSwagClient<IStatsClient>(StatsClient);
+
   useEffectAsync(async () => {
-    if (query.channelId) {
-      const channelId = parseInt(query.channelId as string);
+    if (!query.channelId) return;
+    const channelId = parseInt(query.channelId as string);
 
-      const client = await genStatsClient();
-      const allImages: StatsDto[] = await client.getMemberStats(channelId).catch(() => []);
+    const client = await genClient();
+    const allImages: StatsDto[] = await client.getMemberStats(channelId).catch(() => []);
 
-      setStats(allImages);
-    }
+    setStats(allImages);
   }, [query]);
 
   const sort = useCallback((key: keyof StatsDto, direction: "ASC" | "DESC") => {

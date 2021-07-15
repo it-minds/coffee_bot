@@ -1,8 +1,9 @@
 import { AuthContext } from "contexts/AuthContext";
 import { Dispatch, useCallback, useContext, useEffect, useReducer } from "react";
 import ListReducer, { AllListActions, ListReducerActionType } from "react-list-reducer";
-import { genChannelClient } from "services/backend/apiClients";
 import {
+  ChannelClient,
+  IChannelClient,
   IChannelSettingsDto,
   IChannelSettingsIdDto,
   IUpdateChannelPauseInput,
@@ -10,6 +11,8 @@ import {
   UpdateChannelSettingsCommand
 } from "services/backend/nswagts";
 import { logger } from "utils/logger";
+
+import { useNSwagClient } from "./useNswagClient";
 type ChannelHook = {
   fetchChannels: () => Promise<void>;
   channels: IChannelSettingsIdDto[];
@@ -22,9 +25,11 @@ export const useChannelContext = (): ChannelHook => {
 
   const [channels, dispatchChannels] = useReducer(ListReducer<IChannelSettingsIdDto>("id"), []);
 
+  const { genClient } = useNSwagClient<IChannelClient>(ChannelClient);
+
   const fetchChannels = useCallback(async () => {
     try {
-      const client = await genChannelClient();
+      const client = await genClient();
       const data = await client.getMyChannels();
       if (data && data.length >= 0) {
         dispatchChannels({
@@ -38,8 +43,8 @@ export const useChannelContext = (): ChannelHook => {
   }, []);
 
   const updateChannelPaused = useCallback(async (input: IUpdateChannelPauseInput) => {
+    const client = await genClient();
     try {
-      const client = await genChannelClient();
       await client.updateChannelState(new UpdateChannelPauseCommand({ input: input }));
     } catch (err) {
       logger.warn("ChannelClient.UpdateChannelState Error", err);
@@ -49,8 +54,8 @@ export const useChannelContext = (): ChannelHook => {
   }, []);
 
   const updateChannelSettings = useCallback(async (id: number, input: IChannelSettingsDto) => {
+    const client = await genClient();
     try {
-      const client = await genChannelClient();
       await client.updateChannelSettings(id, new UpdateChannelSettingsCommand({ settings: input }));
     } catch (err) {
       logger.warn("ChannelClient.updateChannelSettings Error", err);
@@ -61,7 +66,7 @@ export const useChannelContext = (): ChannelHook => {
 
   useEffect(() => {
     if (activeUser !== null) fetchChannels();
-  }, [activeUser]);
+  }, [activeUser, fetchChannels]);
 
   return { fetchChannels, channels, dispatchChannels, updateChannelPaused, updateChannelSettings };
 };
