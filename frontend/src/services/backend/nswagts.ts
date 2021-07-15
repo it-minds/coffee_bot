@@ -57,16 +57,16 @@ export class ClientBase {
     const hasBeenHandled = await this.checkStatusCallback(response);
 
     if (hasBeenHandled) {
-      return cb(response).catch(err => {
-        console.error("nswag status had been handled", response.status)
-        console.error(err)
+      return cb(response).catch((err) => {
+        console.error("nswag status had been handled", response.status);
+        console.error(err);
         return null;
       });
     }
     return cb(response);
   }
 
-  private async cacheResponse(
+  private async putToCache(
     request: Request,
     response: Response
   ): Promise<Response> {
@@ -79,62 +79,63 @@ export class ClientBase {
 
   private async checkCache(url: string, networkResponse: Response) {
     let response: Response = networkResponse;
-    if (process.browser && this.cacheableResponse) {
-      console.debug("NswagTs transformResult cacheableResponse executing...");
-      const request = new Request(url, this.cacheableOptions);
+    if (!process.browser || !this.cacheableResponse) {
+      return response;
+    }
+    console.debug("NswagTs transformResult cacheableResponse executing...");
 
-      const cacheResponse = await caches.match(request);
+    const request = new Request(url, this.cacheableOptions);
 
-      const networkOk = this.cacheAllowStatuses.includes(
-        networkResponse?.status ?? 0
-      );
-      const cacheOk = this.cacheAllowStatuses.includes(
-        cacheResponse?.status ?? 0
-      );
+    const cacheResponse = await caches.match(request);
 
-      if (this.cacheStrategy === "CacheFirst") {
-        if (cacheOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse cache first using cache",
-            cacheResponse
-          );
-          response = cacheResponse;
-        } else {
-          console.debug(
-            "NswagTs transformResult cacheableResponse cache first using network",
-            networkResponse
-          );
-          response = networkOk
-            ? await this.cacheResponse(request, networkResponse)
-            : networkResponse;
-        }
-      } else if (this.cacheStrategy === "NetworkFirst") {
-        if (networkOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using network ok",
-            networkResponse
-          );
-          response = await this.cacheResponse(request, networkResponse);
-        } else if (cacheOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using cache",
-            cacheResponse
-          );
-          response = cacheResponse;
-        } else {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using network failure",
-            networkResponse
-          );
-          response = networkResponse;
-        }
+    const networkOk = this.cacheAllowStatuses.includes(
+      networkResponse?.status ?? 0
+    );
+    const cacheOk = this.cacheAllowStatuses.includes(
+      cacheResponse?.status ?? 0
+    );
+
+    if (this.cacheStrategy === "CacheFirst") {
+      if (cacheOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse cache first using cache",
+          cacheResponse
+        );
+        response = cacheResponse;
+      } else {
+        console.debug(
+          "NswagTs transformResult cacheableResponse cache first using network",
+          networkResponse
+        );
+        response = networkOk
+          ? await this.putToCache(request, networkResponse)
+          : networkResponse;
+      }
+    } else if (this.cacheStrategy === "NetworkFirst") {
+      if (networkOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using network ok",
+          networkResponse
+        );
+        response = await this.putToCache(request, networkResponse);
+      } else if (cacheOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using cache",
+          cacheResponse
+        );
+        response = cacheResponse;
+      } else {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using network failure",
+          networkResponse
+        );
+        response = networkResponse;
       }
     }
     this.cacheableResponse = false;
-    return response;
   }
 
-  private async checkStatusCallback(response: Response) : Promise<boolean> {
+  private async checkStatusCallback(response: Response): Promise<boolean> {
     if (this.responseCallbackMap == null) return false;
 
     if (
@@ -876,7 +877,7 @@ export class AuthUser implements IAuthUser {
         data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
         data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
         data["email"] = this.email !== undefined ? this.email : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -926,7 +927,7 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
         data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
         data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
         data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -972,7 +973,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
-        return data;
+        return data; 
     }
 }
 
@@ -1002,7 +1003,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input;
+            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
         }
     }
 
@@ -1022,7 +1023,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1061,7 +1062,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         data = typeof data === 'object' ? data : {};
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1079,7 +1080,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings;
+            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
         }
     }
 
@@ -1099,7 +1100,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1156,7 +1157,7 @@ export class RoundSnipDto implements IRoundSnipDto {
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
         data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
         data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1244,7 +1245,7 @@ export class ActiveRoundDto implements IActiveRoundDto {
         data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
         data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
         data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1322,7 +1323,7 @@ export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data;
+        return data; 
     }
 }
 
@@ -1357,7 +1358,7 @@ export class EventInput implements IEventInput {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event;
+            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event; 
             if (data.authorizations) {
                 this.authorizations = [];
                 for (let i = 0; i < data.authorizations.length; i++) {
@@ -1412,7 +1413,7 @@ export class EventInput implements IEventInput {
         }
         data["is_ext_shared_channel"] = this.is_ext_shared_channel !== undefined ? this.is_ext_shared_channel : <any>null;
         data["event_context"] = this.event_context !== undefined ? this.event_context : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1444,7 +1445,7 @@ export class Event implements IEvent {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file;
+            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file; 
         }
     }
 
@@ -1474,7 +1475,7 @@ export class Event implements IEvent {
         data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
         data["file"] = this.file ? this.file.toJSON() : <any>null;
         data["event_ts"] = this.event_ts !== undefined ? this.event_ts : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1515,7 +1516,7 @@ export class File implements IFile {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1563,7 +1564,7 @@ export class Authorization implements IAuthorization {
         data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
         data["is_bot"] = this.is_bot !== undefined ? this.is_bot : <any>null;
         data["is_enterprise_install"] = this.is_enterprise_install !== undefined ? this.is_enterprise_install : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1626,7 +1627,7 @@ export class StandardGroupDto implements IStandardGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data;
+        return data; 
     }
 }
 
@@ -1676,7 +1677,7 @@ export class BlockResponse implements IBlockResponse {
         data["text"] = this.text !== undefined ? this.text : <any>null;
         data["replace_original"] = this.replace_original !== undefined ? this.replace_original : <any>null;
         data["delete_original"] = this.delete_original !== undefined ? this.delete_original : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1727,7 +1728,7 @@ export class StatsDto implements IStatsDto {
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
-        return data;
+        return data; 
     }
 }
 

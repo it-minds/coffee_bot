@@ -2,7 +2,7 @@ import { Heading, Table, Tbody, Td, Th, Thead, Tr, useBreakpointValue } from "@c
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { useEffectAsync } from "hooks/useEffectAsync";
-import { useNSwagClient } from "hooks/useNswagClient";
+import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";

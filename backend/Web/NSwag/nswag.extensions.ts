@@ -65,7 +65,7 @@ export class ClientBase {
     return cb(response);
   }
 
-  private async cacheResponse(
+  private async putToCache(
     request: Request,
     response: Response
   ): Promise<Response> {
@@ -78,59 +78,60 @@ export class ClientBase {
 
   private async checkCache(url: string, networkResponse: Response) {
     let response: Response = networkResponse;
-    if (process.browser && this.cacheableResponse) {
-      console.debug("NswagTs transformResult cacheableResponse executing...");
-      const request = new Request(url, this.cacheableOptions);
+    if (!process.browser || !this.cacheableResponse) {
+      return response;
+    }
+    console.debug("NswagTs transformResult cacheableResponse executing...");
 
-      const cacheResponse = await caches.match(request);
+    const request = new Request(url, this.cacheableOptions);
 
-      const networkOk = this.cacheAllowStatuses.includes(
-        networkResponse?.status ?? 0
-      );
-      const cacheOk = this.cacheAllowStatuses.includes(
-        cacheResponse?.status ?? 0
-      );
+    const cacheResponse = await caches.match(request);
 
-      if (this.cacheStrategy === "CacheFirst") {
-        if (cacheOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse cache first using cache",
-            cacheResponse
-          );
-          response = cacheResponse;
-        } else {
-          console.debug(
-            "NswagTs transformResult cacheableResponse cache first using network",
-            networkResponse
-          );
-          response = networkOk
-            ? await this.cacheResponse(request, networkResponse)
-            : networkResponse;
-        }
-      } else if (this.cacheStrategy === "NetworkFirst") {
-        if (networkOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using network ok",
-            networkResponse
-          );
-          response = await this.cacheResponse(request, networkResponse);
-        } else if (cacheOk) {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using cache",
-            cacheResponse
-          );
-          response = cacheResponse;
-        } else {
-          console.debug(
-            "NswagTs transformResult cacheableResponse network first using network failure",
-            networkResponse
-          );
-          response = networkResponse;
-        }
+    const networkOk = this.cacheAllowStatuses.includes(
+      networkResponse?.status ?? 0
+    );
+    const cacheOk = this.cacheAllowStatuses.includes(
+      cacheResponse?.status ?? 0
+    );
+
+    if (this.cacheStrategy === "CacheFirst") {
+      if (cacheOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse cache first using cache",
+          cacheResponse
+        );
+        response = cacheResponse;
+      } else {
+        console.debug(
+          "NswagTs transformResult cacheableResponse cache first using network",
+          networkResponse
+        );
+        response = networkOk
+          ? await this.putToCache(request, networkResponse)
+          : networkResponse;
+      }
+    } else if (this.cacheStrategy === "NetworkFirst") {
+      if (networkOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using network ok",
+          networkResponse
+        );
+        response = await this.putToCache(request, networkResponse);
+      } else if (cacheOk) {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using cache",
+          cacheResponse
+        );
+        response = cacheResponse;
+      } else {
+        console.debug(
+          "NswagTs transformResult cacheableResponse network first using network failure",
+          networkResponse
+        );
+        response = networkResponse;
       }
     }
     this.cacheableResponse = false;
-    return response;
   }
 
   private async checkStatusCallback(response: Response): Promise<boolean> {

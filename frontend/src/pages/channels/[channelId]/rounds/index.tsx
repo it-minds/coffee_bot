@@ -2,7 +2,7 @@ import { Box, useColorModeValue } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
-import { useNSwagClient } from "hooks/useNswagClient";
+import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";

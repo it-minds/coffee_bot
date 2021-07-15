@@ -12,7 +12,8 @@ import {
 } from "services/backend/nswagts";
 import { logger } from "utils/logger";
 
-import { useNSwagClient } from "./useNswagClient";
+import { useNSwagClient } from "./useNSwagClient";
+
 type ChannelHook = {
   fetchChannels: () => Promise<void>;
   channels: IChannelSettingsIdDto[];
