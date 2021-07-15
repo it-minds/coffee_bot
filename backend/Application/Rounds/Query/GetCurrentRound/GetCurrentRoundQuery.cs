@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Application.Common.Linq;
+using Application.Common.Security;
 using Application.Rounds.DTO;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Rounds.GetCurrentRound
 {
+  [AuthorizeAttribute]
   public class GetCurrentRoundQuery : IRequest<ActiveRoundDto>
   {
     public int ChannelId { get; set; }

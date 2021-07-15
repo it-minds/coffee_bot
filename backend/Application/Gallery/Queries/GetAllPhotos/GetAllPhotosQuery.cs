@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common;
 using Application.Common.Interfaces;
+using Application.Common.Security;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Gallery.Queries.GetAllPhotos
 {
+  [AuthorizeAttribute]
   public class GetAllPhotosQuery : IRequest<List<StandardGroupDto>>
   {
     public int ChannelId;

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Application.Common.Linq;
+using Application.Common.Security;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Stats.Query.GetMemberStats
 {
+  [AuthorizeAttribute]
   public class GetMemberStatsQuery: IRequest<List<StatsDto>>
   {
     public int ChannelId { get; set; }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Common.Security;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.ChannelSetting.Queries.GetMyChannelsSettings
 {
+  [AuthorizeAttribute]
   public class GetMyChannelSettingsQuery : IRequest<List<ChannelSettingsIdDto>>
   {
     public class GetMyChannelSettingsQueryHandler : IRequestHandler<GetMyChannelSettingsQuery, List<ChannelSettingsIdDto>>

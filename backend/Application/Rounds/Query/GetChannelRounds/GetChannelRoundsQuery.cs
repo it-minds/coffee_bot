@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Application.Common.Linq;
+using Application.Common.Security;
 using Application.Rounds.DTO;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Rounds.GetChannelRounds
 {
+  [AuthorizeAttribute]
   public class GetChannelRoundsQuery : IRequest<IEnumerable<RoundSnipDto>>
   {
     public int ChannelId { get; set; }

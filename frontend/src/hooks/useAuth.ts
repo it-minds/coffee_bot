@@ -39,7 +39,7 @@ export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
 
   const login = useCallback(async (token: string) => {
     setAuthStage(AuthStage.CHECKING);
-    setCookie(token);
+    // setCookie(token);
     setAuthToken(token);
     setAuthCounter(c => c + 1);
     return true;
@@ -47,7 +47,7 @@ export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
 
   const logout = useCallback(() => {
     setAuthStage(AuthStage.CHECKING);
-    deleteCookie();
+    // deleteCookie();
     setAuthToken("");
     setAuthCounter(c => c + 1);
     router.push("/");
@@ -61,8 +61,8 @@ export const getAuthToken = (context?: GetServerSidePropsContext): string => {
 
   if (!context) return null;
 
-  const token = context.req.cookies[process.env.NEXT_PUBLIC_AUTH_NAME];
-  return token;
+  // const token = context.req.cookies[process.env.NEXT_PUBLIC_AUTH_NAME];
+  return null;
 };
 
 export const setAuthToken = (token: string, context?: GetServerSidePropsContext): void => {
@@ -70,9 +70,9 @@ export const setAuthToken = (token: string, context?: GetServerSidePropsContext)
 
   if (!context) return;
 
-  context.res.setHeader("Set-Cookie", genSetCookie(token));
+  // context.res.setHeader("Set-Cookie", genSetCookie(token));
 
-  return; // TODO Maybe use cookie with context read??
+  return;
 };
 
 const genSetCookie = (token: string) => {

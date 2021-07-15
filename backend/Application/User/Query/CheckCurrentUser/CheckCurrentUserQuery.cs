@@ -1,11 +1,14 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common;
 using Application.Common.Interfaces;
+using Application.Common.Security;
 using MediatR;
 
 namespace User.Query.CheckCurrentUser
 {
+  [AuthorizeAttribute]
   public class CheckCurrentUserQuery : IRequest<AuthUser>
   {
     public class CheckCurrentUserQueryHandler : IRequestHandler<CheckCurrentUserQuery, AuthUser>
@@ -20,7 +23,7 @@ namespace User.Query.CheckCurrentUser
       public async Task<AuthUser> Handle(CheckCurrentUserQuery request, CancellationToken cancellationToken)
       {
         if (currentUserService.UserEmail is null) {
-          return null;
+          throw new UnauthorizedAccessException();
         }
 
         return new AuthUser
