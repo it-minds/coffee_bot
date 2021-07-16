@@ -17,6 +17,8 @@ env:
   dotnet-version: 5.0.x
   appName: ${{ secrets.AzureAppService_AppName }}-backend
   test2: ${{ secrets.AzureAppService_AppName }}
+  concurrency-test: ${{ github.ref }}-test
+  concurrency-stg: ${{ github.ref }}-stg
 
 jobs:
   backend-deploy-stg:
@@ -25,7 +27,7 @@ jobs:
     environment: stg
 
     concurrency:
-      group: ${{ github.ref }}
+      group: ${{ env.concurrency-stg }}
       cancel-in-progress: true
 
     steps:
@@ -57,7 +59,7 @@ jobs:
     environment: test
 
     concurrency:
-      group: ${{ github.ref }}
+      group: ${{ env.concurrency-test }}
       cancel-in-progress: true
 
     steps:
