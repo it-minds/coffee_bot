@@ -26,9 +26,9 @@ jobs:
 
     environment: stg
 
-    concurrency:
-      group: ${{ env.concurrency-stg }}
-      cancel-in-progress: true
+    # concurrency:
+    #   group: ${{ env.concurrency-stg }}
+    #   cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@master
@@ -58,9 +58,9 @@ jobs:
 
     environment: test
 
-    concurrency:
-      group: ${{ env.concurrency-test }}
-      cancel-in-progress: true
+    # concurrency:
+    #   group: ${{ env.concurrency-test }}
+    #   cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@master
