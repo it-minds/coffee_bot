@@ -16,7 +16,7 @@ env:
   DOTNET_ROOT: "/opt/dotnet"
   dotnet-version: 5.0.x
   appName: ${{ secrets.AzureAppService_AppName }}-backend
-  test: ${{ secrets.AzureAppService_AppName }}
+  test2: ${{ secrets.AzureAppService_AppName }}
 
 jobs:
   backend-deploy:
