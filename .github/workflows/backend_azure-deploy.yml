@@ -19,6 +19,38 @@ env:
   test2: ${{ secrets.AzureAppService_AppName }}
 
 jobs:
+  backend-deploy-stg:
+    runs-on: ubuntu-latest
+
+    environment: stg
+
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.node-version }}
+
+      - name: Build with dotnet
+        run: dotnet build
+        working-directory: backend/Web
+
+      - name: Build with dotnet
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/${{ env.appName }}
+        working-directory: backend/Web
+
+      - name: Deploy Backend to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.appName }}
+          slot-name: "production"
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_Backend }}
+          package: ${{ env.DOTNET_ROOT }}/${{ env.appName }}
   backend-deploy:
     runs-on: ubuntu-latest
 
