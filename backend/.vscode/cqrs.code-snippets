@@ -1,0 +1,47 @@
+{
+  "CQRS-Query": {
+    "scope": "csharp",
+    "prefix": "cqrs-query",
+    "body": [
+      "public class ${1:ClassName}Query : IRequest<${2:int}>",
+      "{",
+      "  public class ${1:ClassName}QueryHandler : IRequestHandler<${1:ClassName}Query, ${2:int}>",
+      "  {",
+      "    public async Task<${2:int}> Handle(${1:ClassName}Query request, CancellationToken cancellationToken)",
+      "    {",
+      "      $0return null;",
+      "    }",
+      "  }",
+      "}"
+    ]
+  },
+  "CQRS-Command": {
+    "scope": "csharp",
+    "prefix": "cqrs-command",
+    "body": [
+      "public class ${1:ClassName}Command : IRequest<${2:int}>",
+      "{",
+      "  public class ${1:ClassName}CommandHandler : IRequestHandler<${1:ClassName}Command, ${2:int}>",
+      "  {",
+      "    public async Task<${2:int}> Handle(${1:ClassName}Command request, CancellationToken cancellationToken)",
+      "    {",
+      "      $0return null;",
+      "    }",
+      "  }",
+      "}"
+    ]
+  },
+  "CQRS-Command-Validator": {
+    "scope": "csharp",
+    "prefix": "cqrs-command-validator",
+    "body": [
+      "public class ${1:ClassName}CommandValidator : AbstractValidator<${1:ClassName}Command>",
+      "{",
+      "  public ${1:ClassName}CommandValidator()",
+      "  {",
+      "     $0//RuleFor(x => x.Name).NotEmpty();",
+      "  }",
+      "}"
+    ]
+  }
+}

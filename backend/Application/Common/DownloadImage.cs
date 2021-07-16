@@ -28,7 +28,7 @@ namespace Application.Common
       var uri = new Uri(filePath);
       var clientHandler = new HttpClientHandler
       {
-          UseCookies = false,
+          UseCookies = false
       };
       var client = new HttpClient(clientHandler);
       var request = new HttpRequestMessage
