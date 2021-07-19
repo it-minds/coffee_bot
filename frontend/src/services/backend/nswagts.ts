@@ -17,8 +17,11 @@ export class ClientBase {
   private cacheStrategy: "CacheFirst" | "NetworkFirst" = "NetworkFirst";
   private cacheAllowStatuses: number[] = [200];
   private cacheableOptions: RequestInit = null;
-  private responseCallbackMap: Record<number, () => void | Promise<void>> =
-    null;
+  private responseCallbackMap: Record<
+    number,
+    (response: Response) => void | Promise<void>
+  > = null;
+  private signal: AbortSignal = null;
 
   public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
@@ -35,7 +38,13 @@ export class ClientBase {
     this.responseCallbackMap = responseCallbackMap;
   }
 
+  public setAbortSignal(signal: AbortSignal) {
+    this.signal = signal;
+  }
+
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
+    if (this.signal != null) options.signal = this.signal;
+
     if (options.headers && this.clientConfiguration.accessToken) {
       (options.headers as Record<string, string>)["Authorization"] =
         "Bearer " + this.clientConfiguration.accessToken;
@@ -51,19 +60,20 @@ export class ClientBase {
   protected async transformResult(
     url: string,
     networkResponse: Response,
-    cb: (response: Response) => Promise<any>
+    clientProcessCallback: (response: Response) => Promise<any>
   ) {
     const response = await this.checkCache(url, networkResponse);
     const hasBeenHandled = await this.checkStatusCallback(response);
 
-    if (hasBeenHandled) {
-      return cb(response).catch((err) => {
-        console.error("nswag status had been handled", response.status);
-        console.error(err);
-        return null;
-      });
+    if (hasBeenHandled !== null) {
+      return hasBeenHandled;
+      // return clientProcessCallback(response).catch((err) => {
+      //   console.error("nswag status had been handled", response.status);
+      //   console.error(err);
+      //   return null;
+      // });
     }
-    return cb(response);
+    return await clientProcessCallback(response);
   }
 
   private async putToCache(
@@ -135,20 +145,20 @@ export class ClientBase {
     this.cacheableResponse = false;
   }
 
-  private async checkStatusCallback(response: Response): Promise<boolean> {
-    if (this.responseCallbackMap == null) return false;
+  private async checkStatusCallback(response: Response): Promise<unknown> {
+    if (this.responseCallbackMap == null) return null;
 
     if (
       Object.keys(this.responseCallbackMap).includes(response.status.toString())
     ) {
       const db = this.responseCallbackMap[response.status];
 
-      await db();
+      const result = await db(response);
 
-      return true;
+      return result;
     }
 
-    return false;
+    return null;
   }
 }
 
@@ -621,6 +631,7 @@ export class GalleryClient extends ClientBase implements IGalleryClient {
 
 export interface IHealthClient {
     getBackendHealth(): Promise<boolean>;
+    getCancelTest(): Promise<boolean>;
 }
 
 export class HealthClient extends ClientBase implements IHealthClient {
@@ -653,6 +664,42 @@ export class HealthClient extends ClientBase implements IHealthClient {
     }
 
     protected processGetBackendHealth(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(<any>null);
+    }
+
+    getCancelTest(): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Health/cancel";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetCancelTest(_response));
+        });
+    }
+
+    protected processGetCancelTest(response: Response): Promise<boolean> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {

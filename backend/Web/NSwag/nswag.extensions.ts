@@ -16,8 +16,11 @@ export class ClientBase {
   private cacheStrategy: "CacheFirst" | "NetworkFirst" = "NetworkFirst";
   private cacheAllowStatuses: number[] = [200];
   private cacheableOptions: RequestInit = null;
-  private responseCallbackMap: Record<number, () => void | Promise<void>> =
-    null;
+  private responseCallbackMap: Record<
+    number,
+    (response: Response) => void | Promise<void>
+  > = null;
+  private signal: AbortSignal = null;
 
   public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
@@ -34,7 +37,13 @@ export class ClientBase {
     this.responseCallbackMap = responseCallbackMap;
   }
 
+  public setAbortSignal(signal: AbortSignal) {
+    this.signal = signal;
+  }
+
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
+    if (this.signal != null) options.signal = this.signal;
+
     if (options.headers && this.clientConfiguration.accessToken) {
       (options.headers as Record<string, string>)["Authorization"] =
         "Bearer " + this.clientConfiguration.accessToken;
@@ -50,19 +59,20 @@ export class ClientBase {
   protected async transformResult(
     url: string,
     networkResponse: Response,
-    cb: (response: Response) => Promise<any>
+    clientProcessCallback: (response: Response) => Promise<any>
   ) {
     const response = await this.checkCache(url, networkResponse);
     const hasBeenHandled = await this.checkStatusCallback(response);
 
-    if (hasBeenHandled) {
-      return cb(response).catch((err) => {
-        console.error("nswag status had been handled", response.status);
-        console.error(err);
-        return null;
-      });
+    if (hasBeenHandled !== null) {
+      return hasBeenHandled;
+      // return clientProcessCallback(response).catch((err) => {
+      //   console.error("nswag status had been handled", response.status);
+      //   console.error(err);
+      //   return null;
+      // });
     }
-    return cb(response);
+    return await clientProcessCallback(response);
   }
 
   private async putToCache(
@@ -134,19 +144,19 @@ export class ClientBase {
     this.cacheableResponse = false;
   }
 
-  private async checkStatusCallback(response: Response): Promise<boolean> {
-    if (this.responseCallbackMap == null) return false;
+  private async checkStatusCallback(response: Response): Promise<unknown> {
+    if (this.responseCallbackMap == null) return null;
 
     if (
       Object.keys(this.responseCallbackMap).includes(response.status.toString())
     ) {
       const db = this.responseCallbackMap[response.status];
 
-      await db();
+      const result = await db(response);
 
-      return true;
+      return result;
     }
 
-    return false;
+    return null;
   }
 }
