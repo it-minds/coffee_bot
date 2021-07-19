@@ -49,10 +49,11 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
           ) {
             round.NotificationCount++;
 
-            var message = MidwayMessage.Generate(daysLeft);
-            message.Channel = round.SlackMessageId;
-
-            var response = await slackClient.SendMessageToChannel(message: message, cancellationToken: cancellationToken);
+            if (!String.IsNullOrEmpty(round.SlackMessageId) ) {
+              var message = MidwayMessage.Generate(daysLeft);
+              message.Channel = round.SlackMessageId;
+              var response = await slackClient.SendMessageToChannel(message: message, cancellationToken: cancellationToken);
+            }
           }
         }
 
