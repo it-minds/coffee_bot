@@ -34,7 +34,7 @@
     "isomorphic-unfetch": "^3.1.0",
     "next": "11.0.1",
     "next-applicationinsights": "^1.0.4",
-    "next-pwa": "^5.2.23",
+    "next-pwa": "^5.2.24",
     "next-rosetta": "^1.2.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
