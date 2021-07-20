@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -11,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Slack.DTO;
 using Slack.Interfaces;
-using SlackNet.Blocks;
 
 namespace Application.BlockResponses
 {
@@ -32,13 +30,17 @@ namespace Application.BlockResponses
       private readonly ISlackClient slackClient;
       private readonly DownloadImage downloadImage;
       private readonly DeleteSlackMessage deleteSlackMessage;
+      private readonly ChannelUserPoints channelUserPoints;
+      private readonly WordStrings wordStrings;
 
-      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage, DeleteSlackMessage deleteSlackMessage)
+      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage, DeleteSlackMessage deleteSlackMessage, ChannelUserPoints channelUserPoints, WordStrings wordStrings)
       {
         this.applicationDbContext = applicationDbContext;
         this.slackClient = slackClient;
         this.downloadImage = downloadImage;
         this.deleteSlackMessage = deleteSlackMessage;
+        this.channelUserPoints = channelUserPoints;
+        this.wordStrings = wordStrings;
       }
 
       public async Task<int> Handle(EmphPhotoBlockResponseCommand request, CancellationToken cancellationToken)
@@ -54,23 +56,28 @@ namespace Application.BlockResponses
         if (group != null) {
           if (request.Value == "Yes")
           {
+            foreach (var member in group.CoffeeRoundGroupMembers)
+            {
+              if (!group.HasMet)
+                channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId);
+              if (!group.HasPhoto)
+                channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId);
+            }
+
+            var newName = wordStrings.GetPredeterminedStringFromInt(group.Id) + Path.GetExtension(group.SlackPhotoUrl).ToLower();
+            downloadImage.Enqueue(group.SlackPhotoUrl, newName);
+
+            group.LocalPhotoUrl = newName;
+            if (!group.HasMet) group.FinishedAt = DateTimeOffset.UtcNow;
             group.HasMet = true;
             group.HasPhoto = true;
-
-            var newName = "" + group.Id + Path.GetExtension(group.SlackPhotoUrl).ToLower();
-
-            downloadImage.Enqueue(
-              group.SlackPhotoUrl, newName
-            );
-            group.LocalPhotoUrl = newName;
-            group.FinishedAt = DateTimeOffset.UtcNow;
-
           } else if (request.Value == "No")
           {
           }
+
+          await applicationDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        await applicationDbContext.SaveChangesAsync(cancellationToken);
 
         deleteSlackMessage.Enqueue(request.ResponseUrl);
 

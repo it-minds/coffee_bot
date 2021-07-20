@@ -7,9 +7,12 @@ namespace Domain.Entities
     public string SlackUserId { get; set; }
     public string SlackName { get; set; }
 
+    public int Points { get; set; }
+
     public int ChannelSettingsId { get; set; }
     public ChannelSettings ChannelSettings { get; set; }
 
     public bool OnPause { get; set; } = false;
+    public bool IsRemoved { get; set; } = false;
   }
 }

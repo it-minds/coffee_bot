@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Common;
 using Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,22 +25,36 @@ namespace Application.BlockResponses
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly ISlackClient slackClient;
+      private readonly ChannelUserPoints channelUserPoints;
 
-      public StatusBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient)
+      public StatusBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, ChannelUserPoints channelUserPoints)
       {
         this.applicationDbContext = applicationDbContext;
         this.slackClient = slackClient;
+        this.channelUserPoints = channelUserPoints;
       }
 
       public async Task<int> Handle(StatusBlockResponseCommand request, CancellationToken cancellationToken)
       {
         var group = await applicationDbContext.CoffeeRoundGroups
+          .Include(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.SlackMessageId == request.ChannelId)
           .FirstOrDefaultAsync();
 
         if (group != null) {
+
           group.HasMet = request.Value == "Yes";
           group.FinishedAt = DateTimeOffset.UtcNow;
+
+          if (group.HasMet)
+          {
+            foreach (var member in group.CoffeeRoundGroupMembers)
+            {
+              channelUserPoints.Enqueue(
+                member.SlackMemberId, request.ChannelId
+              );
+            }
+          }
         }
 
         await slackClient.UpdateMessage(request.ChannelId, request.PayloadParsed.Message.Ts, cancellationToken);

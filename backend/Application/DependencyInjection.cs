@@ -24,6 +24,8 @@ namespace Application
 
       services.AddScoped<DownloadImage>();
       services.AddScoped<DeleteSlackMessage>();
+      services.AddScoped<ChannelUserPoints>();
+      services.AddScoped<WordStrings>();
 
       services.AddScoped<ISlackClient, BotClient>();
       services.AddScoped<ISlackOAuthClient, OAuthClient>();

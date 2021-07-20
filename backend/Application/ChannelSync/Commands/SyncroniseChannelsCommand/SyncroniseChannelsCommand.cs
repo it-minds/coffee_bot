@@ -64,7 +64,12 @@ namespace Application.ChannelSync.Commands
             x => x.SlackUserId,
             x => x
           );
-          applicationDbContext.ChannelMembers.RemoveRange(removedMembers);
+          // applicationDbContext.ChannelMembers.RemoveRange(removedMembers);
+          foreach (var removedMember in removedMembers)
+          {
+            removedMember.IsRemoved = true;
+            removedMember.SlackName = "";
+          }
 
           var members = updatedMembers.Select(x => x.Item1).ToList();
           members.AddRange(newMembers.Select(x => new ChannelMember
