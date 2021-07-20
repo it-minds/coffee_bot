@@ -20,6 +20,7 @@ namespace Application.Common
     public void Mapping(Profile profile) {
       profile.CreateMap<CoffeeRoundGroup, StandardGroupDto>()
         .ForMember(x => x.Members, opts => opts.MapFrom(x => x.CoffeeRoundGroupMembers.Select( y => y.SlackMemberId)))
+        .ForMember(x => x.PhotoUrl, opts => opts.MapFrom(y => y.LocalPhotoUrl))
       ;
     }
   }

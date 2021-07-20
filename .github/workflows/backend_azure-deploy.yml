@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "backend/**"
-      - ".github/workflows/backend_azure-deploy.yml"
     branches:
       - main
 
@@ -39,7 +38,7 @@ jobs:
         run: dotnet build
         working-directory: backend/Web
 
-      - name: Build with dotnet
+      - name: Publish with dotnet
         run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/${{ env.appName }}
         working-directory: backend/Web
 

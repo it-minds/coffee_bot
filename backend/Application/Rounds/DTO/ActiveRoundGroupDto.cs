@@ -24,6 +24,7 @@ namespace Application.Rounds.DTO
     {
       profile.CreateMap<CoffeeRoundGroup, ActiveRoundGroupDto>()
         .ForMember(x => x.Members, opts => opts.MapFrom(y => y.CoffeeRoundGroupMembers.Select(member => member.SlackMemberId)))
+        .ForMember(x => x.PhotoUrl, opts => opts.MapFrom(y => y.LocalPhotoUrl))
       ;
     }
   }
