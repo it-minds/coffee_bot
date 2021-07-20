@@ -61,7 +61,7 @@ namespace Application.BlockResponses
               if (!group.HasMet)
                 channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId);
               if (!group.HasPhoto)
-                channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId);
+                channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId, 2);
             }
 
             var newName = wordStrings.GetPredeterminedStringFromInt(group.Id) + Path.GetExtension(group.SlackPhotoUrl).ToLower();

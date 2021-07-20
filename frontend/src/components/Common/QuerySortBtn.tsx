@@ -3,86 +3,134 @@ import { MdArrowDownward } from "@react-icons/all-files/md/MdArrowDownward";
 import { MdArrowUpward } from "@react-icons/all-files/md/MdArrowUpward";
 import { MdSort } from "@react-icons/all-files/md/MdSort";
 import { useRouter } from "next/router";
-import { FC, useCallback, useEffect, useState } from "react";
+import { useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 export type Direction = "ASC" | "DESC";
+
+const sortMap: Record<Direction | "null", Direction[]> = {
+  ASC: ["DESC", null, "ASC"],
+  DESC: ["ASC", null, "DESC"],
+  null: ["ASC", "DESC", null]
+};
 
 type Props = {
   queryKey: string;
   queryGroup?: string;
-  sortCb?: (key: string, direction: Direction) => void;
+  sortCb?: (group: string, key: string, direction: Direction) => void;
+  defaultDirection?: Direction;
 };
 
 const QuerySortBtn: FC<Props & Partial<IconButtonProps>> = ({
   sortCb = () => null,
   queryKey,
   queryGroup = "t",
+  defaultDirection = null,
   ...rest
 }) => {
-  const [direction, setDirection] = useState<Direction>(null);
-  const [active, setActive] = useState(false);
+  const [direction, setDirection] = useState<Direction>(defaultDirection);
+  const active = useMemo(() => direction !== null, [direction]);
 
-  const router = useRouter();
+  const { query, replace } = useRouter();
+  const queryCopy = useRef(query);
 
   useEffect(() => {
-    const sort = (router.query.thsort as string)?.split("_");
+    console.log("resetting query", query);
+    queryCopy.current = query;
+  }, [query]);
 
-    if (sort && sort.length === 3) {
-      const [checkQueryGroup, checkkey, direction] = sort;
+  useEffect(() => {
+    sortCb(queryGroup, queryKey, direction as Direction);
+  }, [queryGroup, queryKey, direction]);
 
-      if (queryGroup === checkQueryGroup) {
-        if (queryKey === checkkey) {
-          setActive(true);
-          setDirection(direction as Direction);
-          sortCb(queryKey, direction as Direction);
-        } else {
-          setDirection(null);
-          setActive(false);
+  const firstOrDefaultDirection = useCallback(
+    (key: string): Direction | null => {
+      const sort = key?.split("_");
+
+      if (sort && sort.length === 3) {
+        const [checkQueryGroup, checkkey, direction] = sort;
+
+        if (queryGroup === checkQueryGroup) {
+          if (queryKey === checkkey) {
+            return direction as Direction;
+          }
         }
       }
+      return null;
+    },
+    [queryGroup, queryKey]
+  );
+
+  useEffect(() => {
+    const thsort = queryCopy.current.thsort;
+
+    if (Array.isArray(thsort)) {
+      let myDirection: Direction = null;
+      thsort.some(x => {
+        const result = firstOrDefaultDirection(x);
+        if (result !== null) {
+          myDirection = result;
+          return true;
+        }
+      });
+      setDirection(myDirection);
     }
-  }, [router, router.query]);
+
+    if (typeof thsort === "string") {
+      setDirection(firstOrDefaultDirection(thsort));
+    }
+  }, []);
+
+  const getNextDirection = useCallback(() => {
+    const sortArr = sortMap[defaultDirection ?? "null"];
+    const curIndex = sortArr.findIndex(x => x == direction);
+    return curIndex + 1 >= sortArr.length ? sortArr[0] : sortArr[curIndex + 1];
+  }, [defaultDirection, direction]);
+
+  const setQuery = useCallback((newDirection: string) => {
+    const getQuery = (newDirection: string) => {
+      const key = `${queryGroup}_${queryKey}_${newDirection}`;
+      const thsort = queryCopy.current.thsort;
+
+      if (Array.isArray(thsort)) {
+        const index = thsort.findIndex(x => firstOrDefaultDirection(x) !== null);
+        if (newDirection === null) {
+          delete thsort[index];
+        } else {
+          thsort[index] = key;
+        }
+        return thsort;
+      }
+
+      if (
+        typeof thsort === "string" &&
+        firstOrDefaultDirection(thsort) === null &&
+        newDirection !== null
+      ) {
+        return [thsort, key];
+      }
+
+      if (newDirection === null) return thsort;
+
+      return key;
+    };
+
+    const thsort = getQuery(newDirection);
+
+    console.log(queryCopy.current, newDirection, thsort);
+    queryCopy.current.thsort = thsort;
+    replace({ query: queryCopy.current }, undefined, { shallow: true });
+  }, []);
+
+  useEffect(() => {
+    if (defaultDirection !== null) setQuery(defaultDirection);
+  }, [defaultDirection]);
 
   const onClick = useCallback(() => {
-    switch (direction) {
-      case null: {
-        router.replace(
-          {
-            query: { ...router.query, thsort: `${queryGroup}_${queryKey}_ASC` }
-          },
-          undefined,
-          { shallow: true }
-        );
-        return;
-      }
-      case "ASC": {
-        router.replace(
-          {
-            query: { ...router.query, thsort: `${queryGroup}_${queryKey}_DESC` }
-          },
-          undefined,
-          { shallow: true }
-        );
-        return;
-      }
-      case "DESC": {
-        const copy = { ...router.query };
-        delete copy.thsort;
-        router.replace(
-          {
-            query: copy
-          },
-          undefined,
-          { shallow: true }
-        );
-
-        setActive(false);
-        setDirection(null);
-        sortCb(queryKey, null);
-        return;
-      }
-    }
-  }, [active, direction, router.query]);
+    const newDirection = getNextDirection();
+    setDirection(newDirection);
+    setQuery(newDirection);
+  }, [setQuery, getNextDirection]);
 
   return (
     <IconButton
@@ -90,17 +138,7 @@ const QuerySortBtn: FC<Props & Partial<IconButtonProps>> = ({
       aria-label="Sort column"
       onClick={onClick}
       colorScheme={active ? "purple" : "gray"}
-      icon={
-        active ? (
-          direction === "ASC" ? (
-            <MdArrowUpward />
-          ) : (
-            <MdArrowDownward onClick={onClick} />
-          )
-        ) : (
-          <MdSort onClick={onClick} />
-        )
-      }
+      icon={active ? direction === "ASC" ? <MdArrowDownward /> : <MdArrowUpward /> : <MdSort />}
       {...rest}
     />
   );

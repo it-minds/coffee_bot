@@ -51,6 +51,7 @@ namespace Application.Stats.Query.GetMemberStats
           var totalParticipation = group.Count();
 
           string name = channelMembers.FirstOrDefault(x => x.SlackUserId == group.Key)?.SlackName ?? "";
+          int points = channelMembers.FirstOrDefault(x => x.SlackUserId == group.Key)?.Points ?? 0;
 
           var dto = new StatsDto
           {
@@ -58,7 +59,8 @@ namespace Application.Stats.Query.GetMemberStats
             MeepupPercent = meetupPercent,
             PhotoPercent = photoPercent,
             TotalParticipation = totalParticipation,
-            SlackMemberName = name
+            SlackMemberName = name,
+            Points = points
           };
           result.Add(dto);
         }

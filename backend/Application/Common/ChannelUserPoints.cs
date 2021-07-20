@@ -18,17 +18,17 @@ namespace Application.Common
       this.context = context;
     }
 
-    public void Enqueue(string slackUserId, string slackChannelId)
+    public void Enqueue(string slackUserId, string slackChannelId, int points = 1)
     {
-      BackgroundJob.Enqueue(() => GiveMemberAPoint(slackUserId, slackChannelId));
+      BackgroundJob.Enqueue(() => GiveMemberAPoint(slackUserId, slackChannelId, points));
     }
 
-    public void Enqueue(string slackUserId, int channelSettingsId)
+    public void Enqueue(string slackUserId, int channelSettingsId, int points = 1)
     {
-      BackgroundJob.Enqueue(() => GiveMemberAPoint(slackUserId, channelSettingsId));
+      BackgroundJob.Enqueue(() => GiveMemberAPoint(slackUserId, channelSettingsId, points));
     }
 
-    public async Task GiveMemberAPoint(string slackUserId, string slackChannelId)
+    public async Task GiveMemberAPoint(string slackUserId, string slackChannelId, int points = 1)
     {
       var member = await context.ChannelMembers
         .Include(x => x.ChannelSettings)
@@ -42,7 +42,7 @@ namespace Application.Common
       }
     }
 
-    public async Task GiveMemberAPoint(string slackUserId, int channelSettingsId)
+    public async Task GiveMemberAPoint(string slackUserId, int channelSettingsId , int points = 1)
     {
       var member = await context.ChannelMembers
         .Include(x => x.ChannelSettings)

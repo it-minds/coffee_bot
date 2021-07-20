@@ -774,7 +774,7 @@ export class RoundClient extends ClientBase implements IRoundClient {
 }
 
 export interface ISlashClient {
-    blockResponse(payload?: string | null | undefined): Promise<BlockResponse>;
+    blockResponse(payload?: string | null | undefined): Promise<number>;
 }
 
 export class SlashClient extends ClientBase implements ISlashClient {
@@ -788,7 +788,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    blockResponse(payload?: string | null | undefined): Promise<BlockResponse> {
+    blockResponse(payload?: string | null | undefined): Promise<number> {
         let url_ = this.baseUrl + "/api/Slash/coffee-group-done";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -811,14 +811,14 @@ export class SlashClient extends ClientBase implements ISlashClient {
         });
     }
 
-    protected processBlockResponse(response: Response): Promise<BlockResponse> {
+    protected processBlockResponse(response: Response): Promise<number> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = BlockResponse.fromJS(resultData200);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -826,7 +826,7 @@ export class SlashClient extends ClientBase implements ISlashClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<BlockResponse>(<any>null);
+        return Promise.resolve<number>(<any>null);
     }
 }
 
@@ -1687,57 +1687,10 @@ export interface IStandardGroupDto {
     members?: string[] | null;
 }
 
-export class BlockResponse implements IBlockResponse {
-    response_type?: string | null;
-    text?: string | null;
-    replace_original?: boolean;
-    delete_original?: boolean;
-
-    constructor(data?: IBlockResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.response_type = _data["response_type"] !== undefined ? _data["response_type"] : <any>null;
-            this.text = _data["text"] !== undefined ? _data["text"] : <any>null;
-            this.replace_original = _data["replace_original"] !== undefined ? _data["replace_original"] : <any>null;
-            this.delete_original = _data["delete_original"] !== undefined ? _data["delete_original"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): BlockResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new BlockResponse();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["response_type"] = this.response_type !== undefined ? this.response_type : <any>null;
-        data["text"] = this.text !== undefined ? this.text : <any>null;
-        data["replace_original"] = this.replace_original !== undefined ? this.replace_original : <any>null;
-        data["delete_original"] = this.delete_original !== undefined ? this.delete_original : <any>null;
-        return data; 
-    }
-}
-
-export interface IBlockResponse {
-    response_type?: string | null;
-    text?: string | null;
-    replace_original?: boolean;
-    delete_original?: boolean;
-}
-
 export class StatsDto implements IStatsDto {
     slackMemberId?: string | null;
     slackMemberName?: string | null;
+    points?: number;
     meepupPercent?: number;
     photoPercent?: number;
     totalParticipation?: number;
@@ -1755,6 +1708,7 @@ export class StatsDto implements IStatsDto {
         if (_data) {
             this.slackMemberId = _data["slackMemberId"] !== undefined ? _data["slackMemberId"] : <any>null;
             this.slackMemberName = _data["slackMemberName"] !== undefined ? _data["slackMemberName"] : <any>null;
+            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
             this.meepupPercent = _data["meepupPercent"] !== undefined ? _data["meepupPercent"] : <any>null;
             this.photoPercent = _data["photoPercent"] !== undefined ? _data["photoPercent"] : <any>null;
             this.totalParticipation = _data["totalParticipation"] !== undefined ? _data["totalParticipation"] : <any>null;
@@ -1772,6 +1726,7 @@ export class StatsDto implements IStatsDto {
         data = typeof data === 'object' ? data : {};
         data["slackMemberId"] = this.slackMemberId !== undefined ? this.slackMemberId : <any>null;
         data["slackMemberName"] = this.slackMemberName !== undefined ? this.slackMemberName : <any>null;
+        data["points"] = this.points !== undefined ? this.points : <any>null;
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
@@ -1782,6 +1737,7 @@ export class StatsDto implements IStatsDto {
 export interface IStatsDto {
     slackMemberId?: string | null;
     slackMemberName?: string | null;
+    points?: number;
     meepupPercent?: number;
     photoPercent?: number;
     totalParticipation?: number;
