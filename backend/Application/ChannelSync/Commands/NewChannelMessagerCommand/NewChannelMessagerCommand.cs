@@ -25,11 +25,12 @@ namespace Application.ChannelSync.Commands
 
       public async Task<int> Handle(NewChannelMessagerCommand request, CancellationToken cancellationToken)
       {
-        var channelSettings = await applicationDbContext.ChannelSettings.FirstOrDefaultAsync(x => x.SlackChannelId == request.SlackChannelId);
+        // var channelSettings = await applicationDbContext.ChannelSettings
+        //   .FirstOrDefaultAsync(x => x.SlackChannelId == request.SlackChannelId);
 
-        if (channelSettings == null) return 0;
+        // if (channelSettings == null) return 0;
 
-        await slackClient.SendMessageToChannel(cancellationToken, channelSettings.SlackChannelId, "This <!channel> is now part of the coffee rounds! Changes to the channel settings is currenly not supported. Please `/leave` this channel if you nolonger wish to partake! First round should start shortly.");
+        await slackClient.SendMessageToChannel(cancellationToken, request.SlackChannelId, "This <!channel> is now part of the coffee rounds! Changes to the channel settings is currenly not supported. Please `/leave` this channel if you nolonger wish to partake! First round should start shortly.");
 
         return 1;
       }
