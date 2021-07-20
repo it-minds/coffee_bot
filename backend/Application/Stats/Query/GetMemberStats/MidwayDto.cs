@@ -15,10 +15,8 @@ namespace Application.Stats.Query.GetMemberStats
     {
       profile.CreateMap<CoffeeRoundGroupMember, MidwayDto>()
         .ForMember(x => x.HasMet, opts => opts.MapFrom(from => from.CoffeeRoundGroup.HasMet))
-        .ForMember(x => x.HasPhoto, opts => opts.MapFrom(from => !String.IsNullOrEmpty(from.CoffeeRoundGroup.PhotoUrl) ))
-
+        .ForMember(x => x.HasPhoto, opts => opts.MapFrom(from => from.CoffeeRoundGroup.HasPhoto ))
       ;
-
     }
   }
 }

@@ -12,6 +12,9 @@ namespace Infrastructure.Persistence.Configurations
           .WithMany(e => e.CoffeeRoundGroups)
           .HasForeignKey(e => e.CoffeeRoundId)
           .IsRequired(true);
+
+      builder.Property(x => x.SlackPhotoUrl);
+      builder.Property(x => x.LocalPhotoUrl);
     }
   }
 }

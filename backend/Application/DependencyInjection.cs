@@ -23,6 +23,8 @@ namespace Application
       services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
 
       services.AddScoped<DownloadImage>();
+      services.AddScoped<DeleteSlackMessage>();
+
       services.AddScoped<ISlackClient, BotClient>();
       services.AddScoped<ISlackOAuthClient, OAuthClient>();
 

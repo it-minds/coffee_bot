@@ -15,30 +15,33 @@ using SlackNet.Blocks;
 
 namespace Application.BlockResponses
 {
-  public class EmphPhotoBlockResponseCommand : IRequest<BlockResponse>
+  public class EmphPhotoBlockResponseCommand : IRequest<int>
   {
     public string Payload { get; set; }
 
-    protected SlashInput PayloadParsed { get => JsonConvert.DeserializeObject<SlashInput>(Payload); }
+    private SlashInput PayloadParsed { get => JsonConvert.DeserializeObject<SlashInput>(Payload); }
 
     protected string Value { get => PayloadParsed.Actions[0].Value; }
     protected string ChannelId { get => PayloadParsed.Channel.Id; }
     protected string UserId { get => PayloadParsed.User.Id; }
+    protected string ResponseUrl { get => PayloadParsed.ResponseUrl; }
 
-    public class EmphPhotoBlockResponseCommandHandler : IRequestHandler<EmphPhotoBlockResponseCommand, BlockResponse>
+    public class EmphPhotoBlockResponseCommandHandler : IRequestHandler<EmphPhotoBlockResponseCommand, int>
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly ISlackClient slackClient;
       private readonly DownloadImage downloadImage;
+      private readonly DeleteSlackMessage deleteSlackMessage;
 
-      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage)
+      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage, DeleteSlackMessage deleteSlackMessage)
       {
         this.applicationDbContext = applicationDbContext;
         this.slackClient = slackClient;
         this.downloadImage = downloadImage;
+        this.deleteSlackMessage = deleteSlackMessage;
       }
 
-      public async Task<BlockResponse> Handle(EmphPhotoBlockResponseCommand request, CancellationToken cancellationToken)
+      public async Task<int> Handle(EmphPhotoBlockResponseCommand request, CancellationToken cancellationToken)
       {
         var group = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRound)
@@ -54,12 +57,12 @@ namespace Application.BlockResponses
             group.HasMet = true;
             group.HasPhoto = true;
 
-            var newName = "" + group.Id + Path.GetExtension(group.PhotoUrl).ToLower();
+            var newName = "" + group.Id + Path.GetExtension(group.SlackPhotoUrl).ToLower();
 
             downloadImage.Enqueue(
-              group.PhotoUrl, newName
+              group.SlackPhotoUrl, newName
             );
-            group.PhotoUrl = newName;
+            group.LocalPhotoUrl = newName;
             group.FinishedAt = DateTimeOffset.UtcNow;
 
           } else if (request.Value == "No")
@@ -69,13 +72,9 @@ namespace Application.BlockResponses
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        return new BlockResponse
-        {
-          Replace = true,
-          Delete = false,
-          Type = "ephemeral",
-          Text = "Thank you!"
-        };
+        deleteSlackMessage.Enqueue(request.ResponseUrl);
+
+        return 1;
       }
     }
   }

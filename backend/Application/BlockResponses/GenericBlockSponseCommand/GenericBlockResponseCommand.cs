@@ -12,7 +12,7 @@ using Slack.Messages;
 
 namespace Application.BlockResponses
 {
-  public class GenericBlockResponseCommand : IRequest<BlockResponse>
+  public class GenericBlockResponseCommand : IRequest<int>
   {
     public string Payload { get; set; }
 
@@ -21,7 +21,7 @@ namespace Application.BlockResponses
     protected string ActionId {get => PayloadParsed.Actions[0].BlockId; }
 
 
-    public class GenericBlockResponseCommandHandler : IRequestHandler<GenericBlockResponseCommand, BlockResponse>
+    public class GenericBlockResponseCommandHandler : IRequestHandler<GenericBlockResponseCommand, int>
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly ISlackClient slackClient;
@@ -35,7 +35,7 @@ namespace Application.BlockResponses
         this.mediator = mediator;
       }
 
-      public async Task<BlockResponse> Handle(GenericBlockResponseCommand request, CancellationToken cancellationToken)
+      public async Task<int> Handle(GenericBlockResponseCommand request, CancellationToken cancellationToken)
       {
         switch (request.ActionId) {
           case ActionTypes.MidWay: {
@@ -50,21 +50,18 @@ namespace Application.BlockResponses
 
           case ActionTypes.EmphemeralPhoto: {
 
-              var result = await mediator.Send(new EmphPhotoBlockResponseCommand
+              mediator.Enqueue(new EmphPhotoBlockResponseCommand
               {
                 Payload = request.Payload
               });
-
-              return result;
-          }
+              break;
+            }
 
           default: {
             break;
           }
         }
-
-
-        return null;
+        return 1;
       }
     }
   }

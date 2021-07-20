@@ -14,7 +14,8 @@ namespace Domain.Entities
     public DateTimeOffset? FinishedAt { get; set; }
     public int NotificationCount { get; set; }
 
-    public string PhotoUrl { get; set; }
+    public string SlackPhotoUrl { get; set; }
+    public string LocalPhotoUrl { get; set; }
 
     public int CoffeeRoundId { get; set; }
 

@@ -33,7 +33,7 @@ namespace Application.Gallery.Queries.GetAllPhotos
         var groups = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRound)
           .Include(x => x.CoffeeRoundGroupMembers)
-          .Where(x => x.HasPhoto && x.CoffeeRound.ChannelId == request.ChannelId && x.PhotoUrl != null && x.PhotoUrl != "")
+          .Where(x => x.HasPhoto && x.CoffeeRound.ChannelId == request.ChannelId && !string.IsNullOrEmpty(x.LocalPhotoUrl))
           .OrderByDescending(x => x.FinishedAt)
           .ProjectTo<StandardGroupDto>(mapper.ConfigurationProvider, 0)
           .ToListAsync(cancellationToken);

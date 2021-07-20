@@ -37,7 +37,7 @@ namespace Application.ImagePost.Commands.ImagePostCommand
 
         var file = await slackClient.Client().Files.Info(fileId: request.Event.FileId);
         if (group != null) {
-          group.PhotoUrl = file.File.UrlPrivate;
+          group.SlackPhotoUrl = file.File.UrlPrivate;
         }
 
         var message = EmphemeralPhotoCheckMessage.Generate();
