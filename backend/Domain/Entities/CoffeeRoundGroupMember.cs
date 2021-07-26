@@ -6,6 +6,7 @@ namespace Domain.Entities
   {
     public int Id { get; set; }
     public string SlackMemberId { get; set; }
+    public bool Participated { get; set; }
     public int CoffeeRoundGroupId { get; set; }
     public CoffeeRoundGroup CoffeeRoundGroup { get; set; }
   }

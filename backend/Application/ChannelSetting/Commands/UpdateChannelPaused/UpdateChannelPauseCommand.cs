@@ -10,7 +10,6 @@ using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace Application.ChannelSetting.Commands.UpdateChannelPaused
 {

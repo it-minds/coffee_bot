@@ -3,7 +3,7 @@ import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { api } from "services/backend/api";
-import { AuthClient, AuthUser } from "services/backend/nswagts";
+import { AuthClient, UserDTO } from "services/backend/nswagts";
 
 import { useEffectAsync } from "./useEffectAsync";
 
@@ -21,10 +21,10 @@ type AuthHook<T> = {
   checkAuth: () => Promise<void>;
 };
 
-export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
+export const useAuth = (authSkip: string): AuthHook<UserDTO> => {
   const [authStage, setAuthStage] = useState(AuthStage.CHECKING);
   const [authCounter, setAuthCounter] = useState(0);
-  const [activeUser, setActiveUser] = useState<AuthUser>(null);
+  const [activeUser, setActiveUser] = useState<UserDTO>(null);
   const router = useRouter();
 
   const checkAuth = useCallback(async () => {
@@ -32,7 +32,7 @@ export const useAuth = (authSkip: string): AuthHook<AuthUser> => {
     setAuthStage(AuthStage.CHECKING);
 
     const client: AuthClient = await api(AuthClient);
-    const user: AuthUser = await client.checkAuth().catch(() => null);
+    const user: UserDTO = await client.checkAuth().catch(() => null);
 
     setActiveUser(user);
     setAuthStage(user ? AuthStage.AUTHENTICATED : AuthStage.UNAUTHENTICATED);

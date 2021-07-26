@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import { useReducer } from "react";
 import { useCallback } from "react";
 import ListReducer, { ListReducerActionType } from "react-list-reducer";
-import { IStatsClient, StatsClient, StatsDto } from "services/backend/nswagts";
+import { StatsClient, StatsDto } from "services/backend/nswagts";
 
 const defaultSort = (a: StatsDto, b: StatsDto) => a.slackMemberId.localeCompare(b.slackMemberId);
 
@@ -46,7 +46,7 @@ const IndexPage: NextPage = () => {
     []
   );
 
-  const { genClient } = useNSwagClient<IStatsClient>(StatsClient);
+  const { genClient } = useNSwagClient(StatsClient);
 
   useEffectAsync(async () => {
     if (!query.channelId) return;

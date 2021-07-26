@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Hubs;
+using Application.Prizes.Common;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
@@ -19,6 +25,23 @@ namespace Web.DocumentProcessors
       {
         context.SchemaGenerator.Generate(type, context.SchemaResolver);
       }
+    }
+
+    public static Dictionary<string, Dictionary<string, IEnumerable<Type>>> AllMyHubs()
+    {
+      var dict = new Dictionary<string, Dictionary<string, IEnumerable<Type>>>();
+      dict.Add("prize", MyHubs(typeof(IPrizeHubService)));
+      return dict;
+    }
+
+    public static Dictionary<string, IEnumerable<Type>> MyHubs(Type type)
+    {
+      var dict = new Dictionary<string, IEnumerable<Type>>();
+      foreach (MethodInfo method in type.GetMethods())
+      {
+        dict.Add(method.Name, method.GetParameters().Select(x => x.ParameterType));
+      }
+      return dict;
     }
   }
 }

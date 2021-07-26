@@ -12,6 +12,8 @@ namespace Application.Common.Interfaces
     DbSet<CoffeeRound> CoffeeRounds { get; set; }
     DbSet<CoffeeRoundGroup> CoffeeRoundGroups { get; set; }
     DbSet<CoffeeRoundGroupMember> CoffeeRoundGroupMembers { get; set; }
+    DbSet<Prize> Prizes { get; set; }
+    DbSet<ClaimedPrize> ClaimedPrizes { get; set; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
   }
 }

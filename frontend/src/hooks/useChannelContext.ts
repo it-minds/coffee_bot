@@ -3,7 +3,6 @@ import { Dispatch, useCallback, useContext, useEffect, useReducer } from "react"
 import ListReducer, { AllListActions, ListReducerActionType } from "react-list-reducer";
 import {
   ChannelClient,
-  IChannelClient,
   IChannelSettingsDto,
   IChannelSettingsIdDto,
   IUpdateChannelPauseInput,
@@ -26,7 +25,7 @@ export const useChannelContext = (): ChannelHook => {
 
   const [channels, dispatchChannels] = useReducer(ListReducer<IChannelSettingsIdDto>("id"), []);
 
-  const { genClient } = useNSwagClient<IChannelClient>(ChannelClient);
+  const { genClient } = useNSwagClient(ChannelClient);
 
   const fetchChannels = useCallback(async () => {
     try {

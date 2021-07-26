@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.User.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SlackAuth.Query.GetAuthUrl;
@@ -19,7 +20,7 @@ namespace Web.Controllers
     }
 
     [HttpPut]
-    public async Task<ActionResult<AuthUser>> CheckAuth()
+    public async Task<ActionResult<UserDTO>> CheckAuth()
     {
       return await Mediator.Send(new CheckCurrentUserQuery());
     }

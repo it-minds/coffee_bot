@@ -38,7 +38,7 @@ const IndexPage: NextPage = () => {
 
   const [activeImage, setActiveImage] = useState<ExtendedImageDto>(null);
   const [images, setImages] = useReducer(ListReducer<ExtendedImageDto>("id"), []);
-  const { genClient } = useNSwagClient<GalleryClient>(GalleryClient);
+  const { genClient } = useNSwagClient(GalleryClient);
 
   useEffectAsync(async () => {
     if (!activeUser || !query.channelId) return;

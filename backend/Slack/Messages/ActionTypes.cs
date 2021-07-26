@@ -5,5 +5,6 @@ namespace Slack.Messages
     public const string MidWay = "MidWay";
 
     public const string EmphemeralPhoto = "EmphemeralPhoto";
+    public const string EmphemeralMemberParticipation = "EmphemeralMemberParticipation";
   }
 }

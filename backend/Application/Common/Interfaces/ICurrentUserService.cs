@@ -5,5 +5,6 @@ namespace Application.Common.Interfaces
     string UserEmail { get; }
     string UserSlackId { get; }
     string SlackToken { get; }
+    string SignalRConnectionId { get; }
   }
 }

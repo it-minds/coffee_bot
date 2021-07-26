@@ -1,5 +1,6 @@
-import { Center, Spinner } from "@chakra-ui/react";
+import { Center } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
+import OurSpinner from "components/Common/OurSpinner";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -7,7 +8,7 @@ import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
-import { ActiveRoundDto, IRoundClient, RoundClient } from "services/backend/nswagts";
+import { ActiveRoundDto, RoundClient } from "services/backend/nswagts";
 import isomorphicEnvSettings from "utils/envSettings";
 
 const IndexPage: NextPage = () => {
@@ -41,7 +42,7 @@ const IndexPage: NextPage = () => {
 
   const [round, setRound] = useState<ActiveRoundDto>(null);
 
-  const { genClient } = useNSwagClient<IRoundClient>(RoundClient);
+  const { genClient } = useNSwagClient(RoundClient);
 
   useEffectAsync(async () => {
     if (!activeUser || !query.roundId) return;
@@ -68,7 +69,7 @@ const IndexPage: NextPage = () => {
         <RoundInfo round={round} />
       ) : (
         <Center>
-          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+          <OurSpinner />
         </Center>
       )}
     </>

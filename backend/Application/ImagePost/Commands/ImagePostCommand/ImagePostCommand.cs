@@ -7,12 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using Slack.DTO;
 using Slack.Interfaces;
 using Slack.Messages;
+using SlackNet.Events;
 
 namespace Application.ImagePost.Commands.ImagePostCommand
 {
   public class ImagePostCommand : IRequest<int>
   {
-    public Event Event;
+    public MyFileShared Event;
+
+    protected string FileId { get => Event.FileId ?? Event.File.Id; }
 
     public class ImagePostCommandHandler : IRequestHandler<ImagePostCommand, int>
     {
@@ -35,7 +38,7 @@ namespace Application.ImagePost.Commands.ImagePostCommand
           .Where(x => x.CoffeeRound.SlackChannelId == request.Event.ChannelId && x.CoffeeRound.Active)
           .FirstOrDefaultAsync();
 
-        var file = await slackClient.Client().Files.Info(fileId: request.Event.FileId);
+        var file = await slackClient.Client().Files.Info(fileId: request.FileId);
         if (group != null) {
           group.SlackPhotoUrl = file.File.UrlPrivate;
         }

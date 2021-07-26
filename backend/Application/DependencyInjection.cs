@@ -5,8 +5,10 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Slack.Clients;
 using Slack.Interfaces;
+using SlackNet;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Newtonsoft.Json.Serialization;
 
 namespace Application
 {

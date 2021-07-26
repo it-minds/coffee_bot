@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Domain.Entities
 {
   public class ChannelMember
@@ -12,7 +14,10 @@ namespace Domain.Entities
     public int ChannelSettingsId { get; set; }
     public ChannelSettings ChannelSettings { get; set; }
 
+    public bool IsAdmin { get; set; } = false;
     public bool OnPause { get; set; } = false;
     public bool IsRemoved { get; set; } = false;
+
+    public ICollection<ClaimedPrize> ClaimedPrizes { get; set; }
   }
 }

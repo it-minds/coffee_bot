@@ -27,6 +27,8 @@ namespace Infrastructure.Persistence
     public DbSet<CoffeeRound> CoffeeRounds { get; set; }
     public DbSet<CoffeeRoundGroup> CoffeeRoundGroups { get; set; }
     public DbSet<CoffeeRoundGroupMember> CoffeeRoundGroupMembers { get; set; }
+    public DbSet<Prize> Prizes { get; set; }
+    public DbSet<ClaimedPrize> ClaimedPrizes { get; set; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

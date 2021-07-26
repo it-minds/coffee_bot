@@ -10,30 +10,36 @@ interface NSwagClientType<T> {
   refreshAbortSignal: () => void;
 }
 
-export const useNSwagClient = <
-  T,
-  V extends NSwagClient<ClientBase & T> = NSwagClient<ClientBase & T>
->(
+const genNSwagClient = async <T extends ClientBase, V extends NSwagClient<T> = NSwagClient<T>>(
+  client: V,
+  checkAuth: () => Promise<void>,
+  abortController = new IsomorphicAbortController()
+) => {
+  const initializedClient = await api(client);
+
+  initializedClient.setStatusCallbackMap({
+    401: async res => {
+      console.info("nswag 401 - checking auth");
+      await checkAuth();
+      return res.json();
+    }
+  });
+  initializedClient.setAbortSignal(abortController.signal);
+
+  return initializedClient;
+};
+
+export const useNSwagClient = <T extends ClientBase, V extends NSwagClient<T> = NSwagClient<T>>(
   client: V,
   useAbortOnUnmount = false
-): NSwagClientType<T> => {
+): NSwagClientType<InstanceType<V>> => {
   const { checkAuth } = useContext(AuthContext);
   const abortController = useRef(new IsomorphicAbortController());
 
-  const genClient = useCallback(async () => {
-    const initializedClient = await api(client);
-
-    initializedClient.setStatusCallbackMap({
-      401: async res => {
-        console.info("nswag 401 - checking auth");
-        await checkAuth();
-        return res.json();
-      }
-    });
-    initializedClient.setAbortSignal(abortController.current.signal);
-
-    return initializedClient;
-  }, []);
+  const genClient = useCallback(
+    () => genNSwagClient(client, checkAuth, abortController.current),
+    []
+  );
 
   const refreshAbortSignal = useCallback(() => {
     abortController.current = new IsomorphicAbortController();

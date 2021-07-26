@@ -1,0 +1,22 @@
+{
+  "Controller": {
+    "scope": "csharp",
+    "prefix": "web-controller",
+    "body": [
+      "using System.Threading;",
+      "using Microsoft.AspNetCore.Mvc;",
+      "",
+      "namespace Web.Controllers",
+      "{",
+      "  public class ${1:ClassName}Controller : ApiControllerBase",
+      "  {",
+      "    [HttpGet]",
+      "    public ActionResult<bool> Test()",
+      "    {",
+      "      return true;",
+      "    }",
+      "  }",
+      "}"
+    ]
+  }
+}

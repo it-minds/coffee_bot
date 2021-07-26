@@ -5,9 +5,9 @@ import { GetServerSidePropsContext } from "next";
 import isomorphicEnvSettings, { setEnvSettings } from "utils/envSettings";
 
 // !NOTE: If you are having build errors with this file missing, the backend is required to be built first
-import { ClientConfiguration } from "./nswagts";
+import { ClientBase, ClientConfiguration } from "./nswagts";
 
-export interface NSwagClient<T> {
+export interface NSwagClient<T extends ClientBase> {
   new (
     configuration: ClientConfiguration,
     baseUrl?: string,
@@ -15,10 +15,10 @@ export interface NSwagClient<T> {
   ): T;
 }
 
-export const api = async <T>(
-  Client: NSwagClient<T>,
+export const api = async <T extends ClientBase, V extends NSwagClient<T>>(
+  Client: V,
   context?: GetServerSidePropsContext
-): Promise<T> => {
+): Promise<InstanceType<V>> => {
   let envSettings = isomorphicEnvSettings();
 
   if (envSettings === null && process.browser) {
@@ -32,7 +32,7 @@ export const api = async <T>(
   const authToken = getAuthToken(context) ?? "";
   const initializedClient = new Client(new ClientConfiguration(authToken), envSettings.backendUrl, {
     fetch
-  });
+  }) as InstanceType<V>;
 
   return initializedClient;
 };

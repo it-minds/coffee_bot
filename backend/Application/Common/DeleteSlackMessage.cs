@@ -28,14 +28,6 @@ namespace Application.Common
 
     public async Task DeleteEmphemetalMessage(string url)
     {
-      var body = new BlockResponse
-      {
-        Delete = true,
-        Replace = true,
-        Text = "",
-        Type = "emphemeral"
-      };
-
       var uri = new Uri(url);
       var clientHandler = new HttpClientHandler
       {
@@ -55,8 +47,6 @@ namespace Application.Common
       using (var response = await client.SendAsync(request))
       {
           response.EnsureSuccessStatusCode();
-          // var body = await response.Content.ReadAsByteArrayAsync();
-          // await File.WriteAllBytesAsync("wwwroot/images/coffeegroups/"+ newName , body);
       }
     }
   }

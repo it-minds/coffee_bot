@@ -1,5 +1,4 @@
 import {
-  Button,
   IconButton,
   Menu,
   MenuButton,
@@ -13,28 +12,18 @@ import {
 } from "@chakra-ui/react";
 import { BsThreeDots } from "@react-icons/all-files/bs/BsThreeDots";
 import EditChannelSettingsTriggerBtn from "components/Channels/EditChannelSettings/EditChannelSettingsTriggerBtn";
+import { AuthContext } from "contexts/AuthContext";
 import { ChannelContext } from "contexts/ChannelContext";
 import { useRouter } from "next/dist/client/router";
 import React, { FC, useContext } from "react";
 import { IChannelSettingsIdDto, UpdateChannelPauseInput } from "services/backend/nswagts";
-
-const MyButton: FC<{ onClick: () => void }> = ({ onClick, children }) => (
-  <Button
-    justifyContent="left"
-    isFullWidth={true}
-    size="md"
-    borderRadius={0}
-    variant="ghost"
-    onClick={onClick}>
-    {children}
-  </Button>
-);
 
 type Props = {
   channel: IChannelSettingsIdDto;
 };
 const ChannelListItem: FC<Props> = ({ channel }) => {
   const { updateChannelPaused } = useContext(ChannelContext);
+  const { activeUser } = useContext(AuthContext);
   const router = useRouter();
 
   if (!channel) return null;
@@ -100,15 +89,38 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
                 }>
                 Previous Rounds
               </MenuItem>
-            </MenuGroup>
-            <MenuDivider />
-            <MenuGroup title="Admin">
-              <MenuItem>
-                <EditChannelSettingsTriggerBtn channel={channel}>
-                  Edit Channel Settings
-                </EditChannelSettingsTriggerBtn>
+              <MenuItem
+                onClick={() =>
+                  router.push(
+                    "channels/[channelId]/prizes/mine",
+                    "channels/" + channel.id + "/prizes/mine"
+                  )
+                }>
+                My Prizes
               </MenuItem>
             </MenuGroup>
+
+            {activeUser?.channelsToAdmin.includes(channel.id) && (
+              <>
+                <MenuDivider />
+                <MenuGroup title="Admin">
+                  <MenuItem>
+                    <EditChannelSettingsTriggerBtn channel={channel}>
+                      Edit Channel Settings
+                    </EditChannelSettingsTriggerBtn>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      router.push(
+                        "channels/[channelId]/prizes",
+                        "channels/" + channel.id + "/prizes"
+                      )
+                    }>
+                    Edit Channel Prizes
+                  </MenuItem>
+                </MenuGroup>
+              </>
+            )}
           </MenuList>
         </Menu>
       </Td>

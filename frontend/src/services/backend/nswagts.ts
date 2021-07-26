@@ -22,6 +22,7 @@ export class ClientBase {
     (response: Response) => void | Promise<void>
   > = null;
   private signal: AbortSignal = null;
+  private customHeaders: HeadersInit = {};
 
   public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
@@ -42,10 +43,28 @@ export class ClientBase {
     this.signal = signal;
   }
 
+  public addCustomHeader(key: string, value: string) {
+    //@ts-expect-error
+    this.customHeaders[key] = value;
+  }
+
+  public addSignalRConnectionId(connectionId: string) {
+    this.addCustomHeader("xxx-signalr-connectionId", connectionId);
+  }
+
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
     if (this.signal != null) options.signal = this.signal;
 
-    if (options.headers && this.clientConfiguration.accessToken) {
+    if (options.headers) {
+      Object.entries(this.customHeaders).forEach((entry) => {
+        //@ts-expect-error
+        options.headers[entry[0]] = entry[1];
+      });
+    } else {
+      options.headers = this.customHeaders;
+    }
+
+    if (this.clientConfiguration.accessToken) {
       (options.headers as Record<string, string>)["Authorization"] =
         "Bearer " + this.clientConfiguration.accessToken;
     }
@@ -163,7 +182,7 @@ export class ClientBase {
 }
 
 export interface IAuthClient {
-    checkAuth(): Promise<AuthUser>;
+    checkAuth(): Promise<UserDTO>;
     login(): Promise<boolean>;
     loginCallback(code?: string | null | undefined, state?: string | null | undefined): Promise<boolean>;
 }
@@ -179,7 +198,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    checkAuth(): Promise<AuthUser> {
+    checkAuth(): Promise<UserDTO> {
         let url_ = this.baseUrl + "/api/Auth";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -197,14 +216,14 @@ export class AuthClient extends ClientBase implements IAuthClient {
         });
     }
 
-    protected processCheckAuth(response: Response): Promise<AuthUser> {
+    protected processCheckAuth(response: Response): Promise<UserDTO> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = AuthUser.fromJS(resultData200);
+            result200 = UserDTO.fromJS(resultData200);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -212,7 +231,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<AuthUser>(<any>null);
+        return Promise.resolve<UserDTO>(<any>null);
     }
 
     login(): Promise<boolean> {
@@ -514,7 +533,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
 }
 
 export interface IEventClient {
-    allEventSubscriber(body: EventInput): Promise<string>;
+    allEventSubscriber(body: any): Promise<string>;
 }
 
 export class EventClient extends ClientBase implements IEventClient {
@@ -528,7 +547,7 @@ export class EventClient extends ClientBase implements IEventClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    allEventSubscriber(body: EventInput): Promise<string> {
+    allEventSubscriber(body: any): Promise<string> {
         let url_ = this.baseUrl + "/api/Event";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -718,6 +737,286 @@ export class HealthClient extends ClientBase implements IHealthClient {
     }
 }
 
+export interface IInteractionClient {
+    interactionResponse(payload?: string | null | undefined): Promise<void>;
+}
+
+export class InteractionClient extends ClientBase implements IInteractionClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    interactionResponse(payload?: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Interaction";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (payload !== null && payload !== undefined)
+            content_.append("Payload", payload.toString());
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processInteractionResponse(_response));
+        });
+    }
+
+    protected processInteractionResponse(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+}
+
+export interface IPrizesClient {
+    getChannelPrizes(channelId?: number | undefined): Promise<PrizeIdDTO[]>;
+    createChannelPrize(body: CreateChannelPrizeCommand): Promise<number>;
+    getUserPrizes(slackUserId: string | null, channelId?: number | undefined): Promise<UserPrizesDTO>;
+    getMyPrizes(channelId?: number | undefined): Promise<UserPrizesDTO>;
+    claimPrizeForUser(body: ClaimPrizeForUserCommand): Promise<boolean>;
+}
+
+export class PrizesClient extends ClientBase implements IPrizesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getChannelPrizes(channelId?: number | undefined): Promise<PrizeIdDTO[]> {
+        let url_ = this.baseUrl + "/api/Prizes?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetChannelPrizes(_response));
+        });
+    }
+
+    protected processGetChannelPrizes(response: Response): Promise<PrizeIdDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PrizeIdDTO.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PrizeIdDTO[]>(<any>null);
+    }
+
+    createChannelPrize(body: CreateChannelPrizeCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/Prizes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processCreateChannelPrize(_response));
+        });
+    }
+
+    protected processCreateChannelPrize(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(<any>null);
+    }
+
+    getUserPrizes(slackUserId: string | null, channelId?: number | undefined): Promise<UserPrizesDTO> {
+        let url_ = this.baseUrl + "/api/Prizes/user/{slackUserId}?";
+        if (slackUserId === undefined || slackUserId === null)
+            throw new Error("The parameter 'slackUserId' must be defined.");
+        url_ = url_.replace("{slackUserId}", encodeURIComponent("" + slackUserId));
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetUserPrizes(_response));
+        });
+    }
+
+    protected processGetUserPrizes(response: Response): Promise<UserPrizesDTO> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserPrizesDTO.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserPrizesDTO>(<any>null);
+    }
+
+    getMyPrizes(channelId?: number | undefined): Promise<UserPrizesDTO> {
+        let url_ = this.baseUrl + "/api/Prizes/user/mine?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyPrizes(_response));
+        });
+    }
+
+    protected processGetMyPrizes(response: Response): Promise<UserPrizesDTO> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserPrizesDTO.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserPrizesDTO>(<any>null);
+    }
+
+    claimPrizeForUser(body: ClaimPrizeForUserCommand): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Prizes/claim";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processClaimPrizeForUser(_response));
+        });
+    }
+
+    protected processClaimPrizeForUser(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(<any>null);
+    }
+}
+
 export interface IRoundClient {
     getRound(id: number): Promise<ActiveRoundDto>;
 }
@@ -770,63 +1069,6 @@ export class RoundClient extends ClientBase implements IRoundClient {
             });
         }
         return Promise.resolve<ActiveRoundDto>(<any>null);
-    }
-}
-
-export interface ISlashClient {
-    blockResponse(payload?: string | null | undefined): Promise<number>;
-}
-
-export class SlashClient extends ClientBase implements ISlashClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(configuration: ClientConfiguration, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        super(configuration);
-        this.http = http ? http : <any>window;
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
-    }
-
-    blockResponse(payload?: string | null | undefined): Promise<number> {
-        let url_ = this.baseUrl + "/api/Slash/coffee-group-done";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = new FormData();
-        if (payload !== null && payload !== undefined)
-            content_.append("Payload", payload.toString());
-
-        let options_ = <RequestInit>{
-            body: content_,
-            method: "POST",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processBlockResponse(_response));
-        });
-    }
-
-    protected processBlockResponse(response: Response): Promise<number> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<number>(<any>null);
     }
 }
 
@@ -924,7 +1166,7 @@ export class AuthUser implements IAuthUser {
         data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
         data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
         data["email"] = this.email !== undefined ? this.email : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -932,6 +1174,47 @@ export interface IAuthUser {
     slackUserId?: string | null;
     slackToken?: string | null;
     email?: string | null;
+}
+
+export class UserDTO extends AuthUser implements IUserDTO {
+    channelsToAdmin?: number[] | null;
+
+    constructor(data?: IUserDTO) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            if (Array.isArray(_data["channelsToAdmin"])) {
+                this.channelsToAdmin = [] as any;
+                for (let item of _data["channelsToAdmin"])
+                    this.channelsToAdmin!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): UserDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.channelsToAdmin)) {
+            data["channelsToAdmin"] = [];
+            for (let item of this.channelsToAdmin)
+                data["channelsToAdmin"].push(item);
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IUserDTO extends IAuthUser {
+    channelsToAdmin?: number[] | null;
 }
 
 export class ChannelSettingsDto implements IChannelSettingsDto {
@@ -974,7 +1257,7 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
         data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
         data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
         data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1020,7 +1303,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
-        return data; 
+        return data;
     }
 }
 
@@ -1050,7 +1333,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
+            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input;
         }
     }
 
@@ -1070,7 +1353,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1109,7 +1392,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         data = typeof data === 'object' ? data : {};
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1127,7 +1410,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
+            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings;
         }
     }
 
@@ -1147,7 +1430,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1204,7 +1487,7 @@ export class RoundSnipDto implements IRoundSnipDto {
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
         data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
         data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1292,7 +1575,7 @@ export class ActiveRoundDto implements IActiveRoundDto {
         data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
         data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
         data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
-        return data; 
+        return data;
     }
 }
 
@@ -1370,7 +1653,7 @@ export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data; 
+        return data;
     }
 }
 
@@ -1384,243 +1667,6 @@ export interface IActiveRoundGroupDto {
     photoUrl?: string | null;
     coffeeRoundId?: number;
     members?: string[] | null;
-}
-
-export class EventInput implements IEventInput {
-    token?: string | null;
-    challenge?: string | null;
-    team_id?: string | null;
-    api_app_id?: string | null;
-    event?: Event | null;
-    type?: string | null;
-    event_id?: string | null;
-    event_time?: number;
-    authorizations?: Authorization[] | null;
-    is_ext_shared_channel?: boolean;
-    event_context?: string | null;
-
-    constructor(data?: IEventInput) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.event = data.event && !(<any>data.event).toJSON ? new Event(data.event) : <Event>this.event; 
-            if (data.authorizations) {
-                this.authorizations = [];
-                for (let i = 0; i < data.authorizations.length; i++) {
-                    let item = data.authorizations[i];
-                    this.authorizations[i] = item && !(<any>item).toJSON ? new Authorization(item) : <Authorization>item;
-                }
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.token = _data["token"] !== undefined ? _data["token"] : <any>null;
-            this.challenge = _data["challenge"] !== undefined ? _data["challenge"] : <any>null;
-            this.team_id = _data["team_id"] !== undefined ? _data["team_id"] : <any>null;
-            this.api_app_id = _data["api_app_id"] !== undefined ? _data["api_app_id"] : <any>null;
-            this.event = _data["event"] ? Event.fromJS(_data["event"]) : <any>null;
-            this.type = _data["type"] !== undefined ? _data["type"] : <any>null;
-            this.event_id = _data["event_id"] !== undefined ? _data["event_id"] : <any>null;
-            this.event_time = _data["event_time"] !== undefined ? _data["event_time"] : <any>null;
-            if (Array.isArray(_data["authorizations"])) {
-                this.authorizations = [] as any;
-                for (let item of _data["authorizations"])
-                    this.authorizations!.push(Authorization.fromJS(item));
-            }
-            this.is_ext_shared_channel = _data["is_ext_shared_channel"] !== undefined ? _data["is_ext_shared_channel"] : <any>null;
-            this.event_context = _data["event_context"] !== undefined ? _data["event_context"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): EventInput {
-        data = typeof data === 'object' ? data : {};
-        let result = new EventInput();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["token"] = this.token !== undefined ? this.token : <any>null;
-        data["challenge"] = this.challenge !== undefined ? this.challenge : <any>null;
-        data["team_id"] = this.team_id !== undefined ? this.team_id : <any>null;
-        data["api_app_id"] = this.api_app_id !== undefined ? this.api_app_id : <any>null;
-        data["event"] = this.event ? this.event.toJSON() : <any>null;
-        data["type"] = this.type !== undefined ? this.type : <any>null;
-        data["event_id"] = this.event_id !== undefined ? this.event_id : <any>null;
-        data["event_time"] = this.event_time !== undefined ? this.event_time : <any>null;
-        if (Array.isArray(this.authorizations)) {
-            data["authorizations"] = [];
-            for (let item of this.authorizations)
-                data["authorizations"].push(item.toJSON());
-        }
-        data["is_ext_shared_channel"] = this.is_ext_shared_channel !== undefined ? this.is_ext_shared_channel : <any>null;
-        data["event_context"] = this.event_context !== undefined ? this.event_context : <any>null;
-        return data; 
-    }
-}
-
-export interface IEventInput {
-    token?: string | null;
-    challenge?: string | null;
-    team_id?: string | null;
-    api_app_id?: string | null;
-    event?: IEvent | null;
-    type?: string | null;
-    event_id?: string | null;
-    event_time?: number;
-    authorizations?: IAuthorization[] | null;
-    is_ext_shared_channel?: boolean;
-    event_context?: string | null;
-}
-
-export class Event implements IEvent {
-    type?: string | null;
-    channel_id?: string | null;
-    file_id?: string | null;
-    user_id?: string | null;
-    file?: File | null;
-    event_ts?: string | null;
-
-    constructor(data?: IEvent) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.file = data.file && !(<any>data.file).toJSON ? new File(data.file) : <File>this.file; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.type = _data["type"] !== undefined ? _data["type"] : <any>null;
-            this.channel_id = _data["channel_id"] !== undefined ? _data["channel_id"] : <any>null;
-            this.file_id = _data["file_id"] !== undefined ? _data["file_id"] : <any>null;
-            this.user_id = _data["user_id"] !== undefined ? _data["user_id"] : <any>null;
-            this.file = _data["file"] ? File.fromJS(_data["file"]) : <any>null;
-            this.event_ts = _data["event_ts"] !== undefined ? _data["event_ts"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): Event {
-        data = typeof data === 'object' ? data : {};
-        let result = new Event();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["type"] = this.type !== undefined ? this.type : <any>null;
-        data["channel_id"] = this.channel_id !== undefined ? this.channel_id : <any>null;
-        data["file_id"] = this.file_id !== undefined ? this.file_id : <any>null;
-        data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
-        data["file"] = this.file ? this.file.toJSON() : <any>null;
-        data["event_ts"] = this.event_ts !== undefined ? this.event_ts : <any>null;
-        return data; 
-    }
-}
-
-export interface IEvent {
-    type?: string | null;
-    channel_id?: string | null;
-    file_id?: string | null;
-    user_id?: string | null;
-    file?: IFile | null;
-    event_ts?: string | null;
-}
-
-export class File implements IFile {
-    id?: string | null;
-
-    constructor(data?: IFile) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): File {
-        data = typeof data === 'object' ? data : {};
-        let result = new File();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        return data; 
-    }
-}
-
-export interface IFile {
-    id?: string | null;
-}
-
-export class Authorization implements IAuthorization {
-    enterprise_id?: any | null;
-    team_id?: string | null;
-    user_id?: string | null;
-    is_bot?: boolean;
-    is_enterprise_install?: boolean;
-
-    constructor(data?: IAuthorization) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.enterprise_id = _data["enterprise_id"] !== undefined ? _data["enterprise_id"] : <any>null;
-            this.team_id = _data["team_id"] !== undefined ? _data["team_id"] : <any>null;
-            this.user_id = _data["user_id"] !== undefined ? _data["user_id"] : <any>null;
-            this.is_bot = _data["is_bot"] !== undefined ? _data["is_bot"] : <any>null;
-            this.is_enterprise_install = _data["is_enterprise_install"] !== undefined ? _data["is_enterprise_install"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): Authorization {
-        data = typeof data === 'object' ? data : {};
-        let result = new Authorization();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["enterprise_id"] = this.enterprise_id !== undefined ? this.enterprise_id : <any>null;
-        data["team_id"] = this.team_id !== undefined ? this.team_id : <any>null;
-        data["user_id"] = this.user_id !== undefined ? this.user_id : <any>null;
-        data["is_bot"] = this.is_bot !== undefined ? this.is_bot : <any>null;
-        data["is_enterprise_install"] = this.is_enterprise_install !== undefined ? this.is_enterprise_install : <any>null;
-        return data; 
-    }
-}
-
-export interface IAuthorization {
-    enterprise_id?: any | null;
-    team_id?: string | null;
-    user_id?: string | null;
-    is_bot?: boolean;
-    is_enterprise_install?: boolean;
 }
 
 export class StandardGroupDto implements IStandardGroupDto {
@@ -1674,7 +1720,7 @@ export class StandardGroupDto implements IStandardGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data; 
+        return data;
     }
 }
 
@@ -1685,6 +1731,303 @@ export interface IStandardGroupDto {
     photoUrl?: string | null;
     finishedAt?: Date;
     members?: string[] | null;
+}
+
+export class PrizeDTO implements IPrizeDTO {
+    pointCost?: number;
+    isMilestone?: boolean;
+    isRepeatable?: boolean;
+    channelSettingsId?: number;
+    title?: string | null;
+    description?: string | null;
+
+    constructor(data?: IPrizeDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
+            this.isMilestone = _data["isMilestone"] !== undefined ? _data["isMilestone"] : <any>null;
+            this.isRepeatable = _data["isRepeatable"] !== undefined ? _data["isRepeatable"] : <any>null;
+            this.channelSettingsId = _data["channelSettingsId"] !== undefined ? _data["channelSettingsId"] : <any>null;
+            this.title = _data["title"] !== undefined ? _data["title"] : <any>null;
+            this.description = _data["description"] !== undefined ? _data["description"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): PrizeDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new PrizeDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
+        data["isMilestone"] = this.isMilestone !== undefined ? this.isMilestone : <any>null;
+        data["isRepeatable"] = this.isRepeatable !== undefined ? this.isRepeatable : <any>null;
+        data["channelSettingsId"] = this.channelSettingsId !== undefined ? this.channelSettingsId : <any>null;
+        data["title"] = this.title !== undefined ? this.title : <any>null;
+        data["description"] = this.description !== undefined ? this.description : <any>null;
+        return data;
+    }
+}
+
+export interface IPrizeDTO {
+    pointCost?: number;
+    isMilestone?: boolean;
+    isRepeatable?: boolean;
+    channelSettingsId?: number;
+    title?: string | null;
+    description?: string | null;
+}
+
+export class PrizeIdDTO extends PrizeDTO implements IPrizeIdDTO {
+    id?: number;
+
+    constructor(data?: IPrizeIdDTO) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): PrizeIdDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new PrizeIdDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IPrizeIdDTO extends IPrizeDTO {
+    id?: number;
+}
+
+export class CreateChannelPrizeCommand implements ICreateChannelPrizeCommand {
+    input?: PrizeDTO | null;
+
+    constructor(data?: ICreateChannelPrizeCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.input = data.input && !(<any>data.input).toJSON ? new PrizeDTO(data.input) : <PrizeDTO>this.input;
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.input = _data["input"] ? PrizeDTO.fromJS(_data["input"]) : <any>null;
+        }
+    }
+
+    static fromJS(data: any): CreateChannelPrizeCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateChannelPrizeCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["input"] = this.input ? this.input.toJSON() : <any>null;
+        return data;
+    }
+}
+
+export interface ICreateChannelPrizeCommand {
+    input?: IPrizeDTO | null;
+}
+
+export class UserPrizesDTO implements IUserPrizesDTO {
+    slackUserId?: string | null;
+    points?: number;
+    pointsRemaining?: number;
+    prizesClaimed?: ClaimedPrizeDTO[] | null;
+    prizesAvailable?: PrizeIdDTO[] | null;
+
+    constructor(data?: IUserPrizesDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            if (data.prizesClaimed) {
+                this.prizesClaimed = [];
+                for (let i = 0; i < data.prizesClaimed.length; i++) {
+                    let item = data.prizesClaimed[i];
+                    this.prizesClaimed[i] = item && !(<any>item).toJSON ? new ClaimedPrizeDTO(item) : <ClaimedPrizeDTO>item;
+                }
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
+            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
+            this.pointsRemaining = _data["pointsRemaining"] !== undefined ? _data["pointsRemaining"] : <any>null;
+            if (Array.isArray(_data["prizesClaimed"])) {
+                this.prizesClaimed = [] as any;
+                for (let item of _data["prizesClaimed"])
+                    this.prizesClaimed!.push(ClaimedPrizeDTO.fromJS(item));
+            }
+            if (Array.isArray(_data["prizesAvailable"])) {
+                this.prizesAvailable = [] as any;
+                for (let item of _data["prizesAvailable"])
+                    this.prizesAvailable!.push(PrizeIdDTO.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserPrizesDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserPrizesDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
+        data["points"] = this.points !== undefined ? this.points : <any>null;
+        data["pointsRemaining"] = this.pointsRemaining !== undefined ? this.pointsRemaining : <any>null;
+        if (Array.isArray(this.prizesClaimed)) {
+            data["prizesClaimed"] = [];
+            for (let item of this.prizesClaimed)
+                data["prizesClaimed"].push(item.toJSON());
+        }
+        if (Array.isArray(this.prizesAvailable)) {
+            data["prizesAvailable"] = [];
+            for (let item of this.prizesAvailable)
+                data["prizesAvailable"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IUserPrizesDTO {
+    slackUserId?: string | null;
+    points?: number;
+    pointsRemaining?: number;
+    prizesClaimed?: IClaimedPrizeDTO[] | null;
+    prizesAvailable?: PrizeIdDTO[] | null;
+}
+
+export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
+    id?: number;
+    dateClaimed?: Date;
+    pointCost?: number;
+    prizeId?: number;
+    prizeTitle?: string | null;
+    wasMilestone?: boolean;
+    wasRepeatable?: boolean;
+
+    constructor(data?: IClaimedPrizeDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.dateClaimed = _data["dateClaimed"] ? new Date(_data["dateClaimed"].toString()) : <any>null;
+            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
+            this.prizeId = _data["prizeId"] !== undefined ? _data["prizeId"] : <any>null;
+            this.prizeTitle = _data["prizeTitle"] !== undefined ? _data["prizeTitle"] : <any>null;
+            this.wasMilestone = _data["wasMilestone"] !== undefined ? _data["wasMilestone"] : <any>null;
+            this.wasRepeatable = _data["wasRepeatable"] !== undefined ? _data["wasRepeatable"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): ClaimedPrizeDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClaimedPrizeDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["dateClaimed"] = this.dateClaimed ? this.dateClaimed.toISOString() : <any>null;
+        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
+        data["prizeId"] = this.prizeId !== undefined ? this.prizeId : <any>null;
+        data["prizeTitle"] = this.prizeTitle !== undefined ? this.prizeTitle : <any>null;
+        data["wasMilestone"] = this.wasMilestone !== undefined ? this.wasMilestone : <any>null;
+        data["wasRepeatable"] = this.wasRepeatable !== undefined ? this.wasRepeatable : <any>null;
+        return data;
+    }
+}
+
+export interface IClaimedPrizeDTO {
+    id?: number;
+    dateClaimed?: Date;
+    pointCost?: number;
+    prizeId?: number;
+    prizeTitle?: string | null;
+    wasMilestone?: boolean;
+    wasRepeatable?: boolean;
+}
+
+export class ClaimPrizeForUserCommand implements IClaimPrizeForUserCommand {
+    prizeId?: number;
+
+    constructor(data?: IClaimPrizeForUserCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.prizeId = _data["prizeId"] !== undefined ? _data["prizeId"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): ClaimPrizeForUserCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClaimPrizeForUserCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["prizeId"] = this.prizeId !== undefined ? this.prizeId : <any>null;
+        return data;
+    }
+}
+
+export interface IClaimPrizeForUserCommand {
+    prizeId?: number;
 }
 
 export class StatsDto implements IStatsDto {
@@ -1730,7 +2073,7 @@ export class StatsDto implements IStatsDto {
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
-        return data; 
+        return data;
     }
 }
 

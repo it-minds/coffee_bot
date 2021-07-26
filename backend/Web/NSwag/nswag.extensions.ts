@@ -21,6 +21,7 @@ export class ClientBase {
     (response: Response) => void | Promise<void>
   > = null;
   private signal: AbortSignal = null;
+  private customHeaders: HeadersInit = {};
 
   public setCacheableResponse(
     cacheStrategy: ClientBase["cacheStrategy"] = "NetworkFirst",
@@ -41,10 +42,28 @@ export class ClientBase {
     this.signal = signal;
   }
 
+  public addCustomHeader(key: string, value: string) {
+    //@ts-expect-error
+    this.customHeaders[key] = value;
+  }
+
+  public addSignalRConnectionId(connectionId: string) {
+    this.addCustomHeader("xxx-signalr-connectionId", connectionId);
+  }
+
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
     if (this.signal != null) options.signal = this.signal;
 
-    if (options.headers && this.clientConfiguration.accessToken) {
+    if (options.headers) {
+      Object.entries(this.customHeaders).forEach((entry) => {
+        //@ts-expect-error
+        options.headers[entry[0]] = entry[1];
+      });
+    } else {
+      options.headers = this.customHeaders;
+    }
+
+    if (this.clientConfiguration.accessToken) {
       (options.headers as Record<string, string>)["Authorization"] =
         "Bearer " + this.clientConfiguration.accessToken;
     }

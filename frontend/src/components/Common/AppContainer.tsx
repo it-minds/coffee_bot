@@ -25,7 +25,7 @@ const AppContainer: FC = ({ children }) => {
   return (
     <Center>
       <BreadcrumbContext.Provider value={breadCrumbContextValue}>
-        <Container pt={[2, 4]} w="6xl" maxW="unset">
+        <Container p={0} pt={[2, 4]} w="6xl" maxW="unset">
           <Flex justify="center" align="flex-start">
             <ColorModeToggler />
             <Breadcrumbs />

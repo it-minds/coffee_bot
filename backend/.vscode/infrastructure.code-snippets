@@ -1,0 +1,22 @@
+{
+  "Persistance Configuration": {
+    "scope": "csharp",
+    "prefix": "persist-config",
+    "body": [
+      "using Domain.Entities;",
+      "using Microsoft.EntityFrameworkCore;",
+      "using Microsoft.EntityFrameworkCore.Metadata.Builders;",
+      "",
+      "namespace Infrastructure.Persistence.Configurations",
+      "{",
+      "  public class ${1:ClassName}Config : IEntityTypeConfiguration<${1:ClassName}>",
+      "  {",
+      "    public void Configure(EntityTypeBuilder<${1:ClassName}> builder)",
+      "    {",
+      "      builder.HasKey(x => x.Id);",
+      "    }",
+      "  }",
+      "}"
+    ]
+  }
+}

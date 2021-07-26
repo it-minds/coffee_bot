@@ -32,7 +32,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ env.node-version }}
+          dotnet-version: ${{ env.dotnet-version }}
 
       - name: Build with dotnet
         run: dotnet build

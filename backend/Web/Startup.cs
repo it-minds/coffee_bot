@@ -1,6 +1,5 @@
 using Application;
 using Application.Common.Interfaces;
-using Application.Common.Interfaces.Hubs;
 using FluentValidation.AspNetCore;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -27,6 +26,7 @@ using Application.Common.Options;
 using Web.Options;
 using Microsoft.EntityFrameworkCore;
 using Application.Common.Hangfire;
+using Application.Common.SignalR.Hub;
 
 namespace Web
 {
@@ -101,7 +101,6 @@ namespace Web
 
       services.AddScoped<ICurrentUserService, CurrentUserService>();
       services.AddScoped<IAuthorizationService, AuthorizationService>();
-      services.AddScoped<IExampleHubService, ExampleHubService>();
       services.AddScoped<ITokenService, TokenService>();
       services.AddSignalR();
 
@@ -176,7 +175,7 @@ namespace Web
                   name: "default",
                   pattern: "{controller}/{action=Index}/{id?}");
 
-        // endpoints.MapHub<ExampleHub>("/examplehub");
+        endpoints.MapHub<PrizeHub>("/hubs/prize");
         endpoints.MapHangfireDashboard();
       });
 

@@ -29,6 +29,9 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<int>("ChannelSettingsId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsRemoved")
                         .HasColumnType("bit");
 
@@ -82,6 +85,34 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ChannelSettings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ClaimedPrize", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ChannelMemberId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("DateClaimed")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PointCost")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PrizeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelMemberId");
+
+                    b.HasIndex("PrizeId");
+
+                    b.ToTable("ClaimedPrizes");
                 });
 
             modelBuilder.Entity("Domain.Entities.CoffeeRound", b =>
@@ -163,6 +194,9 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<int>("CoffeeRoundGroupId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Participated")
+                        .HasColumnType("bit");
+
                     b.Property<string>("SlackMemberId")
                         .HasColumnType("nvarchar(max)");
 
@@ -171,6 +205,38 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasIndex("CoffeeRoundGroupId");
 
                     b.ToTable("CoffeeRoundGroupMembers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Prize", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ChannelSettingsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsMilestone")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRepeatable")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PointCost")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelSettingsId");
+
+                    b.ToTable("Prizes");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChannelMember", b =>
@@ -182,6 +248,25 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("ChannelSettings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ClaimedPrize", b =>
+                {
+                    b.HasOne("Domain.Entities.ChannelMember", "ChannelMember")
+                        .WithMany("ClaimedPrizes")
+                        .HasForeignKey("ChannelMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Prize", "Prize")
+                        .WithMany("ClaimedPrizes")
+                        .HasForeignKey("PrizeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChannelMember");
+
+                    b.Navigation("Prize");
                 });
 
             modelBuilder.Entity("Domain.Entities.CoffeeRound", b =>
@@ -217,11 +302,29 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("CoffeeRoundGroup");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Prize", b =>
+                {
+                    b.HasOne("Domain.Entities.ChannelSettings", "ChannelSettings")
+                        .WithMany("Prizes")
+                        .HasForeignKey("ChannelSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChannelSettings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ChannelMember", b =>
+                {
+                    b.Navigation("ClaimedPrizes");
+                });
+
             modelBuilder.Entity("Domain.Entities.ChannelSettings", b =>
                 {
                     b.Navigation("ChannelMembers");
 
                     b.Navigation("CoffeeRounds");
+
+                    b.Navigation("Prizes");
                 });
 
             modelBuilder.Entity("Domain.Entities.CoffeeRound", b =>
@@ -232,6 +335,11 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.CoffeeRoundGroup", b =>
                 {
                     b.Navigation("CoffeeRoundGroupMembers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Prize", b =>
+                {
+                    b.Navigation("ClaimedPrizes");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,8 +1,9 @@
 import "isomorphic-unfetch";
 import "../styles.global.css";
 
-import { Button, Center, ChakraProvider, Spinner } from "@chakra-ui/react";
+import { Button, Center, ChakraProvider } from "@chakra-ui/react";
 import AppContainer from "components/Common/AppContainer";
+import OurSpinner from "components/Common/OurSpinner";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, useAuth } from "hooks/useAuth";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
@@ -103,13 +104,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
             </Center>
           ) : auth.authStage == AuthStage.CHECKING && router.pathname != skipauth ? (
             <Center>
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="blue.500"
-                size="xl"
-              />
+              <OurSpinner />
             </Center>
           ) : (
             <>

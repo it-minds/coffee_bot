@@ -6,7 +6,7 @@ import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import React, { useContext, useState } from "react";
-import { ChannelClient, IChannelClient, RoundSnipDto } from "services/backend/nswagts";
+import { ChannelClient, RoundSnipDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 import { percentFormatter } from "utils/formatters/percentFormatter";
 
@@ -36,7 +36,7 @@ const IndexPage: NextPage = () => {
 
   const [rounds, setRounds] = useState<RoundSnipDto[]>([]);
 
-  const { genClient } = useNSwagClient<IChannelClient>(ChannelClient);
+  const { genClient } = useNSwagClient(ChannelClient);
 
   useEffectAsync(async () => {
     if (!activeUser || !router.query.channelId) return;
