@@ -66,14 +66,6 @@ namespace Application.Interactivity.Block.EmphPhotoBlockResponse
 
         if (request.Value == "Yes")
         {
-          foreach (var member in group.CoffeeRoundGroupMembers)
-          {
-            if (!group.HasMet)
-              channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId);
-            if (!group.HasPhoto)
-              channelUserPoints.Enqueue(member.SlackMemberId, request.ChannelId, 2);
-          }
-
           var newName = wordStrings.GetPredeterminedStringFromInt(group.Id) + Path.GetExtension(group.SlackPhotoUrl).ToLower();
           downloadImage.Enqueue(group.SlackPhotoUrl, newName);
 
@@ -97,6 +89,7 @@ namespace Application.Interactivity.Block.EmphPhotoBlockResponse
             {
               Log.Error(item);
             }
+            throw ex;
           }
 
         } else if (request.Value == "No")

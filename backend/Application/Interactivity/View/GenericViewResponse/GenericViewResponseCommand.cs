@@ -1,5 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Common.Hangfire.MediatR;
+using Application.Interactivity.View.SelectMemeberParticipation;
 using MediatR;
 using Slack.Views;
 using SlackNet.Interaction;
@@ -12,10 +14,20 @@ namespace Application.Interactivity.View.GenericViewResponse
 
     public class GenericViewResponseCommandHandler : IRequestHandler<GenericViewResponseCommand, int>
     {
+      private readonly IMediator mediator;
+
+      public GenericViewResponseCommandHandler(IMediator mediator)
+      {
+        this.mediator = mediator;
+      }
+
       public async Task<int> Handle(GenericViewResponseCommand request, CancellationToken cancellationToken)
       {
         switch (request.ViewSubmission.View.CallbackId) {
-          case ActionTypes.MemberParticipation: {
+          case CallbackIds.MemberParticipation: {
+            mediator.Enqueue(new SelectMemeberParticipationCommand {
+              ViewSubmission = request.ViewSubmission
+            });
             break;
           }
         }
