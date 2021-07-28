@@ -1,8 +1,8 @@
 ---
-name: Question and Answer
+name: Question or discussion
 about: Ask a question or start a discussion.
-title: "QA: XXX"
-labels: "qa"
+title: "Question: XXX"
+labels: "question"
 assignees: "objmj-itminds"
 ---
 

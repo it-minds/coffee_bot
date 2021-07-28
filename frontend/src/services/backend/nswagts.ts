@@ -1166,7 +1166,7 @@ export class AuthUser implements IAuthUser {
         data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
         data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
         data["email"] = this.email !== undefined ? this.email : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1209,7 +1209,7 @@ export class UserDTO extends AuthUser implements IUserDTO {
                 data["channelsToAdmin"].push(item);
         }
         super.toJSON(data);
-        return data;
+        return data; 
     }
 }
 
@@ -1257,7 +1257,7 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
         data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
         data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
         data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1303,7 +1303,7 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
-        return data;
+        return data; 
     }
 }
 
@@ -1333,7 +1333,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input;
+            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
         }
     }
 
@@ -1353,7 +1353,7 @@ export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1392,7 +1392,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         data = typeof data === 'object' ? data : {};
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1410,7 +1410,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings;
+            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
         }
     }
 
@@ -1430,7 +1430,7 @@ export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsComma
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1487,7 +1487,7 @@ export class RoundSnipDto implements IRoundSnipDto {
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
         data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
         data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1575,7 +1575,7 @@ export class ActiveRoundDto implements IActiveRoundDto {
         data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
         data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
         data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1653,7 +1653,7 @@ export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data;
+        return data; 
     }
 }
 
@@ -1720,7 +1720,7 @@ export class StandardGroupDto implements IStandardGroupDto {
             for (let item of this.members)
                 data["members"].push(item);
         }
-        return data;
+        return data; 
     }
 }
 
@@ -1776,7 +1776,7 @@ export class PrizeDTO implements IPrizeDTO {
         data["channelSettingsId"] = this.channelSettingsId !== undefined ? this.channelSettingsId : <any>null;
         data["title"] = this.title !== undefined ? this.title : <any>null;
         data["description"] = this.description !== undefined ? this.description : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1814,7 +1814,7 @@ export class PrizeIdDTO extends PrizeDTO implements IPrizeIdDTO {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
         super.toJSON(data);
-        return data;
+        return data; 
     }
 }
 
@@ -1831,7 +1831,7 @@ export class CreateChannelPrizeCommand implements ICreateChannelPrizeCommand {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.input = data.input && !(<any>data.input).toJSON ? new PrizeDTO(data.input) : <PrizeDTO>this.input;
+            this.input = data.input && !(<any>data.input).toJSON ? new PrizeDTO(data.input) : <PrizeDTO>this.input; 
         }
     }
 
@@ -1851,7 +1851,7 @@ export class CreateChannelPrizeCommand implements ICreateChannelPrizeCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -1922,7 +1922,7 @@ export class UserPrizesDTO implements IUserPrizesDTO {
             for (let item of this.prizesAvailable)
                 data["prizesAvailable"].push(item.toJSON());
         }
-        return data;
+        return data; 
     }
 }
 
@@ -1980,7 +1980,7 @@ export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
         data["prizeTitle"] = this.prizeTitle !== undefined ? this.prizeTitle : <any>null;
         data["wasMilestone"] = this.wasMilestone !== undefined ? this.wasMilestone : <any>null;
         data["wasRepeatable"] = this.wasRepeatable !== undefined ? this.wasRepeatable : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -2022,7 +2022,7 @@ export class ClaimPrizeForUserCommand implements IClaimPrizeForUserCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["prizeId"] = this.prizeId !== undefined ? this.prizeId : <any>null;
-        return data;
+        return data; 
     }
 }
 
@@ -2073,7 +2073,7 @@ export class StatsDto implements IStatsDto {
         data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
         data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
         data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
-        return data;
+        return data; 
     }
 }
 

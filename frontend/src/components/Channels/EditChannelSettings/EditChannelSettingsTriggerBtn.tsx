@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import ChannelSettingsForm from "components/Channels/EditChannelSettings/ChannelSettingsForm";
 import { ChannelContext } from "contexts/ChannelContext";
-import { FC, useCallback, useContext } from "react";
+import React, { FC, useCallback, useContext } from "react";
 import { IChannelSettingsDto, IChannelSettingsIdDto } from "services/backend/nswagts";
 
 type Props = {

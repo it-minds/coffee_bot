@@ -23,7 +23,8 @@ namespace Rounds.Commands.RoundFinisherCommand
       private readonly IApplicationDbContext applicationDbContext;
       private readonly ChannelUserPoints channelUserPoints;
 
-      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, ChannelUserPoints channelUserPoints)
+      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext,
+        ChannelUserPoints channelUserPoints)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
@@ -40,30 +41,34 @@ namespace Rounds.Commands.RoundFinisherCommand
           .Where(x => x.EndDate < DateTimeOffset.UtcNow)
           .ToListAsync();
 
-        var sendMessageTasks = new List<Task>();
-        foreach (var round in activeRounds)
-        {
-          round.Active = false;
-          var meetupPercent = round.CoffeeRoundGroups.Percent(x => x.HasMet);
+        IList<Task> sendMessageTasks = new List<Task>();
 
-          foreach (var group in round.CoffeeRoundGroups.Where(x => x.HasMet))
-          {
-            channelUserPoints.Enqueue(
-              group.CoffeeRoundGroupMembers.Where(x => x.Participated).Select(x => x.SlackMemberId),
-              round.ChannelId,
-              group.HasPhoto ? 2 : 1
-            );
-          }
+        activeRounds.ForEach(round => HandleRound(round, ref sendMessageTasks, cancellationToken));
 
-          var msg = BuildChannelMessage(round, meetupPercent);
-
-          sendMessageTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.SlackChannelId, msg));
-        }
         Task.WaitAll(sendMessageTasks.ToArray());
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
         return 1;
+      }
+
+      private void HandleRound(CoffeeRound round, ref IList<Task> sendMessageTasks, CancellationToken cancellationToken)
+      {
+        round.Active = false;
+        var meetupPercent = round.CoffeeRoundGroups.Percent(x => x.HasMet);
+
+        foreach (var group in round.CoffeeRoundGroups.Where(x => x.HasMet))
+        {
+          channelUserPoints.Enqueue(
+            group.CoffeeRoundGroupMembers.Where(x => x.Participated).Select(x => x.SlackMemberId),
+            round.ChannelId,
+            group.HasPhoto ? 2 : 1
+          );
+        }
+
+        var msg = BuildChannelMessage(round, meetupPercent);
+
+        sendMessageTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.SlackChannelId, msg));
       }
 
       private string BuildChannelMessage(CoffeeRound round, decimal meetupPercent)
@@ -73,7 +78,7 @@ namespace Rounds.Commands.RoundFinisherCommand
         sb
           .AppendLine("Curtain call ladies and gentlefolk. <!channel>.")
           .AppendLine("Your success has been measured and I give you a solid 10! (For effort.) Your points has been given.")
-          .Append("The total meetup percent of the round was: ")
+          .Append("The total meetup rate of the round was: ")
           .Append(Decimal.Round(meetupPercent).ToString())
           .AppendLine("%.");
 
