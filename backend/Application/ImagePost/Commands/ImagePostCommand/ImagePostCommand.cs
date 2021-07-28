@@ -38,6 +38,8 @@ namespace Application.ImagePost.Commands.ImagePostCommand
           .Where(x => x.CoffeeRound.SlackChannelId == request.Event.ChannelId && x.CoffeeRound.Active)
           .FirstOrDefaultAsync();
 
+        if (group.HasPhoto) return 1;
+
         var file = await slackClient.Client().Files.Info(fileId: request.FileId);
         if (group != null) {
           group.SlackPhotoUrl = file.File.UrlPrivate;
