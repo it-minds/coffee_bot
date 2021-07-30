@@ -10,6 +10,8 @@ namespace Domain.Entities
     public string Description { get; set; }
     public int PointCost { get; set; }
 
+    // public bool AnnounceOnClaim { get; set; }
+
     /// <summary>
     /// This prize can be claimed after the total amount of points for a member has been reached.
     /// <br/>

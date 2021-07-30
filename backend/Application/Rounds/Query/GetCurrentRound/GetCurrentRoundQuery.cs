@@ -35,6 +35,8 @@ namespace Application.Rounds.GetCurrentRound
           .ProjectTo<ActiveRoundDto>(mapper.ConfigurationProvider)
           .FirstOrDefaultAsync();
 
+        if (round == null) return null;
+
         var lastRound = await applicationDbContext.CoffeeRounds
           .Include(x => x.CoffeeRoundGroups)
           .Where(x => !x.Active && x.ChannelId == request.ChannelId)

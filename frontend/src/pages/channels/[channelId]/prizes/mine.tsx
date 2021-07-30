@@ -104,13 +104,13 @@ const IndexPage: NextPage = () => {
         <VStack spacing={2}>
           {Object.entries(
             prizes?.prizesClaimed.groupBy(
-              x => x.prizeId,
+              x => x.prize.id,
               a => a
             ) ?? {}
           ).map(([prizeId, prizes]) => {
             const p = prizes[0];
-            let title = (p.wasMilestone ? "Milestone: " : "") + p.prizeTitle;
-            if (p.wasRepeatable) title += ` (repeated ${prizes.length} times)`;
+            let title = (p.prize.isMilestone ? "Milestone: " : "") + p.prize.title;
+            if (p.prize.isRepeatable) title += ` (repeated ${prizes.length} times)`;
             return (
               <BoxCover key={"claimed-milestone-" + prizeId}>
                 <AvailablePrize

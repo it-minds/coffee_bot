@@ -1500,7 +1500,6 @@ export interface IUpdateChannelSettingsCommand {
 export class RoundSnipDto implements IRoundSnipDto {
     id?: number;
     channelId?: number;
-    slackChannelId?: string | null;
     active?: boolean;
     startDate?: Date;
     endDate?: Date;
@@ -1520,7 +1519,6 @@ export class RoundSnipDto implements IRoundSnipDto {
         if (_data) {
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
             this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
             this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
             this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
             this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
@@ -1540,7 +1538,6 @@ export class RoundSnipDto implements IRoundSnipDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
         data["active"] = this.active !== undefined ? this.active : <any>null;
         data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
@@ -1553,7 +1550,6 @@ export class RoundSnipDto implements IRoundSnipDto {
 export interface IRoundSnipDto {
     id?: number;
     channelId?: number;
-    slackChannelId?: string | null;
     active?: boolean;
     startDate?: Date;
     endDate?: Date;
@@ -1564,7 +1560,6 @@ export interface IRoundSnipDto {
 export class ActiveRoundDto implements IActiveRoundDto {
     id?: number;
     channelId?: number;
-    slackChannelId?: string | null;
     active?: boolean;
     startDate?: Date;
     endDate?: Date;
@@ -1594,7 +1589,6 @@ export class ActiveRoundDto implements IActiveRoundDto {
         if (_data) {
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
             this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
             this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
             this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
             this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
@@ -1624,7 +1618,6 @@ export class ActiveRoundDto implements IActiveRoundDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
         data["active"] = this.active !== undefined ? this.active : <any>null;
         data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
@@ -1644,7 +1637,6 @@ export class ActiveRoundDto implements IActiveRoundDto {
 export interface IActiveRoundDto {
     id?: number;
     channelId?: number;
-    slackChannelId?: string | null;
     active?: boolean;
     startDate?: Date;
     endDate?: Date;
@@ -2012,10 +2004,8 @@ export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
     id?: number;
     dateClaimed?: Date;
     pointCost?: number;
-    prizeId?: number;
-    prizeTitle?: string | null;
-    wasMilestone?: boolean;
-    wasRepeatable?: boolean;
+    isDelivered?: boolean;
+    prize?: PrizeIdDTO | null;
 
     constructor(data?: IClaimedPrizeDTO) {
         if (data) {
@@ -2023,6 +2013,7 @@ export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+            this.prize = data.prize && !(<any>data.prize).toJSON ? new PrizeIdDTO(data.prize) : <PrizeIdDTO>this.prize; 
         }
     }
 
@@ -2031,10 +2022,8 @@ export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
             this.dateClaimed = _data["dateClaimed"] ? new Date(_data["dateClaimed"].toString()) : <any>null;
             this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
-            this.prizeId = _data["prizeId"] !== undefined ? _data["prizeId"] : <any>null;
-            this.prizeTitle = _data["prizeTitle"] !== undefined ? _data["prizeTitle"] : <any>null;
-            this.wasMilestone = _data["wasMilestone"] !== undefined ? _data["wasMilestone"] : <any>null;
-            this.wasRepeatable = _data["wasRepeatable"] !== undefined ? _data["wasRepeatable"] : <any>null;
+            this.isDelivered = _data["isDelivered"] !== undefined ? _data["isDelivered"] : <any>null;
+            this.prize = _data["prize"] ? PrizeIdDTO.fromJS(_data["prize"]) : <any>null;
         }
     }
 
@@ -2050,10 +2039,8 @@ export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
         data["id"] = this.id !== undefined ? this.id : <any>null;
         data["dateClaimed"] = this.dateClaimed ? this.dateClaimed.toISOString() : <any>null;
         data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
-        data["prizeId"] = this.prizeId !== undefined ? this.prizeId : <any>null;
-        data["prizeTitle"] = this.prizeTitle !== undefined ? this.prizeTitle : <any>null;
-        data["wasMilestone"] = this.wasMilestone !== undefined ? this.wasMilestone : <any>null;
-        data["wasRepeatable"] = this.wasRepeatable !== undefined ? this.wasRepeatable : <any>null;
+        data["isDelivered"] = this.isDelivered !== undefined ? this.isDelivered : <any>null;
+        data["prize"] = this.prize ? this.prize.toJSON() : <any>null;
         return data; 
     }
 }
@@ -2062,10 +2049,8 @@ export interface IClaimedPrizeDTO {
     id?: number;
     dateClaimed?: Date;
     pointCost?: number;
-    prizeId?: number;
-    prizeTitle?: string | null;
-    wasMilestone?: boolean;
-    wasRepeatable?: boolean;
+    isDelivered?: boolean;
+    prize?: IPrizeIdDTO | null;
 }
 
 export class ClaimPrizeForUserCommand implements IClaimPrizeForUserCommand {

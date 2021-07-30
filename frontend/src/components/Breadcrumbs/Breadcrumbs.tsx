@@ -1,9 +1,15 @@
-import { HStack, Text, useBreakpointValue } from "@chakra-ui/react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Text,
+  useBreakpointValue
+} from "@chakra-ui/react";
 import { useRouter } from "next/dist/client/router";
 import React, { FC, ReactNode, useContext } from "react";
 import { useMemo } from "react";
 
-import { Breadcrumb } from "./Breadcrumb";
+// import { Breadcrumb } from "./Breadcrumb";
 import { BreadcrumbContext } from "./BreadcrumbContext";
 
 const Divider = () => (
@@ -16,7 +22,7 @@ const middle = {
   name: "...",
   path: null,
   asPath: null
-} as Breadcrumb;
+} as any;
 
 const Breadcrumbs: FC = () => {
   const { breadcrumbs } = useContext(BreadcrumbContext);
@@ -41,13 +47,15 @@ const Breadcrumbs: FC = () => {
   }, [breadcrumbs, maxCount]);
 
   return (
-    <HStack divider={<Divider />} mr={[1, 2, 4]} ml={4}>
-      {crumbs.map<ReactNode>(x => (
-        <Text cursor="pointer" key={x.name} onClick={() => x.path && router.push(x.path, x.asPath)}>
-          {x.name}
-        </Text>
+    <Breadcrumb mr={[1, 2, 4]} ml={4}>
+      {crumbs.map<ReactNode>((x, i) => (
+        <BreadcrumbItem key={x.name} isCurrentPage={crumbs.length - 1 == i}>
+          <BreadcrumbLink onClick={() => x.path && router.push(x.path, x.asPath)}>
+            {x.name}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
       ))}
-    </HStack>
+    </Breadcrumb>
   );
 };
 

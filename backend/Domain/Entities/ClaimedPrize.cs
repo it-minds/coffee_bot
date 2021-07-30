@@ -10,6 +10,8 @@ namespace Domain.Entities
     public int PrizeId { get; set; }
     public Prize Prize { get; set; }
 
+    public bool IsDelivered { get; set; }
+
     public DateTimeOffset DateClaimed { get; set; }
 
     public int ChannelMemberId { get; set; }
