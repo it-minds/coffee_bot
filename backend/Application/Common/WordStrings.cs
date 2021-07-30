@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Application.Common.Linq;
 
 namespace Application.Common
 {
@@ -16,7 +17,7 @@ namespace Application.Common
 
     private Random rng;
 
-    public int MaxCount { get => sets.Sum(set => set.Count()); }
+    public int MaxCount { get => sets.RunningSum((set) => set.Count(), (a, b) => a * b); }
 
     public string GetPredeterminedStringFromInt(int x)
     {
