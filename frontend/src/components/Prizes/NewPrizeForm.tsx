@@ -113,7 +113,7 @@ const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
 
       <FormControl id="pointCost">
         <FormLabel>Points</FormLabel>
-        <NumberInput max={1000} min={10}>
+        <NumberInput max={1000} min={0}>
           <NumberInputField
             {...register("pointCost", { valueAsNumber: true, required: true, min: 0, max: 1000 })}
           />
