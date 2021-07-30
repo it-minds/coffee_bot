@@ -13,7 +13,7 @@ namespace Application.Common.Linq
       foreach (var item in source)
       {
         var count = countFunction(item);
-        runningSum = sumFunction(count, runningSum);
+        runningSum = sumFunction(runningSum, count);
       }
       return runningSum;
     }

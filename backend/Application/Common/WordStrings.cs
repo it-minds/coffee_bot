@@ -17,7 +17,7 @@ namespace Application.Common
 
     private Random rng;
 
-    public int MaxCount { get => sets.RunningSum((set) => set.Count(), (a, b) => a * b); }
+    public int MaxCount { get => sets.RunningSum((set) => set.Count(), (a, b) => a == 0 ? b : a * b); }
 
     public string GetPredeterminedStringFromInt(int x)
     {
