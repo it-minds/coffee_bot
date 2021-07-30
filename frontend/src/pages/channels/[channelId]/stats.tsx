@@ -1,6 +1,7 @@
 import { Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
+import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
@@ -142,4 +143,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default withAuth(IndexPage);

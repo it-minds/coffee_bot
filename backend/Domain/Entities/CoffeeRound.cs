@@ -8,7 +8,6 @@ namespace Domain.Entities
     public int Id { get; set; }
     public ChannelSettings ChannelSettings { get; set; }
     public int ChannelId { get; set; }
-    public string SlackChannelId { get; set; }
 
     public bool Active { get; set; }
 

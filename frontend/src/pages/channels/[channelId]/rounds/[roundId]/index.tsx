@@ -3,6 +3,7 @@ import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import OurSpinner from "components/Common/OurSpinner";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
+import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
@@ -76,4 +77,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default withAuth(IndexPage);

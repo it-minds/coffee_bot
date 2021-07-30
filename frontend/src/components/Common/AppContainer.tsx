@@ -1,4 +1,11 @@
-import { Center, Container, Flex, Spacer, useBreakpointValue } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Flex,
+  Spacer,
+  useBreakpointValue,
+  useColorModeValue
+} from "@chakra-ui/react";
 import { BreadcrumbContext } from "components/Breadcrumbs/BreadcrumbContext";
 import Breadcrumbs from "components/Breadcrumbs/Breadcrumbs";
 import { useBreadcrumbsContext } from "components/Breadcrumbs/useBreadcrumbContext";
@@ -13,6 +20,8 @@ const AppContainer: FC = ({ children }) => {
 
   const breadCrumbContextValue = useBreadcrumbsContext();
 
+  const topBarColor = useColorModeValue("blue.300", "blue.600");
+
   const user = useBreakpointValue({
     base: activeUser.email,
     sm: "User: " + activeUser.email
@@ -23,10 +32,12 @@ const AppContainer: FC = ({ children }) => {
   });
 
   return (
-    <Center>
-      <BreadcrumbContext.Provider value={breadCrumbContextValue}>
-        <Container p={0} pt={[2, 4]} w="6xl" maxW="unset">
-          <Flex justify="center" align="flex-start">
+    <BreadcrumbContext.Provider value={breadCrumbContextValue}>
+      {/* <Center>
+        <Stack> */}
+      <Box w="100%" backgroundColor={topBarColor}>
+        <Container p={2} maxW="6xl">
+          <Flex align="center">
             <ColorModeToggler />
             <Breadcrumbs />
             <Spacer />
@@ -36,10 +47,14 @@ const AppContainer: FC = ({ children }) => {
               {version}
             </AppVersion>
           </Flex>
-          {children}
         </Container>
-      </BreadcrumbContext.Provider>
-    </Center>
+      </Box>
+      <Container p={0} pt={[2, 4]} maxW="6xl">
+        {children}
+      </Container>
+      {/* </Stack>
+      </Center> */}
+    </BreadcrumbContext.Provider>
   );
 };
 

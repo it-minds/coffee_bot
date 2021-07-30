@@ -6,6 +6,7 @@ namespace Slack.DTO
   {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string WorkspaceId { get; set; }
 
     public IEnumerable<string> MemberIds { get; set; }
   }

@@ -51,8 +51,9 @@ namespace Application.Interactivity.Block.EmphPhotoBlockResponse
 
         var group = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRound)
+            .ThenInclude(x => x.ChannelSettings)
           .Include(x => x.CoffeeRoundGroupMembers)
-          .Where(x => x.CoffeeRound.SlackChannelId == request.ChannelId &&
+          .Where(x => x.CoffeeRound.ChannelSettings.SlackChannelId == request.ChannelId &&
             x.CoffeeRoundGroupMembers.Any(y => y.SlackMemberId == request.UserId) &&
             x.CoffeeRound.Active)
           .FirstOrDefaultAsync();

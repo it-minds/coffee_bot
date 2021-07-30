@@ -6,8 +6,9 @@ namespace Domain.Entities
   public class ChannelSettings
   {
     public int Id { get; set; }
-    public string SlackChannelId { get; set; }
+    public string SlackChannelId { get; set; } // SlackChannelId
     public string SlackChannelName { get; set; }
+    public string SlackWorkSpaceId { get; set; }
 
     public int GroupSize { get; set; } = 3;
     public DayOfWeek StartsDay { get; set; } = DayOfWeek.Monday;

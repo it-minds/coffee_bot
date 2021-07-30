@@ -1,4 +1,4 @@
-import { Code, useToast, VisuallyHidden } from "@chakra-ui/react";
+import { Code, useColorModeValue, useToast, VisuallyHidden } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { useRouter } from "next/router";
 import { useContext } from "react";
@@ -40,16 +40,20 @@ const AppVersion: FC = ({ children }) => {
     });
   }, [router, activeUser]);
 
+  const backgroundColor = useColorModeValue("blue.200", "blue.500");
+  const fontColor = useColorModeValue("blue.500", "blue.200");
+
   return (
     <>
       <Code
-        colorScheme="gray"
+        // colorScheme="blue"
         variant="subtle"
         cursor="pointer"
         userSelect="none"
         onClick={copy}
         p={1}
-        opacity={0.5}
+        color={fontColor}
+        backgroundColor={backgroundColor}
         textAlign="right">
         {children}
       </Code>

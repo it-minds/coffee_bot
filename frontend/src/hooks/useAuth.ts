@@ -21,6 +21,8 @@ type AuthHook<T> = {
   checkAuth: () => Promise<void>;
 };
 
+export const skipauth = "/logincallback";
+
 export const useAuth = (authSkip: string): AuthHook<UserDTO> => {
   const [authStage, setAuthStage] = useState(AuthStage.CHECKING);
   const [authCounter, setAuthCounter] = useState(0);

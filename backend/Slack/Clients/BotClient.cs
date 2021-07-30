@@ -49,6 +49,7 @@ namespace Slack.Clients
         {
           Id = channel.Id,
           Name = channel.Name,
+          WorkspaceId = "", // TODO
           MemberIds = members.Where(x => x != myId)
         };
         result.Add(dto);

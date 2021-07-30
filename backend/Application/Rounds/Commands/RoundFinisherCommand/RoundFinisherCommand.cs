@@ -68,7 +68,7 @@ namespace Rounds.Commands.RoundFinisherCommand
 
         var msg = BuildChannelMessage(round, meetupPercent);
 
-        sendMessageTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.SlackChannelId, msg));
+        sendMessageTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.ChannelSettings.SlackChannelId, msg));
       }
 
       private string BuildChannelMessage(CoffeeRound round, decimal meetupPercent)

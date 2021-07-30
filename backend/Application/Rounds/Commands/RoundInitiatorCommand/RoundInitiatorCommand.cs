@@ -33,8 +33,9 @@ namespace Rounds.Commands.RoundInitiatorCommand
       public async Task<int> Handle(RoundInitiatorCommand request, CancellationToken cancellationToken)
       {
         var activeRounds = await applicationDbContext.CoffeeRounds
+          .Include(x => x.ChannelSettings)
           .Where(x => x.Active)
-          .Select(x => x.SlackChannelId)
+          .Select(x => x.ChannelSettings.SlackChannelId)
           .ToListAsync();
 
         var channelSettings = await applicationDbContext.ChannelSettings
@@ -99,7 +100,6 @@ namespace Rounds.Commands.RoundInitiatorCommand
         var endDate = startDate.AddDays(settings.DurationInDays);
 
         var round = new CoffeeRound {
-          SlackChannelId = settings.SlackChannelId,
           Active = true,
           ChannelId = settings.Id,
           StartDate = startDate,

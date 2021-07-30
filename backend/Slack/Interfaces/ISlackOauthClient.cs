@@ -10,6 +10,7 @@ namespace Slack.Interfaces
     string BuildRedirectUrl();
 
     Task<string> ExchangeToken(string code, CancellationToken cancellationToken);
+    Task<string> FirstTimeToken(string code, CancellationToken cancellationToken);
 
     Task<Identity> GetUser(string acessToken,CancellationToken cancellationToken);
   }

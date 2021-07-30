@@ -10,6 +10,7 @@ namespace SlackAuth.Query.GetUserFromCallback
   public class GetUserFromCallbackQuery : IRequest<string>
   {
     public string Code { get; set; }
+    public bool IsInstall { get; set; } = false;
 
     public class GetUserFromCallbackQueryHandler : IRequestHandler<GetUserFromCallbackQuery, string>
     {
@@ -22,7 +23,12 @@ namespace SlackAuth.Query.GetUserFromCallback
 
       public async Task<string> Handle(GetUserFromCallbackQuery request, CancellationToken cancellationToken)
       {
-        var token = await oAuthClient.ExchangeToken(request.Code, CancellationToken.None);
+        string token = "";
+        if (request.IsInstall) {
+          token = await oAuthClient.FirstTimeToken(request.Code, CancellationToken.None);
+        } else {
+           token = await oAuthClient.ExchangeToken(request.Code, CancellationToken.None);
+        }
 
         var slackUser = await oAuthClient.GetUser(token, CancellationToken.None);
 

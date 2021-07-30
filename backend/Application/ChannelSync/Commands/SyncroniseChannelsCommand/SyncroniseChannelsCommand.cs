@@ -110,7 +110,8 @@ namespace Application.ChannelSync.Commands
           var entitiy = applicationDbContext.ChannelSettings.Add(new ChannelSettings
           {
             SlackChannelId = newChannel.Id,
-            SlackChannelName = newChannel.Name
+            SlackChannelName = newChannel.Name,
+            SlackWorkSpaceId = newChannel.WorkspaceId
           }).Entity;
 
           applicationDbContext.ChannelMembers.AddRange(newChannel.MemberIds.Select(x => new ChannelMember {

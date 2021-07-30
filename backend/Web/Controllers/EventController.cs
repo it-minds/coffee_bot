@@ -18,7 +18,8 @@ namespace Web.Controllers
       var request = body.ToObject<EventRequest>( );
 
       if (request.Type == "url_verification") {
-        return ((UrlVerification) request).Challenge;
+        var urlVerification = body.ToObject<UrlVerification>( );
+        return urlVerification.Challenge;
       }
 
       var callback = body.ToObject<EventCallback>();
@@ -36,5 +37,7 @@ namespace Web.Controllers
 
       return "";
     }
+
+
   }
 }

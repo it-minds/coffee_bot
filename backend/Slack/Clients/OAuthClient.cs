@@ -39,6 +39,19 @@ namespace Slack.Clients
       return sb.ToString();
     }
 
+    public async Task<string> FirstTimeToken(string code, CancellationToken cancellationToken)
+    {
+      var result = await apiClient.OAuth.Access(
+        clientId: options.ClientId,
+        clientSecret: options.ClientSecret,
+        code: code,
+        redirectUrl: options.OAuthInstallRedirectUrl,
+        cancellationToken: cancellationToken
+      );
+
+      return result.AccessToken;
+    }
+
     public async Task<string> ExchangeToken(string code, CancellationToken cancellationToken)
     {
       var result = await apiClient.OAuth.Access(

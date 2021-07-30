@@ -1,0 +1,16 @@
+{
+  "Functional Component": {
+    "scope": "typescriptreact",
+    "prefix": "react-fc",
+    "body": [
+      "import React, { FC } from \"react\";",
+      "",
+      "const ${1:MyComponent}: FC = () => {",
+      "  $0",
+      "  return <p>body</p>;",
+      "};",
+      "",
+      "export default ${1:MyComponent};\n"
+    ]
+  }
+}

@@ -1,9 +1,13 @@
-import { Box, Center, Heading, VStack } from "@chakra-ui/react";
+import "ts-array-ext/groupBy";
+
+import { Box, Center, Heading, HStack, Spacer, VStack } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import OurSpinner from "components/Common/OurSpinner";
 import AvailablePrize from "components/Prizes/AvailablePrize";
 import BoxCover from "components/Prizes/BoxCover";
+import PurchaseButton from "components/Prizes/PurchaseButton";
 import { MyHub, PrizeSignalRContext } from "contexts/SignalRContext";
+import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
@@ -25,13 +29,13 @@ const IndexPage: NextPage = () => {
       path: "/channels/[channelId]/rounds",
       asPath: `/channels/${query.channelId}/rounds`
     },
+    // {
+    //   name: "prizes",
+    //   path: "/channels/[channelId]",
+    //   asPath: `/channels/${query.channelId}`
+    // },
     {
-      name: "prizes",
-      path: "/channels/[channelId]",
-      asPath: `/channels/${query.channelId}`
-    },
-    {
-      name: "My Prizes",
+      name: "my prizes",
       path: "/channels/[channelId]/prizes/mine",
       asPath: `/channels/${query.channelId}/prizes/mine`
     }
@@ -85,53 +89,83 @@ const IndexPage: NextPage = () => {
       )}
 
       <Box pointerEvents={loading ? "none" : "inherit"} opacity={loading ? 0.4 : 1}>
-        <p>Rank: {prizes?.points}</p>
-        <p>
-          Points: {prizes?.pointsRemaining}
-          <i>p</i>
-        </p>
-        <Heading size="md">Claimed Prizes</Heading>
+        <HStack>
+          <p>Rank: {prizes?.points}</p>
+          <Spacer />
+          <p>
+            Points available: {prizes?.pointsRemaining}
+            <i>p</i>
+          </p>
+        </HStack>
+
+        <Heading size="md" mt={2} mb={2}>
+          Claimed Prizes
+        </Heading>
         <VStack spacing={2}>
-          {prizes?.prizesClaimed.map(p => (
-            <BoxCover key={"claimed-milestone-" + p.id}>
-              <p>
-                Date: {p.dateClaimed.toLocaleDateString()}
-                <br />
-                Title: {p.prizeTitle}
-                <br />
-                Cost: {p.pointCost}
-              </p>
-            </BoxCover>
-          ))}
+          {Object.entries(
+            prizes?.prizesClaimed.groupBy(
+              x => x.prizeId,
+              a => a
+            ) ?? {}
+          ).map(([prizeId, prizes]) => {
+            const p = prizes[0];
+            let title = (p.wasMilestone ? "Milestone: " : "") + p.prizeTitle;
+            if (p.wasRepeatable) title += ` (repeated ${prizes.length} times)`;
+            return (
+              <BoxCover key={"claimed-milestone-" + prizeId}>
+                <AvailablePrize
+                  isClaimed
+                  prize={{
+                    title: title
+                  }}>
+                  Have bought
+                </AvailablePrize>
+              </BoxCover>
+            );
+          })}
         </VStack>
-        <Heading size="md">Available for purchase</Heading>
-        <Heading size="sm">Milestones</Heading>
+        <Heading size="md" mt={2} mb={2}>
+          Available for purchase
+        </Heading>
+        {prizes?.prizesAvailable.filter(x => x.isMilestone).length > 0 && (
+          <Heading size="sm">Milestones</Heading>
+        )}
         <VStack spacing={4}>
           {prizes?.prizesAvailable
             .filter(x => x.isMilestone)
             .map(p => (
               <BoxCover key={"avail-milestone-" + p.id}>
-                <AvailablePrize prize={p} addCallback={refetch} />
+                <AvailablePrize prize={p}>
+                  <PurchaseButton prize={p} addCallback={refetch} />
+                </AvailablePrize>
               </BoxCover>
             ))}
         </VStack>
-        <Heading size="sm">Repeatable</Heading>
+        {prizes?.prizesAvailable.filter(x => x.isRepeatable).length > 0 && (
+          <Heading size="sm">Repeatable</Heading>
+        )}
         <VStack spacing={4}>
           {prizes?.prizesAvailable
             .filter(x => x.isRepeatable)
             .map(p => (
               <BoxCover key={"avail-repeatable-" + p.id}>
-                <AvailablePrize prize={p} addCallback={refetch} />
+                <AvailablePrize prize={p}>
+                  <PurchaseButton prize={p} addCallback={refetch} />
+                </AvailablePrize>
               </BoxCover>
             ))}
         </VStack>
-        <Heading size="sm">Other</Heading>
+        {prizes?.prizesAvailable.filter(x => !x.isMilestone && !x.isRepeatable).length > 0 && (
+          <Heading size="sm">One-Time</Heading>
+        )}
         <VStack spacing={4}>
           {prizes?.prizesAvailable
             .filter(x => !x.isMilestone && !x.isRepeatable)
             .map(p => (
               <BoxCover key={"avail-other-" + p.id}>
-                <AvailablePrize prize={p} addCallback={refetch} />
+                <AvailablePrize prize={p}>
+                  <PurchaseButton prize={p} addCallback={refetch} />
+                </AvailablePrize>
               </BoxCover>
             ))}
         </VStack>
@@ -140,4 +174,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default withAuth(IndexPage);

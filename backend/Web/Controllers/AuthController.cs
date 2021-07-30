@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Hangfire.MediatR;
 using Application.User.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -41,6 +42,17 @@ namespace Web.Controllers
       });
 
       return Redirect(redirectOptions.URL + token);
+    }
+
+    [HttpGet("app-install")]
+    public async Task<ActionResult<bool>> InstallCallback([FromQuery] string code, [FromQuery] string state)
+    {
+      Mediator.Enqueue(new GetUserFromCallbackQuery {
+        Code = code,
+        IsInstall = true
+      });
+
+      return true;
     }
   }
 }

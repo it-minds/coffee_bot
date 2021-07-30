@@ -5,6 +5,7 @@ import { Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
+import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
@@ -104,4 +105,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default withAuth(IndexPage);

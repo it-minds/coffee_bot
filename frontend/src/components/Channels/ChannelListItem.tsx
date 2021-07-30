@@ -112,8 +112,8 @@ const ChannelListItem: FC<Props> = ({ channel }) => {
                   <MenuItem
                     onClick={() =>
                       router.push(
-                        "channels/[channelId]/prizes",
-                        "channels/" + channel.id + "/prizes"
+                        "channels/[channelId]/prizes/admin",
+                        "channels/" + channel.id + "/prizes/admin"
                       )
                     }>
                     Edit Channel Prizes

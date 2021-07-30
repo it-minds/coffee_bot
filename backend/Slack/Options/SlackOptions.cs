@@ -11,5 +11,6 @@ namespace Slack.Options
     public string OAuthScope { get; set; }
     public string OAuthTeam { get; set; }
     public string OAuthRedirectUrl { get; set; }
+    public string OAuthInstallRedirectUrl { get; set; }
   }
 }

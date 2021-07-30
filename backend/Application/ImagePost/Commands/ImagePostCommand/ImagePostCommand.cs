@@ -34,8 +34,9 @@ namespace Application.ImagePost.Commands.ImagePostCommand
         var group = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRoundGroupMembers)
           .Include(x => x.CoffeeRound)
+            .ThenInclude(x => x.ChannelSettings)
           .Where(x => x.CoffeeRoundGroupMembers.Any(y => y.SlackMemberId == request.Event.UserId))
-          .Where(x => x.CoffeeRound.SlackChannelId == request.Event.ChannelId && x.CoffeeRound.Active)
+          .Where(x => x.CoffeeRound.ChannelSettings.SlackChannelId == request.Event.ChannelId && x.CoffeeRound.Active)
           .FirstOrDefaultAsync();
 
         if (group == null || group.HasPhoto) return 1;

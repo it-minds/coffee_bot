@@ -1,28 +1,23 @@
 import "isomorphic-unfetch";
 import "../styles.global.css";
+import "utils/errorToJSON";
 
-import { Button, Center, ChakraProvider } from "@chakra-ui/react";
-import AppContainer from "components/Common/AppContainer";
-import OurSpinner from "components/Common/OurSpinner";
+import { ChakraProvider } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
-import { AuthStage, useAuth } from "hooks/useAuth";
+import { skipauth, useAuth } from "hooks/useAuth";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
 import { I18nProvider } from "next-rosetta";
 import React, { ReactElement, useEffect } from "react";
-import { useCallback } from "react";
 import EnvSettings from "types/EnvSettings";
 import isomorphicEnvSettings, { setEnvSettings } from "utils/envSettings";
 import { logger } from "utils/logger";
-import { openSignInWindow } from "utils/openPopup";
 
 import theme from "../theme/theme";
 
 type Props = {
   envSettings: EnvSettings;
 };
-
-const skipauth = "/logincallback";
 
 const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props): ReactElement => {
   // usePWA(); //! OPT IN
@@ -51,33 +46,6 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
     }
   }, []);
 
-  const click = useCallback(() => {
-    const envSettings = isomorphicEnvSettings();
-
-    if (auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth) {
-      openSignInWindow(envSettings.backendUrl + "/api/auth/login", "login", e => {
-        if (typeof e.data == "string") {
-          try {
-            const pairs = (e.data as string).substring(1).split("&");
-
-            let i: string;
-            for (i in pairs) {
-              if (pairs[i] === "") continue;
-
-              const pair = pairs[i].split("=");
-              const key = decodeURIComponent(pair[0]);
-              const value = decodeURIComponent(pair[1]);
-
-              if (key == "token") auth.login(value);
-            }
-          } catch (e) {
-            console.error(e, e.data);
-          }
-        }
-      });
-    }
-  }, [auth, auth.authStage, auth.login]);
-
   return (
     <main>
       <Head>
@@ -96,32 +64,9 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
       </noscript>
       <I18nProvider table={pageProps.table}>
         <ChakraProvider theme={theme}>
-          {auth.authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth ? (
-            <Center>
-              <Button onClick={click} colorScheme="blue" mt={[2, 4]}>
-                Click me to login
-              </Button>
-            </Center>
-          ) : auth.authStage == AuthStage.CHECKING && router.pathname != skipauth ? (
-            <Center>
-              <OurSpinner />
-            </Center>
-          ) : (
-            <>
-              <AuthContext.Provider value={auth}>
-                {router.pathname != skipauth ? (
-                  <AppContainer>
-                    {/* <SignalRContext.Provider value={{ connection }}> */}
-                    <Component {...pageProps} />
-                  </AppContainer>
-                ) : (
-                  <Component {...pageProps} />
-                )}
-
-                {/* </SignalRContext.Provider> */}
-              </AuthContext.Provider>
-            </>
-          )}
+          <AuthContext.Provider value={auth}>
+            <Component {...pageProps} />
+          </AuthContext.Provider>
         </ChakraProvider>
       </I18nProvider>
     </main>

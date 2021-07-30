@@ -1,6 +1,7 @@
 import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import ChannelList from "components/Channels/ChannelList";
 import { ChannelContext } from "contexts/ChannelContext";
+import { withAuth } from "hocs/withAuth";
 import { useChannelContext } from "hooks/useChannelContext";
 import { NextPage } from "next";
 import React from "react";
@@ -22,4 +23,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default withAuth(IndexPage);
