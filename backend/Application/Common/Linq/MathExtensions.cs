@@ -5,18 +5,18 @@ using System.Linq;
 
 namespace Application.Common.Linq
 {
+  public delegate T MyFunc<T>(ref T arg1, in T arg2);
+
   public static class MathExtensions
   {
-    public static int RunningSum<T>(this IEnumerable<T> source, Func<T, int> countFunction, Func<int, int, int> sumFunction)
+    public static U RunningSum<T, U>(this IEnumerable<T> source, Func<T, U> countFunction, Func<U,U,U> sumFunction, in U startingValue)
     {
-      var runningSum = 0;
-      foreach (var item in source)
-      {
-        var count = countFunction(item);
-        runningSum = sumFunction(runningSum, count);
-      }
+      U runningSum = startingValue;
+      source.ForEach(item => runningSum = sumFunction(runningSum, countFunction(item)));
       return runningSum;
     }
+    public static U RunningSum<T, U>(this IEnumerable<T> source, Func<T, U> countFunction,  Func<U,U,U> sumFunction) =>
+      source.RunningSum(countFunction, sumFunction, default(U));
 
     public static decimal Percent<T>(this IEnumerable<T> source, Func<T, bool> dividendPredicate) =>
       source.Percent(dividendPredicate, _ignore => true);

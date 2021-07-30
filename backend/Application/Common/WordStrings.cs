@@ -17,7 +17,7 @@ namespace Application.Common
 
     private Random rng;
 
-    public int MaxCount { get => sets.RunningSum((set) => set.Count(), (a, b) => a == 0 ? b : a * b); }
+    public int MaxCount { get => sets.RunningSum((set) => set.Count(), (int a, int b) => a == 0 ? b : a * b); }
 
     public string GetPredeterminedStringFromInt(int x)
     {
@@ -30,7 +30,7 @@ namespace Application.Common
 
       for (int i = 0; i < sets.Count(); i++)
       {
-        var remainingCount = sets.Skip(i + 1).Sum(x => x.Count());
+        var remainingCount = sets.Skip(i + 1).RunningSum(x => x.Count(), (int a, int b) => a == 0 ? b : a * b);
         var set = sets[i].OrderBy(_ignore => this.rng.Next()).ToList();
         var result = GetModuloIndexIfValueInRange(set, remainingCount, ref x);
 
