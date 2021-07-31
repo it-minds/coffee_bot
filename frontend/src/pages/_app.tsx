@@ -5,6 +5,7 @@ import "utils/errorToJSON";
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { skipauth, useAuth } from "hooks/useAuth";
+import { usePWA } from "hooks/usePWA";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
 import { I18nProvider } from "next-rosetta";
@@ -20,7 +21,7 @@ type Props = {
 };
 
 const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props): ReactElement => {
-  // usePWA(); //! OPT IN
+  usePWA(); //! OPT IN
 
   const auth = useAuth(skipauth);
 
@@ -49,7 +50,7 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
   return (
     <main>
       <Head>
-        <title>IT Minds Coffee Bot</title>
+        <title>Coffee Bot</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#2196f3" />
@@ -57,7 +58,9 @@ const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props):
         <meta name="robots" content="noindex" />
 
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png"></link>
+        <link
+          rel="apple-touch-icon"
+          href="/images/icons/android-icon-192x192-dunplab-manifest-45301.png"></link>
       </Head>
       <noscript>
         <h1>JavaScript must be enabled!</h1>
