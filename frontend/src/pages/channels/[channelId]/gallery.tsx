@@ -1,7 +1,16 @@
 import "ts-array-ext/groupBy";
 import "ts-array-ext/sortByAttr";
 
-import { Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Image,
+  Skeleton,
+  useColorModeValue
+} from "@chakra-ui/react";
+import { DividerWithText } from "components/Common/DividerWIthText";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
@@ -49,41 +58,48 @@ const IndexPage: NextPage = () => {
       });
   }, [activeUser, query]);
 
-  // return <Demo />;
   return (
-    <>
-      <Heading textAlign="center">Gallery</Heading>
-      {activeImage !== null && (
-        <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
-      )}
-      {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970))
-        .sortByAttr(([year]) => year, "DESC")
-        .map(([year, images]) => (
-          <Fragment key={year}>
-            <Heading size="md" textAlign="center">
-              -{year}-
-            </Heading>
-            <Flex pt="4" wrap="wrap" justifyContent="center">
-              {images.map(image =>
-                image.publicSrc ? (
-                  <Image
-                    _hover={{
-                      cursor: "pointer",
-                      borderSize: "2px"
-                    }}
-                    maxH="300px"
-                    key={image.id}
-                    src={image.publicSrc}
-                    onClick={() => setActiveImage(image)}
-                  />
-                ) : (
-                  <Skeleton key={image.id} height="300px" width="300px" />
-                )
-              )}
-            </Flex>
-          </Fragment>
-        ))}
-    </>
+    <Container maxW="6xl">
+      <Heading size="lg" textAlign="center">
+        Buddy Channels!
+      </Heading>
+      <Box
+        p={[2, 4, 8]}
+        mt={8}
+        bgColor={useColorModeValue("gray.200", "gray.700")}
+        borderRadius={[12, 24]}>
+        {activeImage !== null && (
+          <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
+        )}
+        {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970))
+          .sortByAttr(([year]) => year, "DESC")
+          .map(([year, images]) => (
+            <Fragment key={year}>
+              <Heading size="md" textAlign="center">
+                <DividerWithText>{year}</DividerWithText>
+              </Heading>
+              <Flex pt="4" wrap="wrap" justifyContent="center">
+                {images.map(image =>
+                  image.publicSrc ? (
+                    <Image
+                      _hover={{
+                        cursor: "pointer",
+                        borderSize: "2px"
+                      }}
+                      maxH="300px"
+                      key={image.id}
+                      src={image.publicSrc}
+                      onClick={() => setActiveImage(image)}
+                    />
+                  ) : (
+                    <Skeleton key={image.id} height="300px" width="300px" />
+                  )
+                )}
+              </Flex>
+            </Fragment>
+          ))}
+      </Box>
+    </Container>
   );
 };
 

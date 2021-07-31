@@ -32,8 +32,6 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
     setValue
   } = useForm<IUpdateChannelPauseInput>();
 
-  const isActive = watch("paused"); // you can supply default value as second argumen
-
   const [loading, setLoading] = useState(false);
 
   const { genClient } = useNSwagClient(ChannelClient);
@@ -77,8 +75,8 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
         </FormHelperText>
         <Switch
           isReadOnly={loading}
-          isChecked={!isActive}
-          onChange={() => setValue("paused", !isActive)}
+          isChecked={!watch("paused")}
+          onChange={x => setValue("paused", !x.target.checked)}
         />
         <FormErrorMessage>Titles length must be between 3 and 30 characters.</FormErrorMessage>
       </FormControl>

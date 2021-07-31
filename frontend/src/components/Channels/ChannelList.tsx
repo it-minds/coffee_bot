@@ -73,16 +73,13 @@ const ChannelList: FC = () => {
           </ListItem>
         </List>
         <DividerWithText m={1}>Your memberships</DividerWithText>
-        <Flex direction="column" gap={2}>
+        <Flex direction="column" style={{ gap: "0.5rem" }}>
           {channels.map(channel => (
             <ChannelListItem key={channel.id} membership={channel} />
           ))}
         </Flex>
         <DividerWithText m={1}>Other open channels in your organization</DividerWithText>
         <Flex direction="column">
-          {/* {channels.map((channel: ChannelSettingsIdDto) => (
-            <ChannelListItem key={channel.id} channel={channel} />
-          ))} */}
           <Text as="i">Not yet implemented</Text>
         </Flex>
         <DividerWithText m={1}>Create a new buddies channel</DividerWithText>

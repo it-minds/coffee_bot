@@ -11,6 +11,7 @@ import {
   StatLabel,
   StatNumber,
   Text,
+  useBreakpointValue,
   useColorModeValue
 } from "@chakra-ui/react";
 import { CgMathEqual } from "@react-icons/all-files/cg/CgMathEqual";
@@ -119,8 +120,8 @@ const RoundInfo: FC<Props> = ({ round }) => {
 
       <Heading size="lg">Groups</Heading>
       <SimpleGrid
-        spacingX={["0px", "15px", "30px"]}
-        spacingY={["15px", "15px", "30px"]}
+        spacingX={[0, 2, 4]}
+        spacingY={[1, 2, 4]}
         mt={4}
         columns={[1, 2, 3, 4]}
         justifyItems="space-around">
@@ -129,11 +130,14 @@ const RoundInfo: FC<Props> = ({ round }) => {
             key={x.id}
             backgroundColor={x.hasMet ? greenColor : redColor}
             backgroundImage={x.hasPhoto ? (x as any).publicSrc : ""}
-            backgroundPosition="top"
+            backgroundPosition={useBreakpointValue({
+              base: "center",
+              md: "top"
+            })}
             backgroundSize="cover"
-            minH="250px"
-            maxH="300px"
-            minW="200px"
+            minH={64}
+            maxH={70}
+            minW={64}
             p={[2, 3, 4]}>
             {/* <pre>{JSON.stringify(x, null, 2)}</pre> */}
             <Box backgroundColor={imageBackdrop} p={[1, 2]}>

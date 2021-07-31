@@ -37,7 +37,7 @@ namespace Application.ChannelSetting.Commands.UpdateChannelSettings
 
         if (channelMember == null) throw new NotFoundException(nameof(ChannelMember), currentUserService.UserSlackId );
 
-        var localSettings = await dbContext.ChannelSettings.FindAsync(request.Id, cancellationToken);
+        var localSettings = await dbContext.ChannelSettings.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken : cancellationToken);
         if (localSettings == null) throw new NotFoundException(nameof(ChannelSettings), request.Id);
 
         localSettings.GroupSize = request.Settings.GroupSize;
