@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Slack.DTO;
 using Slack.Interfaces;
 using Slack.Options;
 using SlackNet;
+using SlackNet.WebApi;
 
 namespace Slack.Clients
 {
@@ -74,6 +76,36 @@ namespace Slack.Clients
         Email = result.User.Email,
         Id = result.User.Id
       };
+    }
+
+    public async Task<IEnumerable<SlackNet.Conversation>> GetUserChannels(string acessToken, CancellationToken cancellationToken)
+    {
+      var result = await apiClient.WithAccessToken(acessToken)
+        .Users.Conversations(excludeArchived: true);
+
+      string cursor = "";
+      var channelsImMemberOf = new List<SlackNet.Conversation>();
+      do
+      {
+        var response = await apiClient.WithAccessToken(acessToken)
+        .Users.Conversations(
+          cancellationToken: cancellationToken,
+          excludeArchived: true,
+          limit: 1000,
+          types: new List<ConversationType> {
+            ConversationType.PublicChannel,
+            ConversationType.PrivateChannel
+          },
+          cursor: cursor
+        );
+
+        channelsImMemberOf.AddRange(response.Channels);
+
+        cursor = response.ResponseMetadata.NextCursor ?? "";
+
+      } while (cursor != "" );
+
+      return channelsImMemberOf;
     }
   }
 }

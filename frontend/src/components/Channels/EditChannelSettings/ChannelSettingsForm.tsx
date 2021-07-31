@@ -12,26 +12,38 @@ import {
   Select,
   Switch
 } from "@chakra-ui/react";
-import React, { FC, useCallback, useEffect, useState } from "react";
-import { DayOfWeek, IChannelSettingsDto } from "services/backend/nswagts";
+import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNSwagClient";
+import React, { FC, useCallback, useState } from "react";
+import { ChannelClient, DayOfWeek, IChannelSettingsDto } from "services/backend/nswagts";
 
 type Props = {
   submitCallback: (metaData: IChannelSettingsDto) => Promise<void>;
-  channel?: IChannelSettingsDto;
+  channelId?: number;
 };
 
-const ChannelSettingsForm: FC<Props> = ({ submitCallback, channel }) => {
+const defaultChannel: IChannelSettingsDto = {
+  groupSize: 2,
+  startsDay: DayOfWeek.Thursday,
+  weekRepeat: 1,
+  durationInDays: 1,
+  individualMessage: false
+};
+
+const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [localFormData, setLocalFormData] = useState<IChannelSettingsDto>({
-    groupSize: 2,
-    startsDay: DayOfWeek.Monday,
-    weekRepeat: 1,
-    durationInDays: 1,
-    individualMessage: false
-  });
-  useEffect(() => {
-    if (channel) {
+  const [localFormData, setLocalFormData] = useState<IChannelSettingsDto>(defaultChannel);
+
+  const { genClient } = useNSwagClient(ChannelClient);
+
+  useEffectAsync(async () => {
+    if (channelId) {
+      setIsLoading(true);
+      const client = await genClient();
+      const channel = await client.getChannelSettings(channelId);
+
       setLocalFormData(channel);
+      setIsLoading(false);
     }
   }, []);
 
@@ -54,7 +66,7 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channel }) => {
 
   return (
     <Flex w="full" align="center" justifyContent="center">
-      <Box width="md">
+      <Box width="md" opacity={isLoading ? 0.2 : 1}>
         <form onSubmit={onSubmit}>
           <FormControl isRequired>
             <FormLabel>Start day</FormLabel>

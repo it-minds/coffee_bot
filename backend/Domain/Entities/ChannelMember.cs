@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Domain.Entities
@@ -17,6 +18,8 @@ namespace Domain.Entities
     public bool IsAdmin { get; set; } = false;
     public bool OnPause { get; set; } = false;
     public bool IsRemoved { get; set; } = false;
+
+    public DateTimeOffset? ReturnFromPauseDate { get; set; }
 
     public ICollection<ClaimedPrize> ClaimedPrizes { get; set; }
   }

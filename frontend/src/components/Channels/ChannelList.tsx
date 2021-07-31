@@ -12,16 +12,31 @@ import {
 } from "@chakra-ui/react";
 import { BiShield } from "@react-icons/all-files/bi/BiShield";
 import { DividerWithText } from "components/Common/DividerWIthText";
-import { ChannelContext } from "contexts/ChannelContext";
-import React, { FC, useContext } from "react";
-import { ChannelSettingsIdDto } from "services/backend/nswagts";
+import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNSwagClient";
+import React, { FC, useState } from "react";
+import { ChannelClient, ChannelMemberDTO } from "services/backend/nswagts";
+import { logger } from "utils/logger";
 
 import ChannelListItem from "./ChannelListItem";
 import NewChannelButton from "./NewChannelButton";
 
 const ChannelList: FC = () => {
-  const { channels } = useContext(ChannelContext);
-  if (!channels) return null;
+  const [channels, setChannels] = useState<ChannelMemberDTO[]>([]);
+
+  const { genClient } = useNSwagClient(ChannelClient);
+
+  useEffectAsync(async () => {
+    try {
+      const client = await genClient();
+      const data = await client.getMyChannelMemberships();
+      if (data && data.length >= 0) {
+        setChannels(data);
+      } else logger.info("ChannelClient.getMyChannels got no data");
+    } catch (err) {
+      logger.warn("ChannelClient.getMyChannels Error", err);
+    }
+  }, []);
 
   const activePause = useBreakpointValue({
     base: "active",
@@ -42,26 +57,25 @@ const ChannelList: FC = () => {
           available for you to join or should you be daring type where you get to create a new one!
           <br />
           Once you are in, your active channels hold:
-          <List>
-            <ListItem>
-              <ListIcon color="blue.500" as={BiShield} />
-              an overview of all the rounds present and past.
-            </ListItem>
-            <ListItem>
-              <ListIcon color="blue.500" as={BiShield} />a gallery of all the important beautiful
-              selfies everyone has shared.
-            </ListItem>
-            <ListItem>
-              <ListIcon color="blue.500" as={BiShield} />
-              and most importantly, the prizes!
-            </ListItem>
-          </List>
-          <br />
         </Text>
+        <List>
+          <ListItem>
+            <ListIcon color="blue.500" as={BiShield} />
+            an overview of all the rounds present and past.
+          </ListItem>
+          <ListItem>
+            <ListIcon color="blue.500" as={BiShield} />a gallery of all the important beautiful
+            selfies everyone has shared.
+          </ListItem>
+          <ListItem>
+            <ListIcon color="blue.500" as={BiShield} />
+            and most importantly, the prizes!
+          </ListItem>
+        </List>
         <DividerWithText m={1}>Your memberships</DividerWithText>
-        <Flex direction="column">
-          {channels.map((channel: ChannelSettingsIdDto) => (
-            <ChannelListItem key={channel.id} channel={channel} />
+        <Flex direction="column" gap={2}>
+          {channels.map(channel => (
+            <ChannelListItem key={channel.id} membership={channel} />
           ))}
         </Flex>
         <DividerWithText m={1}>Other open channels in your organization</DividerWithText>

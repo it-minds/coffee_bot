@@ -1,4 +1,5 @@
 import { Button, Text } from "@chakra-ui/react";
+import ColorModeToggler from "components/Common/AppContainer/ColorModeToggler";
 import { useRouter } from "next/router";
 import React, { FC } from "react";
 
@@ -10,15 +11,13 @@ const Footer: FC = () => {
       <Button variant="ghost" onClick={() => router.push("/")}>
         Go to app.
       </Button>
-      <Button
-        as="a"
-        variant="ghost"
-        href={`mailto:contact@it-minds.dk?subject="Coffee Buddies Web: "`}>
-        Contact us.
-      </Button>
       <Button variant="ghost" onClick={() => router.push("/info")}>
         Info.
       </Button>
+      <Button as="a" variant="ghost" href={`mailto:contact@it-minds.dk?subject="Coffee Buddies: "`}>
+        Contact us.
+      </Button>
+      <ColorModeToggler />
     </Text>
   );
 };

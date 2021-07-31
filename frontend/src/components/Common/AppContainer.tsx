@@ -1,60 +1,54 @@
-import {
-  Box,
-  Container,
-  Flex,
-  Spacer,
-  useBreakpointValue,
-  useColorModeValue
-} from "@chakra-ui/react";
-import { BreadcrumbContext } from "components/Breadcrumbs/BreadcrumbContext";
-import Breadcrumbs from "components/Breadcrumbs/Breadcrumbs";
-import { useBreadcrumbsContext } from "components/Breadcrumbs/useBreadcrumbContext";
-import ColorModeToggler from "components/Common/ColorModeToggler";
-import { AuthContext } from "contexts/AuthContext";
-import React, { FC, useContext } from "react";
+import { Box, Container, Flex, Spacer } from "@chakra-ui/react";
+import ChannelActionsMenu from "components/Channels/ChannelActionsMenu";
+import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
+import { useRouter } from "next/dist/client/router";
+import React, { FC, useMemo } from "react";
 
-import AppVersion from "./AppVersion";
+import Logo from "./AppContainer/Logo";
+import UserMenu from "./AppContainer/UserMenu";
 
 const AppContainer: FC = ({ children }) => {
-  const { activeUser } = useContext(AuthContext);
+  const { push, query } = useRouter();
 
-  const breadCrumbContextValue = useBreadcrumbsContext();
-
-  const topBarColor = useColorModeValue("blue.300", "blue.600");
-
-  const user = useBreakpointValue({
-    base: activeUser.email,
-    sm: "User: " + activeUser.email
-  });
-  const version = useBreakpointValue({
-    base: "v." + process.env.NEXT_PUBLIC_APP_VERSION,
-    sm: "App Version: " + process.env.NEXT_PUBLIC_APP_VERSION
-  });
+  const channelId = useMemo(() => {
+    if (!query.channelId) return null;
+    const channelId = parseInt(query.channelId as string);
+    return channelId;
+  }, [query]);
 
   return (
-    <BreadcrumbContext.Provider value={breadCrumbContextValue}>
-      {/* <Center>
-        <Stack> */}
-      <Box w="100%" backgroundColor={topBarColor}>
+    <ChosenChannelContext.Provider
+      value={{
+        chosenChannel: {
+          id: channelId,
+          name: ""
+        }
+      }}>
+      <Box w="100%" backgroundColor="blue.600">
         <Container p={2} maxW="6xl">
-          <Flex align="center">
-            <ColorModeToggler />
-            <Breadcrumbs />
+          <Flex align="center" justify="space-between">
+            <Logo
+              onClick={() => push("/")}
+              cursor="pointer"
+              _hover={{
+                textDecoration: "underline"
+              }}
+              color="white"
+            />
+            {channelId && (
+              <Box ml={8}>
+                <ChannelActionsMenu channelId={channelId} />
+              </Box>
+            )}
             <Spacer />
-            <AppVersion>
-              {user}
-              <br />
-              {version}
-            </AppVersion>
+            <UserMenu />
           </Flex>
         </Container>
       </Box>
       <Container p={0} pt={[2, 4]} maxW="6xl">
         {children}
       </Container>
-      {/* </Stack>
-      </Center> */}
-    </BreadcrumbContext.Provider>
+    </ChosenChannelContext.Provider>
   );
 };
 

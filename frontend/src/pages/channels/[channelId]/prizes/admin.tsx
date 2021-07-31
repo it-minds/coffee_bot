@@ -1,5 +1,4 @@
 import { Heading } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import NewPrizeModal from "components/Prizes/NewPrizeModal";
 import PrizeListOverview from "components/Prizes/PrizeListOverview";
 import { AuthContext } from "contexts/AuthContext";
@@ -22,28 +21,6 @@ const IndexPage: NextPage = () => {
       replace("/");
     }
   }, [activeUser, channelId]);
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${channelId}/rounds`
-    },
-    {
-      name: "prizes",
-      path: "/channels/[channelId]/prizes",
-      asPath: `/channels/${channelId}/prizes`
-    },
-    {
-      name: "admin",
-      path: "/channels/[channelId]/prizes/admin",
-      asPath: `/channels/${channelId}/prizes/admin`
-    }
-  ]);
 
   return (
     <>

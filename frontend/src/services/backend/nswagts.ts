@@ -353,7 +353,10 @@ export class AuthClient extends ClientBase implements IAuthClient {
 }
 
 export interface IChannelClient {
-    getMyChannels(): Promise<ChannelSettingsIdDto[]>;
+    getMyChannelMemberships(request?: GetMyChannelMembershipsQuery | null | undefined): Promise<ChannelMemberDTO[]>;
+    getMyChannelMembership(channelSettingsId: number): Promise<ChannelMemberDTO>;
+    getChannelSettings(channelSettingsId?: number | undefined): Promise<ChannelSettingsIdDto>;
+    getMyAvailableChannels(): Promise<SimpleChannelDTO[]>;
     updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
     updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse>;
     getRounds(id: number): Promise<RoundSnipDto[]>;
@@ -371,8 +374,10 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getMyChannels(): Promise<ChannelSettingsIdDto[]> {
-        let url_ = this.baseUrl + "/api/Channel/MyChannels";
+    getMyChannelMemberships(request?: GetMyChannelMembershipsQuery | null | undefined): Promise<ChannelMemberDTO[]> {
+        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships?";
+        if (request !== undefined && request !== null)
+            url_ += "request=" + encodeURIComponent("" + request) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -385,11 +390,11 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         return this.transformOptions(options_).then(transformedOptions_ => {
             return this.http.fetch(url_, transformedOptions_);
         }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyChannels(_response));
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyChannelMemberships(_response));
         });
     }
 
-    protected processGetMyChannels(response: Response): Promise<ChannelSettingsIdDto[]> {
+    protected processGetMyChannelMemberships(response: Response): Promise<ChannelMemberDTO[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -399,7 +404,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(ChannelSettingsIdDto.fromJS(item));
+                    result200!.push(ChannelMemberDTO.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -411,11 +416,133 @@ export class ChannelClient extends ClientBase implements IChannelClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ChannelSettingsIdDto[]>(<any>null);
+        return Promise.resolve<ChannelMemberDTO[]>(<any>null);
+    }
+
+    getMyChannelMembership(channelSettingsId: number): Promise<ChannelMemberDTO> {
+        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships/{ChannelSettingsId}";
+        if (channelSettingsId === undefined || channelSettingsId === null)
+            throw new Error("The parameter 'channelSettingsId' must be defined.");
+        url_ = url_.replace("{ChannelSettingsId}", encodeURIComponent("" + channelSettingsId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyChannelMembership(_response));
+        });
+    }
+
+    protected processGetMyChannelMembership(response: Response): Promise<ChannelMemberDTO> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ChannelMemberDTO.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ChannelMemberDTO>(<any>null);
+    }
+
+    getChannelSettings(channelSettingsId?: number | undefined): Promise<ChannelSettingsIdDto> {
+        let url_ = this.baseUrl + "/api/Channel?";
+        if (channelSettingsId === null)
+            throw new Error("The parameter 'channelSettingsId' cannot be null.");
+        else if (channelSettingsId !== undefined)
+            url_ += "ChannelSettingsId=" + encodeURIComponent("" + channelSettingsId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetChannelSettings(_response));
+        });
+    }
+
+    protected processGetChannelSettings(response: Response): Promise<ChannelSettingsIdDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ChannelSettingsIdDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ChannelSettingsIdDto>(<any>null);
+    }
+
+    getMyAvailableChannels(): Promise<SimpleChannelDTO[]> {
+        let url_ = this.baseUrl + "/api/Channel/MyChannels/available";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMyAvailableChannels(_response));
+        });
+    }
+
+    protected processGetMyAvailableChannels(response: Response): Promise<SimpleChannelDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(SimpleChannelDTO.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<SimpleChannelDTO[]>(<any>null);
     }
 
     updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/api/Channel/UpdateChannelState";
+        let url_ = this.baseUrl + "/api/Channel/UpdateChannelPause";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(command);
@@ -846,6 +973,7 @@ export interface IPrizesClient {
     getUserPrizes(slackUserId: string | null, channelId?: number | undefined): Promise<UserPrizesDTO>;
     getMyPrizes(channelId?: number | undefined): Promise<UserPrizesDTO>;
     claimPrizeForUser(body: ClaimPrizeForUserCommand): Promise<boolean>;
+    getClaimedPrizesForApproval(channelSettingsId?: number | undefined): Promise<ClaimedUserPrizeDTO[]>;
 }
 
 export class PrizesClient extends ClientBase implements IPrizesClient {
@@ -1068,6 +1196,53 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         }
         return Promise.resolve<boolean>(<any>null);
     }
+
+    getClaimedPrizesForApproval(channelSettingsId?: number | undefined): Promise<ClaimedUserPrizeDTO[]> {
+        let url_ = this.baseUrl + "/api/Prizes/admin/claim?";
+        if (channelSettingsId === null)
+            throw new Error("The parameter 'channelSettingsId' cannot be null.");
+        else if (channelSettingsId !== undefined)
+            url_ += "ChannelSettingsId=" + encodeURIComponent("" + channelSettingsId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetClaimedPrizesForApproval(_response));
+        });
+    }
+
+    protected processGetClaimedPrizesForApproval(response: Response): Promise<ClaimedUserPrizeDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ClaimedUserPrizeDTO.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ClaimedUserPrizeDTO[]>(<any>null);
+    }
 }
 
 export interface IRoundClient {
@@ -1276,12 +1451,91 @@ export interface IUserDTO extends IAuthUser {
     channelsToAdmin?: number[] | null;
 }
 
+export class ChannelMemberDTO implements IChannelMemberDTO {
+    id?: number;
+    slackChannelId?: string | null;
+    slackUserId?: string | null;
+    slackName?: string | null;
+    channelSettingsId?: number;
+    points?: number;
+    isAdmin?: boolean;
+    onPause?: boolean;
+    isRemoved?: boolean;
+    returnFromPauseDate?: Date | null;
+    channelSettings?: ChannelSettingsIdDto | null;
+
+    constructor(data?: IChannelMemberDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.channelSettings = data.channelSettings && !(<any>data.channelSettings).toJSON ? new ChannelSettingsIdDto(data.channelSettings) : <ChannelSettingsIdDto>this.channelSettings; 
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
+            this.slackName = _data["slackName"] !== undefined ? _data["slackName"] : <any>null;
+            this.channelSettingsId = _data["channelSettingsId"] !== undefined ? _data["channelSettingsId"] : <any>null;
+            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
+            this.isAdmin = _data["isAdmin"] !== undefined ? _data["isAdmin"] : <any>null;
+            this.onPause = _data["onPause"] !== undefined ? _data["onPause"] : <any>null;
+            this.isRemoved = _data["isRemoved"] !== undefined ? _data["isRemoved"] : <any>null;
+            this.returnFromPauseDate = _data["returnFromPauseDate"] ? new Date(_data["returnFromPauseDate"].toString()) : <any>null;
+            this.channelSettings = _data["channelSettings"] ? ChannelSettingsIdDto.fromJS(_data["channelSettings"]) : <any>null;
+        }
+    }
+
+    static fromJS(data: any): ChannelMemberDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelMemberDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
+        data["slackName"] = this.slackName !== undefined ? this.slackName : <any>null;
+        data["channelSettingsId"] = this.channelSettingsId !== undefined ? this.channelSettingsId : <any>null;
+        data["points"] = this.points !== undefined ? this.points : <any>null;
+        data["isAdmin"] = this.isAdmin !== undefined ? this.isAdmin : <any>null;
+        data["onPause"] = this.onPause !== undefined ? this.onPause : <any>null;
+        data["isRemoved"] = this.isRemoved !== undefined ? this.isRemoved : <any>null;
+        data["returnFromPauseDate"] = this.returnFromPauseDate ? this.returnFromPauseDate.toISOString() : <any>null;
+        data["channelSettings"] = this.channelSettings ? this.channelSettings.toJSON() : <any>null;
+        return data; 
+    }
+}
+
+export interface IChannelMemberDTO {
+    id?: number;
+    slackChannelId?: string | null;
+    slackUserId?: string | null;
+    slackName?: string | null;
+    channelSettingsId?: number;
+    points?: number;
+    isAdmin?: boolean;
+    onPause?: boolean;
+    isRemoved?: boolean;
+    returnFromPauseDate?: Date | null;
+    channelSettings?: IChannelSettingsIdDto | null;
+}
+
 export class ChannelSettingsDto implements IChannelSettingsDto {
     groupSize?: number;
     startsDay?: DayOfWeek;
     weekRepeat?: number;
     durationInDays?: number;
     individualMessage?: boolean;
+    slackChannelId?: string | null;
+    slackChannelName?: string | null;
 
     constructor(data?: IChannelSettingsDto) {
         if (data) {
@@ -1299,6 +1553,8 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
             this.weekRepeat = _data["weekRepeat"] !== undefined ? _data["weekRepeat"] : <any>null;
             this.durationInDays = _data["durationInDays"] !== undefined ? _data["durationInDays"] : <any>null;
             this.individualMessage = _data["individualMessage"] !== undefined ? _data["individualMessage"] : <any>null;
+            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
+            this.slackChannelName = _data["slackChannelName"] !== undefined ? _data["slackChannelName"] : <any>null;
         }
     }
 
@@ -1316,6 +1572,8 @@ export class ChannelSettingsDto implements IChannelSettingsDto {
         data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
         data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
         data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
+        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
+        data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
         return data; 
     }
 }
@@ -1326,13 +1584,12 @@ export interface IChannelSettingsDto {
     weekRepeat?: number;
     durationInDays?: number;
     individualMessage?: boolean;
+    slackChannelId?: string | null;
+    slackChannelName?: string | null;
 }
 
 export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannelSettingsIdDto {
     id?: number;
-    slackChannelId?: string | null;
-    slackChannelName?: string | null;
-    paused?: boolean;
 
     constructor(data?: IChannelSettingsIdDto) {
         super(data);
@@ -1342,9 +1599,6 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
         super.init(_data);
         if (_data) {
             this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
-            this.slackChannelName = _data["slackChannelName"] !== undefined ? _data["slackChannelName"] : <any>null;
-            this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
         }
     }
 
@@ -1358,9 +1612,6 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
-        data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
-        data["paused"] = this.paused !== undefined ? this.paused : <any>null;
         super.toJSON(data);
         return data; 
     }
@@ -1368,9 +1619,6 @@ export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannel
 
 export interface IChannelSettingsIdDto extends IChannelSettingsDto {
     id?: number;
-    slackChannelId?: string | null;
-    slackChannelName?: string | null;
-    paused?: boolean;
 }
 
 export enum DayOfWeek {
@@ -1381,6 +1629,80 @@ export enum DayOfWeek {
     Thursday = 4,
     Friday = 5,
     Saturday = 6,
+}
+
+export class GetMyChannelMembershipsQuery implements IGetMyChannelMembershipsQuery {
+
+    constructor(data?: IGetMyChannelMembershipsQuery) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): GetMyChannelMembershipsQuery {
+        data = typeof data === 'object' ? data : {};
+        let result = new GetMyChannelMembershipsQuery();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data; 
+    }
+}
+
+export interface IGetMyChannelMembershipsQuery {
+}
+
+export class SimpleChannelDTO implements ISimpleChannelDTO {
+    id?: string | null;
+    name?: string | null;
+    isPrivate?: boolean;
+
+    constructor(data?: ISimpleChannelDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.name = _data["name"] !== undefined ? _data["name"] : <any>null;
+            this.isPrivate = _data["isPrivate"] !== undefined ? _data["isPrivate"] : <any>null;
+        }
+    }
+
+    static fromJS(data: any): SimpleChannelDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new SimpleChannelDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["name"] = this.name !== undefined ? this.name : <any>null;
+        data["isPrivate"] = this.isPrivate !== undefined ? this.isPrivate : <any>null;
+        return data; 
+    }
+}
+
+export interface ISimpleChannelDTO {
+    id?: string | null;
+    name?: string | null;
+    isPrivate?: boolean;
 }
 
 export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
@@ -1423,6 +1745,7 @@ export interface IUpdateChannelPauseCommand {
 export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
     channelId?: number;
     paused?: boolean;
+    unPauseDate?: Date | null;
 
     constructor(data?: IUpdateChannelPauseInput) {
         if (data) {
@@ -1437,6 +1760,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         if (_data) {
             this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
             this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
+            this.unPauseDate = _data["unPauseDate"] ? new Date(_data["unPauseDate"].toString()) : <any>null;
         }
     }
 
@@ -1451,6 +1775,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
         data = typeof data === 'object' ? data : {};
         data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
         data["paused"] = this.paused !== undefined ? this.paused : <any>null;
+        data["unPauseDate"] = this.unPauseDate ? this.unPauseDate.toISOString() : <any>null;
         return data; 
     }
 }
@@ -1458,6 +1783,7 @@ export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
 export interface IUpdateChannelPauseInput {
     channelId?: number;
     paused?: boolean;
+    unPauseDate?: Date | null;
 }
 
 export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsCommand {
@@ -2087,6 +2413,64 @@ export class ClaimPrizeForUserCommand implements IClaimPrizeForUserCommand {
 
 export interface IClaimPrizeForUserCommand {
     prizeId?: number;
+}
+
+export class ClaimedUserPrizeDTO implements IClaimedUserPrizeDTO {
+    id?: number;
+    dateClaimed?: Date;
+    pointCost?: number;
+    isDelivered?: boolean;
+    prize?: PrizeIdDTO | null;
+    channelMember?: ChannelMemberDTO | null;
+
+    constructor(data?: IClaimedUserPrizeDTO) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.prize = data.prize && !(<any>data.prize).toJSON ? new PrizeIdDTO(data.prize) : <PrizeIdDTO>this.prize; 
+            this.channelMember = data.channelMember && !(<any>data.channelMember).toJSON ? new ChannelMemberDTO(data.channelMember) : <ChannelMemberDTO>this.channelMember; 
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
+            this.dateClaimed = _data["dateClaimed"] ? new Date(_data["dateClaimed"].toString()) : <any>null;
+            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
+            this.isDelivered = _data["isDelivered"] !== undefined ? _data["isDelivered"] : <any>null;
+            this.prize = _data["prize"] ? PrizeIdDTO.fromJS(_data["prize"]) : <any>null;
+            this.channelMember = _data["channelMember"] ? ChannelMemberDTO.fromJS(_data["channelMember"]) : <any>null;
+        }
+    }
+
+    static fromJS(data: any): ClaimedUserPrizeDTO {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClaimedUserPrizeDTO();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id !== undefined ? this.id : <any>null;
+        data["dateClaimed"] = this.dateClaimed ? this.dateClaimed.toISOString() : <any>null;
+        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
+        data["isDelivered"] = this.isDelivered !== undefined ? this.isDelivered : <any>null;
+        data["prize"] = this.prize ? this.prize.toJSON() : <any>null;
+        data["channelMember"] = this.channelMember ? this.channelMember.toJSON() : <any>null;
+        return data; 
+    }
+}
+
+export interface IClaimedUserPrizeDTO {
+    id?: number;
+    dateClaimed?: Date;
+    pointCost?: number;
+    isDelivered?: boolean;
+    prize?: IPrizeIdDTO | null;
+    channelMember?: IChannelMemberDTO | null;
 }
 
 export class StatsDto implements IStatsDto {

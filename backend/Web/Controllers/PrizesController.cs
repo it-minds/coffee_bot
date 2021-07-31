@@ -6,7 +6,9 @@ using Application.Prizes.Commands.ClaimPrizeForUser;
 using Application.Prizes.Commands.CreateChannelPrize;
 using Application.Prizes.Common;
 using Application.Prizes.Queries.GetChannelPrizes;
+using Application.Prizes.Queries.GetClaimedPrizesForApproval;
 using Application.Prizes.Queries.GetUserPrizes;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,5 +61,11 @@ namespace Web.Controllers
     {
       return await Mediator.Send(body, cancellationToken);
     }
+
+    [HttpGet("admin/claim")]
+    public async Task<IEnumerable<ClaimedUserPrizeDTO>> GetClaimedPrizesForApproval(
+      [FromQuery] GetClaimedPrizesForApprovalQuery input,
+      CancellationToken cancellationToken) =>
+    await Mediator.Send(input, cancellationToken);
   }
 }

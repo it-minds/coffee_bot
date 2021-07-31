@@ -1,3 +1,5 @@
+using System;
+using Application.ChannelSetting;
 using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Entities;
@@ -16,6 +18,9 @@ namespace Common
     public bool IsAdmin { get; set; }
     public bool OnPause { get; set; }
     public bool IsRemoved { get; set; }
+    public DateTimeOffset? ReturnFromPauseDate { get; set; }
+
+    public ChannelSettingsIdDto ChannelSettings { get; set; }
 
     public void Mapping(Profile profile)
     {

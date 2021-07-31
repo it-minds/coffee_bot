@@ -1,5 +1,4 @@
 import { Heading, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import QuerySortBtn from "components/Common/QuerySortBtn";
 import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -22,23 +21,6 @@ const formatter = new Intl.NumberFormat("en-US", {
 const IndexPage: NextPage = () => {
   // const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + query.channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${query.channelId}/rounds`
-    },
-    {
-      name: "stats",
-      path: "/channels/[channelId]/stats",
-      asPath: `/channels/${query.channelId}/stats`
-    }
-  ]);
 
   const [stats, setStats] = useState<StatsDto[]>([]);
 

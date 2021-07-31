@@ -39,7 +39,7 @@ namespace Application.Interactivity.Block.GenericBlockResponse
 
               mediator.Enqueue(new StatusBlockResponseCommand
               {
-                Payload = ""
+                BlockActionRequest = request.BlockActionRequest
               });
 
               break;

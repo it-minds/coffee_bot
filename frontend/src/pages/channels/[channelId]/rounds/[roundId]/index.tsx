@@ -1,5 +1,4 @@
 import { Center } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import OurSpinner from "components/Common/OurSpinner";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
@@ -15,31 +14,6 @@ import isomorphicEnvSettings from "utils/envSettings";
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
-
-  useBreadcrumbs(
-    [
-      {
-        name: "home",
-        path: "/"
-      },
-      {
-        name: "channel " + query.channelId,
-        path: "/channels/[channelId]/rounds",
-        asPath: `/channels/${query.channelId}/rounds`
-      },
-      {
-        name: "rounds",
-        path: "/channels/[channelId]/rounds",
-        asPath: `/channels/${query.channelId}/rounds`
-      },
-      {
-        name: query.roundId as string,
-        path: "/channels/[channelId]/rounds/[roundId]",
-        asPath: `/channels/${query.channelId}/rounds/${query.roundId}`
-      }
-    ],
-    [query]
-  );
 
   const [round, setRound] = useState<ActiveRoundDto>(null);
 

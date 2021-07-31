@@ -11,5 +11,7 @@ namespace Application.ChannelSetting
     public int WeekRepeat { get; set; }
     public int DurationInDays { get; set; }
     public bool IndividualMessage { get; set; }
+    public string SlackChannelId { get; set; }
+    public string SlackChannelName { get; set; }
   }
 }

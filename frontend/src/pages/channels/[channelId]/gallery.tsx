@@ -2,7 +2,6 @@ import "ts-array-ext/groupBy";
 import "ts-array-ext/sortByAttr";
 
 import { Flex, Heading, Image, Skeleton } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import ImageCover from "components/ImageCover/ImageCover";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
@@ -19,23 +18,6 @@ import isomorphicEnvSettings from "utils/envSettings";
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const { query } = useRouter();
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + query.channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${query.channelId}/rounds`
-    },
-    {
-      name: "gallery",
-      path: "/channels/[channelId]/gallery",
-      asPath: `/channels/${query.channelId}/gallery`
-    }
-  ]);
 
   const [activeImage, setActiveImage] = useState<ExtendedImageDto>(null);
   const [images, setImages] = useReducer(ListReducer<ExtendedImageDto>("id"), []);

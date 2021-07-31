@@ -1,5 +1,5 @@
 import { Center } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
+import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
 import OurSpinner from "components/Common/OurSpinner";
 import RoundInfo from "components/Round/RoundInfo";
 import { AuthContext } from "contexts/AuthContext";
@@ -14,29 +14,8 @@ import isomorphicEnvSettings from "utils/envSettings";
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
-  const { query } = useRouter();
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + query.channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${query.channelId}/rounds`
-    },
-    {
-      name: "rounds",
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${query.channelId}/rounds`
-    },
-    {
-      name: "active",
-      path: "/channels/[channelId]/rounds/active",
-      asPath: `/channels/${query.channelId}/rounds/active`
-    }
-  ]);
+  const { chosenChannel } = useContext(ChosenChannelContext);
+  const { query, replace } = useRouter();
 
   const [round, setRound] = useState<ActiveRoundDto>(null);
 
@@ -48,6 +27,11 @@ const IndexPage: NextPage = () => {
 
     const client = await genClient();
     const result = await client.getActiveRound(channelId);
+
+    if (result == null) {
+      replace("/channels/[channelId]/rounds", `/channels/${chosenChannel.id}/rounds`);
+      return;
+    }
 
     const envSettings = isomorphicEnvSettings();
 

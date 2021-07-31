@@ -37,6 +37,7 @@ namespace Application.ChannelSetting.Commands.UpdateChannelPaused
         if (channelMember == null) throw new NotFoundException(nameof(ChannelMember), request.Input);
 
         channelMember.OnPause = request.Input.Paused;
+        channelMember.ReturnFromPauseDate = request.Input.UnPauseDate;
         _context.ChannelMembers.Update(channelMember);
         await _context.SaveChangesAsync(cancellationToken);
 

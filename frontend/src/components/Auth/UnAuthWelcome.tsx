@@ -3,12 +3,12 @@ import {
   Button,
   Container,
   Heading,
-  HStack,
   Image,
   Stack,
   Text,
   useColorModeValue
 } from "@chakra-ui/react";
+import Logo from "components/Common/AppContainer/Logo";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, skipauth } from "hooks/useAuth";
 import router from "next/router";
@@ -56,12 +56,7 @@ const UnauthWelcome: FC = () => {
   return (
     <Container maxW="3xl">
       <Box p={8} mt={8} bgColor={bgColor} borderRadius={24}>
-        <HStack mb={2}>
-          <Image src="/images/icons/icon-128x128.png" w={8} />
-          <Heading size="md" textAlign="left">
-            IT Minds
-          </Heading>
-        </HStack>
+        <Logo mb={2} />
         <Heading textAlign="left" mb={2} fontWeight="extrabold">
           Welcome to Coffee Buddies
         </Heading>

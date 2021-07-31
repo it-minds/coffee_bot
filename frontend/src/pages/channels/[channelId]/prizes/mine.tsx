@@ -1,7 +1,6 @@
 import "ts-array-ext/groupBy";
 
 import { Box, Center, Heading, HStack, Spacer, VStack } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import OurSpinner from "components/Common/OurSpinner";
 import AvailablePrize from "components/Prizes/AvailablePrize";
 import BoxCover from "components/Prizes/BoxCover";
@@ -18,28 +17,6 @@ import { IUserPrizesDTO, PrizesClient } from "services/backend/nswagts";
 
 const IndexPage: NextPage = () => {
   const { query } = useRouter();
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + query.channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${query.channelId}/rounds`
-    },
-    // {
-    //   name: "prizes",
-    //   path: "/channels/[channelId]",
-    //   asPath: `/channels/${query.channelId}`
-    // },
-    {
-      name: "my prizes",
-      path: "/channels/[channelId]/prizes/mine",
-      asPath: `/channels/${query.channelId}/prizes/mine`
-    }
-  ]);
 
   const [hub, setHub] = useState<MyHub<"prize">>();
   const [loading, setLoading] = useState(false);

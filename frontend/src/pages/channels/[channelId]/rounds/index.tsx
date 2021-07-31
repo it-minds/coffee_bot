@@ -1,5 +1,4 @@
 import { Box, useColorModeValue } from "@chakra-ui/react";
-import { useBreadcrumbs } from "components/Breadcrumbs/useBreadcrumbs";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
@@ -14,23 +13,6 @@ import { percentFormatter } from "utils/formatters/percentFormatter";
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const router = useRouter();
-
-  useBreadcrumbs([
-    {
-      name: "home",
-      path: "/"
-    },
-    {
-      name: "channel " + router.query.channelId,
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${router.query.channelId}/rounds`
-    },
-    {
-      name: "rounds",
-      path: "/channels/[channelId]/rounds",
-      asPath: `/channels/${router.query.channelId}/rounds`
-    }
-  ]);
 
   const activeColor = useColorModeValue("green.200", "green.600");
   const normalColor = useColorModeValue("blue.100", "blue.700");

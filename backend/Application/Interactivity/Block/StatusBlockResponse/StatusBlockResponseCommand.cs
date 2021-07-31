@@ -19,13 +19,11 @@ namespace Application.Interactivity.Block.StatusBlockResponse
 {
   public class StatusBlockResponseCommand : IRequest<int>
   {
-    public string Payload { get; set; }
+    public BlockActionRequest BlockActionRequest { get; set; }
 
-    protected BlockActionRequest PayloadParsed { get => JsonConvert.DeserializeObject<BlockActionRequest>(Payload); }
-
-    protected string Value { get => ((ButtonAction)PayloadParsed.Actions[0]).Value; }
-    protected string ChannelId { get => PayloadParsed.Channel.Id; }
-    protected string TriggerId { get => PayloadParsed.TriggerId; }
+    protected string Value { get => ((ButtonAction)BlockActionRequest.Actions[0]).Value; }
+    protected string ChannelId { get =>  BlockActionRequest.Channel.Id; }
+    protected string TriggerId { get => BlockActionRequest.TriggerId; }
 
     public class StatusBlockResponseCommandHandler : IRequestHandler<StatusBlockResponseCommand, int>
     {
@@ -71,7 +69,7 @@ namespace Application.Interactivity.Block.StatusBlockResponse
           }
         }
 
-        await slackClient.UpdateMessage(request.ChannelId, request.PayloadParsed.Message.Ts, cancellationToken);
+        await slackClient.UpdateMessage(request.ChannelId, request.BlockActionRequest.Message.Ts, cancellationToken);
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 

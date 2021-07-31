@@ -1,44 +1,59 @@
-import { Button, HStack, Select } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { FC } from "react";
+import "ts-array-ext/sortByAttr";
 
-const options = {
-  label: "channels",
-  options: [
-    { value: "blue", label: "Blue", color: "#0052CC" },
-    { value: "purple", label: "Purple", color: "#5243AA" },
-    { value: "red", label: "Red", color: "#FF5630" },
-    { value: "orange", label: "Orange", color: "#FF8B00" },
-    { value: "yellow", label: "Yellow", color: "#FFC400" },
-    { value: "green", label: "Green", color: "#36B37E" }
-  ]
-};
+import { Button, Select, Stack, StackDirection, useBreakpointValue } from "@chakra-ui/react";
+import { useEffectAsync } from "hooks/useEffectAsync";
+import { useNSwagClient } from "hooks/useNSwagClient";
+import React from "react";
+import { useState } from "react";
+import { FC } from "react";
+import { ChannelClient, ISimpleChannelDTO } from "services/backend/nswagts";
 
 const NewChannelButton: FC = () => {
-  const [consent, setConsent] = useState(false);
+  const stackDirect = useBreakpointValue<StackDirection>({
+    base: "column",
+    md: "row"
+  });
+
+  const [availChannels, setAvailChannels] = useState<ISimpleChannelDTO[]>([]);
+
+  const { genClient } = useNSwagClient(ChannelClient);
+
+  useEffectAsync(async () => {
+    const client = await genClient();
+    const channels = await client.getMyAvailableChannels();
+
+    setAvailChannels(
+      channels.sort((a, b) => {
+        if (a.isPrivate && !b.isPrivate) return 1;
+        if (!a.isPrivate && b.isPrivate) return -1;
+
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      })
+    );
+  }, []);
 
   return (
-    <HStack>
-      <Button hidden={consent} onClick={() => setConsent(true)}>
-        Select Buddy Channel
-      </Button>
+    <Stack direction={stackDirect}>
       <Select
         animation="slide-in"
-        w={64}
+        w={"100%"}
         marginInlineStart="0 !important"
-        hidden={!consent}
         name="colors"
         placeholder="Select channel...">
-        {options.options.map(x => (
-          <option value={x.value} key={x.value}>
-            {x.color}
+        {availChannels.map(x => (
+          <option value={x.id} key={x.id}>
+            {/* <Icon as={x.isPrivate ? FaLock : FaHashtag} /> */}
+            {x.isPrivate ? "(private) " : "(public) "}
+            {x.name}
           </option>
         ))}
       </Select>
-      <Button hidden={!consent} onClick={() => setConsent(false)}>
+      <Button minW={64} onClick={() => null}>
         Create Buddy Channel
       </Button>
-    </HStack>
+    </Stack>
   );
 };
 
