@@ -1,60 +1,47 @@
 import "ts-array-ext/groupBy";
 
 import { Box, Center, Heading, HStack, Spacer, VStack } from "@chakra-ui/react";
+import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
 import OurSpinner from "components/Common/OurSpinner";
 import AvailablePrize from "components/Prizes/AvailablePrize";
 import BoxCover from "components/Prizes/BoxCover";
 import PurchaseButton from "components/Prizes/PurchaseButton";
-import { MyHub, PrizeSignalRContext } from "contexts/SignalRContext";
+import { useHubProvider } from "contexts/SignalRContext/useHubProvider";
 import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
-import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
-import { useMemo } from "react";
-import { IUserPrizesDTO, PrizesClient } from "services/backend/nswagts";
+import React, { useCallback, useContext, useState } from "react";
+import { PrizesClient, UserPrizesDTO } from "services/backend/nswagts";
 
 const IndexPage: NextPage = () => {
-  const { query } = useRouter();
+  const { chosenChannel } = useContext(ChosenChannelContext);
 
-  const [hub, setHub] = useState<MyHub<"prize">>();
+  const { hub, Provider } = useHubProvider("prize", true);
+
   const [loading, setLoading] = useState(false);
-  const [prizes, setPrizes] = useState<IUserPrizesDTO>(null);
+  const [prizes, setPrizes] = useState<UserPrizesDTO>(null);
 
   const { genClient } = useNSwagClient(PrizesClient);
 
-  const channelId = useMemo(() => {
-    if (!query.channelId) return;
-    const channelId = parseInt(query.channelId as string);
-    return channelId;
-  }, [query]);
-
   useEffectAsync(async () => {
-    if (channelId === null) return;
+    if (chosenChannel.id === null) return;
     const client = await genClient();
-    const allPrizes: IUserPrizesDTO = await client.getMyPrizes(channelId).catch(() => null);
+    const allPrizes: UserPrizesDTO = await client.getMyPrizes(chosenChannel.id).catch(() => null);
     setPrizes(allPrizes);
-
-    const hub = await MyHub.startConnection("prize");
-    client.addSignalRConnectionId(hub.getConnection().connectionId);
-    setHub(hub);
-    // hub.onConnect("NewPrize", newPrize => {
-    //   if (newPrize.channelSettingsId === channelId) setPrizes(p => [...p, newPrize]);
-    // });
-  }, [channelId]);
+  }, [chosenChannel.id]);
 
   const refetch = useCallback(async () => {
     setLoading(true);
     const client = await genClient();
-    const allPrizes: IUserPrizesDTO = await client.getMyPrizes(channelId).catch(() => null);
+    const allPrizes: UserPrizesDTO = await client.getMyPrizes(chosenChannel.id).catch(() => null);
     setPrizes(allPrizes);
     setLoading(false);
-  }, [channelId]);
+  }, [chosenChannel.id]);
 
   return (
     <>
-      <PrizeSignalRContext.Provider value={hub}></PrizeSignalRContext.Provider>
+      <Provider value={hub}></Provider>
       <Heading textAlign="center">My Prizes</Heading>
 
       {loading && (

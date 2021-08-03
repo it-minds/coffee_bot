@@ -1,48 +1,44 @@
 import { Heading, VStack } from "@chakra-ui/react";
-import { MyHub } from "contexts/SignalRContext";
+import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
+import { useHubProvider } from "contexts/SignalRContext/useHubProvider";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
-import { useRouter } from "next/router";
-import React, { useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
 import { FC } from "react";
-import { IPrizeIdDTO, PrizesClient } from "services/backend/nswagts";
+import { PrizeIdDTO, PrizesClient } from "services/backend/nswagts";
 
 import AvailablePrize from "./AvailablePrize";
 import BoxCover from "./BoxCover";
 import PurchaseButton from "./PurchaseButton";
 
 const PrizeListOverview: FC = () => {
-  const { query } = useRouter();
-  const channelId = useMemo(() => {
-    if (!query.channelId) return;
-    const channelId = parseInt(query.channelId as string);
-    return channelId;
-  }, [query]);
+  const { chosenChannel } = useContext(ChosenChannelContext);
 
-  const [hub, setHub] = useState<MyHub<"prize">>();
-  const [prizes, setPrizes] = useState<IPrizeIdDTO[]>([]);
+  const { hub, Provider } = useHubProvider("prize", true);
+
+  const [prizes, setPrizes] = useState<PrizeIdDTO[]>([]);
 
   const { genClient } = useNSwagClient(PrizesClient);
 
-  useEffectAsync(async () => {
-    if (!channelId) return;
+  useEffect(() => {
+    hub?.onConnect("newPrize", newPrize => {
+      if (newPrize.channelSettingsId === chosenChannel.id) setPrizes(p => [...p, newPrize]);
+    });
+  }, [hub]);
 
-    const hub = await MyHub.startConnection("prize");
+  useEffectAsync(async () => {
+    if (!chosenChannel.id) return;
+
     const client = await genClient();
 
-    client.addSignalRConnectionId(hub.getConnection().connectionId);
+    const allPrizes: PrizeIdDTO[] = await client.getChannelPrizes(chosenChannel.id).catch(() => []);
 
-    const allPrizes: IPrizeIdDTO[] = await client.getChannelPrizes(channelId).catch(() => []);
     setPrizes(allPrizes);
-
-    setHub(hub);
-    hub.onConnect("NewPrize", newPrize => {
-      if (newPrize.channelSettingsId === channelId) setPrizes(p => [...p, newPrize]);
-    });
-  }, [channelId]);
+  }, [chosenChannel.id]);
 
   return (
-    <>
+    <Provider value={hub}>
       <Heading size="ms">Milestones</Heading>
       <VStack spacing={4}>
         {prizes
@@ -81,7 +77,7 @@ const PrizeListOverview: FC = () => {
             </BoxCover>
           ))}
       </VStack>
-    </>
+    </Provider>
   );
 };
 

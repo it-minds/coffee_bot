@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Application.Prizes.Commands.ClaimPrizeForUser;
 using Application.Prizes.Commands.CreateChannelPrize;
+using Application.Prizes.Commands.DeliverClaimedPrize;
 using Application.Prizes.Common;
 using Application.Prizes.Queries.GetChannelPrizes;
 using Application.Prizes.Queries.GetClaimedPrizesForApproval;
@@ -24,18 +25,14 @@ namespace Web.Controllers
     }
 
     [HttpGet]
-    public async Task<IEnumerable<PrizeIdDTO>> GetChannelPrizes([FromQuery] int channelId, CancellationToken cancellationToken)
-    {
-      return await Mediator.Send(new GetChannelPrizesQuery {
-        ChannelSettingsId = channelId
-      }, cancellationToken);
-    }
+    public async Task<IEnumerable<PrizeIdDTO>> GetChannelPrizes([FromQuery] GetChannelPrizesQuery request, CancellationToken cancellationToken) =>
+       await Mediator.Send(request, cancellationToken);
+
 
     [HttpPost]
-    public async Task<int> CreateChannelPrize([FromBody] CreateChannelPrizeCommand body , CancellationToken cancellationToken)
-    {
-      return await Mediator.Send(body, cancellationToken);
-    }
+    public async Task<int> CreateChannelPrize([FromBody] CreateChannelPrizeCommand body , CancellationToken cancellationToken) =>
+      await Mediator.Send(body, cancellationToken);
+
 
     [HttpGet("user/{slackUserId}")]
     public async Task<UserPrizesDTO> GetUserPrizes([FromRoute] string slackUserId, [FromQuery] int channelId, CancellationToken cancellationToken)
@@ -47,7 +44,7 @@ namespace Web.Controllers
     }
 
     [HttpGet("user/mine")]
-    [Authorize]
+    [Authorize] // TODO: Fix this into its own query
     public async Task<UserPrizesDTO> GetMyPrizes([FromQuery] int channelId, CancellationToken cancellationToken)
     {
       return await Mediator.Send(new GetUserPrizesQuery {
@@ -67,5 +64,9 @@ namespace Web.Controllers
       [FromQuery] GetClaimedPrizesForApprovalQuery input,
       CancellationToken cancellationToken) =>
     await Mediator.Send(input, cancellationToken);
+
+    [HttpPut("admin/claim")]
+    public async Task<int> DeliverClaimedPrize([FromBody] DeliverClaimedPrizeCommand body, CancellationToken cancellationToken) =>
+      await Mediator.Send(body, cancellationToken);
   }
 }

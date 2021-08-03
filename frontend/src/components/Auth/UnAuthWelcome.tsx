@@ -28,13 +28,13 @@ const UnauthWelcome: FC = () => {
 
     if (authStage == AuthStage.UNAUTHENTICATED && router.pathname != skipauth) {
       openSignInWindow(envSettings.backendUrl + "/api/auth/login", "login", e => {
-        if (typeof e.data == "string") {
+        if (typeof e.data == "string" && e.data.indexOf("?token=") === 0) {
           try {
             const pairs = (e.data as string).substring(1).split("&");
 
             let i: string;
             for (i in pairs) {
-              if (pairs[i] === "") continue;
+              if (!pairs[i] || pairs[i] === "") continue;
 
               const pair = pairs[i].split("=");
               const key = decodeURIComponent(pair[0]);

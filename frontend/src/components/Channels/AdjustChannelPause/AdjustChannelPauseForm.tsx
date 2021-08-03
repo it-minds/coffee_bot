@@ -11,11 +11,7 @@ import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  ChannelClient,
-  IUpdateChannelPauseInput,
-  UpdateChannelPauseCommand
-} from "services/backend/nswagts";
+import { ChannelClient, UpdateChannelPauseInput } from "services/backend/nswagts";
 
 type Props = {
   channelId: number;
@@ -30,7 +26,7 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
     reset,
     watch,
     setValue
-  } = useForm<IUpdateChannelPauseInput>();
+  } = useForm<UpdateChannelPauseInput>();
 
   const [loading, setLoading] = useState(false);
 
@@ -49,17 +45,15 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
   }, []);
 
   const onSubmit = useCallback(
-    async (data: IUpdateChannelPauseInput) => {
+    async (data: UpdateChannelPauseInput) => {
       setLoading(true);
       data.channelId = channelId;
       data.unPauseDate && (data.unPauseDate = new Date(data.unPauseDate));
 
       const client = await genClient();
-      await client.updateChannelState(
-        new UpdateChannelPauseCommand({
-          input: data
-        })
-      );
+      await client.updateChannelState({
+        input: data
+      });
 
       onSuccess();
       setLoading(false);

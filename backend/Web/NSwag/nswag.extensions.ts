@@ -47,10 +47,6 @@ export class ClientBase {
     this.customHeaders[key] = value;
   }
 
-  public addSignalRConnectionId(connectionId: string) {
-    this.addCustomHeader("xxx-signalr-connectionId", connectionId);
-  }
-
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
     if (this.signal != null) options.signal = this.signal;
 

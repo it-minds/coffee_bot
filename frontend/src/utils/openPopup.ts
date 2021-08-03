@@ -5,7 +5,7 @@ export const openSignInWindow = (
   url: string,
   name: string,
   receiveMessage: (event: MessageEvent) => void
-) => {
+): void => {
   // remove any existing event listeners
   window.removeEventListener("message", receiveMessage);
 

@@ -1,13 +1,14 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { getAuthToken } from "hooks/useAuth";
-import { createContext } from "react";
-import { HubMap } from "services/backend/HubMap";
+import { AllHubs } from "services/backend/nswagts";
 import isomorphicEnvSettings from "utils/envSettings";
 
-export class MyHub<T extends keyof HubMap> {
+type Wrap = AllHubs;
+
+export class AuthorizedHub<T extends keyof Wrap> {
   private constructor(private connection: HubConnection) {}
 
-  static async startConnection<T extends keyof HubMap>(hub: T): Promise<MyHub<T>> {
+  static async startConnection<T extends keyof Wrap>(hub: T): Promise<AuthorizedHub<T>> {
     if (!process.browser) return null;
 
     const envSettings = isomorphicEnvSettings();
@@ -18,23 +19,26 @@ export class MyHub<T extends keyof HubMap> {
         headers: {
           Authorization: "bearer " + token
         },
-        accessTokenFactory: () => token
+        withCredentials: false,
+        accessTokenFactory: () => "bearer " + token
       })
       .withAutomaticReconnect()
       .build();
 
     await connection.start();
 
-    return new MyHub<T>(connection);
+    return new AuthorizedHub<T>(connection);
   }
 
-  public onConnect<U extends keyof HubMap[T]>(key: U, cb: (args: HubMap[T][U]) => void): void {
+  public onConnect<U extends keyof Wrap[T]>(key: U, cb: (args: Wrap[T][U]) => void): void {
     this.connection.on(key.toString(), cb);
   }
 
   public getConnection(): HubConnection {
     return this.connection;
   }
-}
 
-export const PrizeSignalRContext = createContext<MyHub<"prize">>(null);
+  public closeConnection(): Promise<void> {
+    return this.connection.stop();
+  }
+}

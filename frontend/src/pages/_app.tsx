@@ -4,7 +4,7 @@ import "utils/errorToJSON";
 
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
-import { skipauth, useAuth } from "hooks/useAuth";
+import { useAuth } from "hooks/useAuth";
 import { usePWA } from "hooks/usePWA";
 import { AppPropsType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
@@ -20,10 +20,10 @@ type Props = {
   envSettings: EnvSettings;
 };
 
-const MyApp = ({ Component, pageProps, __N_SSG, router }: AppPropsType & Props): ReactElement => {
+const MyApp = ({ Component, pageProps, __N_SSG }: AppPropsType & Props): ReactElement => {
   usePWA(); //! OPT IN
 
-  const auth = useAuth(skipauth);
+  const auth = useAuth();
 
   useEffect(() => {
     if (!__N_SSG) {

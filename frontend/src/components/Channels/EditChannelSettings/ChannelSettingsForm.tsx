@@ -15,14 +15,14 @@ import {
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { FC, useCallback, useState } from "react";
-import { ChannelClient, DayOfWeek, IChannelSettingsDto } from "services/backend/nswagts";
+import { ChannelClient, ChannelSettingsDto, DayOfWeek } from "services/backend/nswagts";
 
 type Props = {
-  submitCallback: (metaData: IChannelSettingsDto) => Promise<void>;
+  submitCallback: (metaData: ChannelSettingsDto) => Promise<void>;
   channelId?: number;
 };
 
-const defaultChannel: IChannelSettingsDto = {
+const defaultChannel: ChannelSettingsDto = {
   groupSize: 2,
   startsDay: DayOfWeek.Thursday,
   weekRepeat: 1,
@@ -32,7 +32,7 @@ const defaultChannel: IChannelSettingsDto = {
 
 const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [localFormData, setLocalFormData] = useState<IChannelSettingsDto>(defaultChannel);
+  const [localFormData, setLocalFormData] = useState<ChannelSettingsDto>(defaultChannel);
 
   const { genClient } = useNSwagClient(ChannelClient);
 
@@ -57,7 +57,7 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
     [localFormData, submitCallback]
   );
 
-  const updateLocalForm = useCallback((value: unknown, key: keyof IChannelSettingsDto) => {
+  const updateLocalForm = useCallback((value: unknown, key: keyof ChannelSettingsDto) => {
     setLocalFormData(form => {
       (form[key] as unknown) = value;
       return { ...form };

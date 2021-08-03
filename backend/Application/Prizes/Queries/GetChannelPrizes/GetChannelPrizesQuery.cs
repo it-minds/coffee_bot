@@ -5,9 +5,12 @@ namespace Application.Prizes.Queries.GetChannelPrizes
   using System.Threading;
   using System.Threading.Tasks;
   using Application.Common.Interfaces;
+  using Application.Common.Interfaces.Hubs;
+  using Application.Common.SignalR.Hub;
   using Application.Prizes.Common;
   using AutoMapper;
   using MediatR;
+  using Microsoft.AspNetCore.SignalR;
   using Microsoft.EntityFrameworkCore;
 
   public class GetChannelPrizesQuery : IRequest<IEnumerable<PrizeIdDTO>>
@@ -18,6 +21,7 @@ namespace Application.Prizes.Queries.GetChannelPrizes
       private readonly IApplicationDbContext dbContext;
       private readonly IMapper autoMapper;
       private readonly ICurrentUserService currentUserService;
+      private readonly IHubContext<PrizeHub, IPrizeHubService> hubContext;
 
       public GetChannelPrizesQueryHandler(IApplicationDbContext dbContext, IMapper autoMapper, ICurrentUserService currentUserService)
       {

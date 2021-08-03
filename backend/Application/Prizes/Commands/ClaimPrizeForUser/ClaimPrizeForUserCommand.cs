@@ -28,7 +28,7 @@ namespace Application.Prizes.Commands.ClaimPrizeForUser
 
       public async Task<bool> Handle(ClaimPrizeForUserCommand request, CancellationToken cancellationToken)
       {
-        var prizeToClaim = await dbContext.Prizes.FindAsync(request.PrizeId);
+        var prizeToClaim = await dbContext.Prizes.FirstOrDefaultAsync(x => x.Id == request.PrizeId, cancellationToken);
 
         var member = await dbContext.ChannelMembers
           .Include(x => x.ClaimedPrizes)

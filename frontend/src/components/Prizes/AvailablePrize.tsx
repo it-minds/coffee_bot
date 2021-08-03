@@ -1,10 +1,10 @@
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import CupImage from "components/Images/CupImage";
 import React, { FC } from "react";
-import { IPrizeIdDTO } from "services/backend/nswagts";
+import { PrizeIdDTO } from "services/backend/nswagts";
 
 interface Props {
-  prize: IPrizeIdDTO;
+  prize: PrizeIdDTO;
   isClaimed?: boolean;
 }
 

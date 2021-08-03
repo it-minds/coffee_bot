@@ -12,17 +12,17 @@ import {
   NumberInputStepper,
   Select
 } from "@chakra-ui/react";
+import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
 import { useNSwagClient } from "hooks/useNSwagClient";
-import { useRouter } from "next/router";
-import React, { FC, useMemo } from "react";
+import React, { FC, useContext } from "react";
 import { useState } from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { CreateChannelPrizeCommand, IPrizeDTO, PrizesClient } from "services/backend/nswagts";
+import { PrizeDTO, PrizesClient } from "services/backend/nswagts";
 
 const customDropdown = (
-  setValue: (str: keyof IPrizeDTO, value: unknown) => unknown,
+  setValue: (str: keyof PrizeDTO, value: unknown) => unknown,
   value: string
 ) => {
   if (value === "onetime") {
@@ -42,40 +42,33 @@ interface Props {
 }
 
 const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
-  const { query } = useRouter();
-  const channelId = useMemo(() => {
-    if (!query.channelId) return;
-    const channelId = parseInt(query.channelId as string);
-    return channelId;
-  }, [query]);
+  const { chosenChannel } = useContext(ChosenChannelContext);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue
-  } = useForm<IPrizeDTO>();
+  } = useForm<PrizeDTO>();
 
   const [loading, setLoading] = useState(false);
 
   const { genClient } = useNSwagClient(PrizesClient);
 
   const onSubmit = useCallback(
-    async (data: IPrizeDTO) => {
+    async (data: PrizeDTO) => {
       setLoading(true);
-      data.channelSettingsId = channelId;
+      data.channelSettingsId = chosenChannel.id;
 
       const client = await genClient();
-      await client.createChannelPrize(
-        new CreateChannelPrizeCommand({
-          input: data
-        })
-      );
+      await client.createChannelPrize({
+        input: data
+      });
 
       onSuccess();
       setLoading(false);
     },
-    [channelId]
+    [chosenChannel.id]
   );
 
   useEffect(() => {

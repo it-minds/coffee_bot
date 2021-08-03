@@ -23,14 +23,14 @@ type AuthHook<T> = {
 
 export const skipauth = "/logincallback";
 
-export const useAuth = (authSkip: string): AuthHook<UserDTO> => {
+export const useAuth = (): AuthHook<UserDTO> => {
   const [authStage, setAuthStage] = useState(AuthStage.CHECKING);
   const [authCounter, setAuthCounter] = useState(0);
   const [activeUser, setActiveUser] = useState<UserDTO>(null);
   const router = useRouter();
 
   const checkAuth = useCallback(async () => {
-    if (router.pathname == authSkip) return;
+    if (router.pathname == skipauth) return;
     setAuthStage(AuthStage.CHECKING);
 
     const client: AuthClient = await api(AuthClient);

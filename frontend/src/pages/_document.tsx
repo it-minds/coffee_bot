@@ -16,7 +16,7 @@ class Document extends NextDocument {
     return NextDocument.getInitialProps(ctx);
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <Html lang="en-US">
         <Head />

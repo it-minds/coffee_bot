@@ -48,9 +48,6 @@ namespace Application.Prizes.Commands.CreateChannelPrize
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var test = PrizeHub.GetConnectedSlackUserIds;
-        var test2 = PrizeHub.GetUserConnectionIds(test.First());
-
         await hubContext.Clients.All.NewPrize(mapper.Map<PrizeIdDTO>(prize));
 
         return 1;

@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,29 +14,27 @@ namespace Application.ChannelSetting.Commands.UpdateChannelPaused
   {
     public UpdateChannelPauseInput Input { get; set; }
 
-    public class UpdateChannelPauseCommandHandler : IRequestHandler<UpdateChannelPauseCommand>
+    public class UpdateChannelPauseCommandHandler : CommandBase, IRequestHandler<UpdateChannelPauseCommand>
     {
-      private readonly IApplicationDbContext _context;
-      private readonly ICurrentUserService _currentUserService;
+      private readonly ICurrentUserService currentUserService;
 
-      public UpdateChannelPauseCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+      public UpdateChannelPauseCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService) : base(context)
       {
-        _context = context;
-        _currentUserService = currentUserService;
+        this.currentUserService = currentUserService;
       }
 
       public async Task<Unit> Handle(UpdateChannelPauseCommand request, CancellationToken cancellationToken)
       {
-        var channelMember = await _context.ChannelMembers
-          .Where(e => e.SlackUserId == _currentUserService.UserSlackId && e.ChannelSettingsId == request.Input.ChannelId)
+        var channelMember = await dbContext.ChannelMembers
+          .Where(e => e.SlackUserId == currentUserService.UserSlackId && e.ChannelSettingsId == request.Input.ChannelId)
           .FirstOrDefaultAsync(cancellationToken);
 
         if (channelMember == null) throw new NotFoundException(nameof(ChannelMember), request.Input);
 
         channelMember.OnPause = request.Input.Paused;
         channelMember.ReturnFromPauseDate = request.Input.UnPauseDate;
-        _context.ChannelMembers.Update(channelMember);
-        await _context.SaveChangesAsync(cancellationToken);
+        dbContext.ChannelMembers.Update(channelMember);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
       }

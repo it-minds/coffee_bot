@@ -16,13 +16,5 @@ namespace Web.Services
     public string UserEmail => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
     public string UserSlackId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
     public string SlackToken => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.UserData);
-    public string SignalRConnectionId
-    {
-      get
-      {
-        _httpContextAccessor.HttpContext.Request.Headers.TryGetValue("xxx-signalr-connectionId", out var value);
-        return value;
-      }
-    }
   }
 }

@@ -11,7 +11,8 @@ export interface NSwagClient<T extends ClientBase> {
   new (
     configuration: ClientConfiguration,
     baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }
+    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
+    ...args: unknown[]
   ): T;
 }
 

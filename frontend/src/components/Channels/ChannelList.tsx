@@ -7,7 +7,6 @@ import {
   ListIcon,
   ListItem,
   Text,
-  useBreakpointValue,
   useColorModeValue
 } from "@chakra-ui/react";
 import { BiShield } from "@react-icons/all-files/bi/BiShield";
@@ -38,20 +37,12 @@ const ChannelList: FC = () => {
     }
   }, []);
 
-  const activePause = useBreakpointValue({
-    base: "active",
-    md: "pause/active"
-  });
-
-  const bgColor = useColorModeValue("gray.200", "gray.700");
-  const border = useColorModeValue("whiteAlpha.700", "whiteAlpha.300");
-
   return (
     <Container maxW="4xl">
       <Heading size="lg" textAlign="center">
         Buddy Channels!
       </Heading>
-      <Box p={8} mt={8} bgColor={bgColor} borderRadius={24}>
+      <Box p={8} mt={8} bgColor={useColorModeValue("gray.200", "gray.700")} borderRadius={24}>
         <Text>
           Welcome to your Coffee Buddies home away from home. Here you will find the channels
           available for you to join or should you be daring type where you get to create a new one!

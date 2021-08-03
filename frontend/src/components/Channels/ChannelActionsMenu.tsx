@@ -104,11 +104,20 @@ const ChannelActionsMenu: FC<Props> = ({ channelId }) => {
               <MenuItem
                 onClick={() =>
                   router.push(
-                    "/channels/[channelId]/prizes/admin",
-                    "/channels/" + channelId + "/prizes/admin"
+                    "/channels/[channelId]/admin/prizes",
+                    "/channels/" + channelId + "/admin/prizes"
                   )
                 }>
                 Edit Channel Prizes
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  router.push(
+                    "/channels/[channelId]/admin/prizes/claims",
+                    "/channels/" + channelId + "/admin/prizes/claims"
+                  )
+                }>
+                Handle Prize Claims
               </MenuItem>
             </MenuGroup>
           </>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Application;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Hubs;
 using Application.Prizes.Common;
@@ -24,6 +25,13 @@ namespace Web.DocumentProcessors
       if (!context.SchemaResolver.HasSchema(type, true))
       {
         context.SchemaGenerator.Generate(type, context.SchemaResolver);
+      }
+
+      var hubType = new AllHubsTypeGenerator().Generate();
+
+      if (!context.SchemaResolver.HasSchema(hubType, true))
+      {
+        context.SchemaGenerator.Generate(hubType, context.SchemaResolver);
       }
     }
 

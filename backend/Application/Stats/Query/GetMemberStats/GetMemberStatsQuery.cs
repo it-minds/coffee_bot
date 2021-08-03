@@ -13,11 +13,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Stats.Query.GetMemberStats
 {
   [AuthorizeAttribute]
-  public class GetMemberStatsQuery: IRequest<List<StatsDto>>
+  public class GetMemberStatsQuery: IRequest<IEnumerable<StatsDto>>
   {
     public int ChannelId { get; set; }
 
-    public class GetMemberStatsQueryHandler : IRequestHandler<GetMemberStatsQuery, List<StatsDto>>
+    public class GetMemberStatsQueryHandler : IRequestHandler<GetMemberStatsQuery, IEnumerable<StatsDto>>
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly IMapper mapper;
@@ -28,7 +28,7 @@ namespace Application.Stats.Query.GetMemberStats
         this.mapper = mapper;
       }
 
-      public async Task<List<StatsDto>> Handle(GetMemberStatsQuery request, CancellationToken cancellationToken)
+      public async Task<IEnumerable<StatsDto>> Handle(GetMemberStatsQuery request, CancellationToken cancellationToken)
       {
         var groups = await applicationDbContext.CoffeeRoundGroupMembers
           .Include(x => x.CoffeeRoundGroup)

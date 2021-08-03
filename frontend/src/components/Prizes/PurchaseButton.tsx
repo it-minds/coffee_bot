@@ -3,12 +3,12 @@ import { MdShoppingCart } from "@react-icons/all-files/md/MdShoppingCart";
 import { useHover } from "hooks/useHover";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { useCallback, useState } from "react";
-import { ClaimPrizeForUserCommand, IPrizeIdDTO, PrizesClient } from "services/backend/nswagts";
+import { PrizeIdDTO, PrizesClient } from "services/backend/nswagts";
 
 import { PFC } from "./PrizeFunctionalComponent";
 
 interface Props {
-  prize: IPrizeIdDTO;
+  prize: PrizeIdDTO;
   isPurchasable?: boolean;
   addCallback?: (result: boolean) => void | Promise<void>;
 }
@@ -26,11 +26,9 @@ const PurchaseButton: PFC<Props> = ({ prize, isPurchasable = true, addCallback =
     const client = await genClient();
 
     const result = await client
-      .claimPrizeForUser(
-        new ClaimPrizeForUserCommand({
-          prizeId: prize.id
-        })
-      )
+      .claimPrizeForUser({
+        prizeId: prize.id
+      })
       .catch(() => false);
 
     await addCallback(result);

@@ -25,7 +25,7 @@ namespace Domain.Entities
     /// </summary>
     public bool IsRepeatable { get; set; }
 
-    public bool IsValid { get => IsMilestone ^ IsRepeatable; } // Exclusive OR
+    public bool IsValid { get => !(IsMilestone & IsRepeatable); } // Exclusive OR
 
 
     public int ChannelSettingsId { get; set; }

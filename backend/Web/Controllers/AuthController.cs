@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SlackAuth.Query.GetAuthUrl;
 using SlackAuth.Query.GetUserFromCallback;
+using System.Threading;
 using System.Threading.Tasks;
 using User.Query.CheckCurrentUser;
 using Web.Options;
@@ -21,10 +22,9 @@ namespace Web.Controllers
     }
 
     [HttpPut]
-    public async Task<ActionResult<UserDTO>> CheckAuth()
-    {
-      return await Mediator.Send(new CheckCurrentUserQuery());
-    }
+    public async Task<ActionResult<UserDTO>> CheckAuth([FromQuery] CheckCurrentUserQuery request, CancellationToken cancellationToken) =>
+      await Mediator.Send(request, cancellationToken);
+
 
     [HttpGet("login")]
     public async Task<ActionResult<bool>> Login()

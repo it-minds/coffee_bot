@@ -1,12 +1,10 @@
-import "ts-array-ext/sortByAttr";
-
 import { Button, Select, Stack, StackDirection, useBreakpointValue } from "@chakra-ui/react";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import React from "react";
 import { useState } from "react";
 import { FC } from "react";
-import { ChannelClient, ISimpleChannelDTO } from "services/backend/nswagts";
+import { ChannelClient, SimpleChannelDTO } from "services/backend/nswagts";
 
 const NewChannelButton: FC = () => {
   const stackDirect = useBreakpointValue<StackDirection>({
@@ -14,12 +12,13 @@ const NewChannelButton: FC = () => {
     md: "row"
   });
 
-  const [availChannels, setAvailChannels] = useState<ISimpleChannelDTO[]>([]);
+  const [availChannels, setAvailChannels] = useState<SimpleChannelDTO[]>([]);
 
   const { genClient } = useNSwagClient(ChannelClient);
 
   useEffectAsync(async () => {
     const client = await genClient();
+
     const channels = await client.getMyAvailableChannels();
 
     setAvailChannels(

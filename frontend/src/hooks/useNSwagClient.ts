@@ -11,11 +11,11 @@ interface NSwagClientType<T> {
 }
 
 const genNSwagClient = async <T extends ClientBase, V extends NSwagClient<T> = NSwagClient<T>>(
-  client: V,
+  Client: V,
   checkAuth: () => Promise<void>,
   abortController = new IsomorphicAbortController()
 ) => {
-  const initializedClient = await api(client);
+  const initializedClient = await api(Client);
 
   initializedClient.setStatusCallbackMap({
     401: async res => {

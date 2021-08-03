@@ -34,7 +34,7 @@ namespace User.Query.CheckCurrentUser
         var channelsToAdmin = await dbContext.ChannelMembers
           .Where(x => x.IsAdmin && x.SlackUserId == currentUserService.UserSlackId)
           .Select(x => x.ChannelSettingsId)
-          .ToListAsync();
+          .ToListAsync(cancellationToken);
 
         return new UserDTO
         {

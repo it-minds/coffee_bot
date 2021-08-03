@@ -5,6 +5,8 @@ export const usePWA = (): void => {
   // This hook only run once in browser after the component is rendered for the first time.
   // It has same effect as the old componentDidMount lifecycle callback.
   useEffect(() => {
+    if (process.env.NODE_ENV == "development") return;
+
     if (process.browser && "serviceWorker" in navigator && window?.workbox !== undefined) {
       const wb = window.workbox;
       // add event listeners to handle any of PWA lifecycle event

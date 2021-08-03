@@ -6,9 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Hangfire.SqlServer;
 using Rounds.Commands.RoundFinisherCommand;
 using Rounds.Commands.RoundInitiatorCommand;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Rounds.Commands.RoundMidwayCheckupCommand;
+using Application.User.Commands.CheckParticipationStatus;
 
 namespace Application
 {
@@ -36,30 +35,36 @@ namespace Application
       return services;
     }
 
-    public static IMediator SetupHangfireJobs(this IMediator mediator, IWebHostEnvironment env)
+    public static IMediator SetupHangfireJobs(this IMediator mediator, bool isDev)
     {
       mediator.RecurringJob(
         new SyncronizeChannelsCommand { },
         "Syncronize Channels",
-        env.IsDevelopment() ? Cron.Never() : Cron.Hourly(minute: 30)
+        isDev ? Cron.Never() : Cron.Hourly(minute: 30)
       );
 
       mediator.RecurringJob(
         new RoundFinisherCommand { },
         "Round Finisher",
-        env.IsDevelopment() ? Cron.Never() : "0 12-17 * * *"
+        isDev ? Cron.Never() : "0 12-17 * * *"
       );
 
       mediator.RecurringJob(
         new RoundInitiatorCommand { },
         "Round Initiator",
-        env.IsDevelopment() ? Cron.Never() : "0 8-12 * * *"
+        isDev ? Cron.Never() : "0 8-12 * * *"
       );
 
       mediator.RecurringJob(
         new RoundMidwayCheckupCommand { },
         "Round Midway",
-        env.IsDevelopment() ? Cron.Never() : "0 11 * * *"
+        isDev ? Cron.Never() : "0 11 * * *"
+      );
+
+      mediator.RecurringJob(
+        new CheckParticipationStatusCommand { },
+        "Check Repaticipation",
+        isDev ? Cron.Never() : Cron.Daily(0)
       );
 
 

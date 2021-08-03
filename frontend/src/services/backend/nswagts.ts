@@ -48,10 +48,6 @@ export class ClientBase {
     this.customHeaders[key] = value;
   }
 
-  public addSignalRConnectionId(connectionId: string) {
-    this.addCustomHeader("xxx-signalr-connectionId", connectionId);
-  }
-
   protected async transformOptions(options: RequestInit): Promise<RequestInit> {
     if (this.signal != null) options.signal = this.signal;
 
@@ -181,14 +177,7 @@ export class ClientBase {
   }
 }
 
-export interface IAuthClient {
-    checkAuth(): Promise<UserDTO>;
-    login(): Promise<boolean>;
-    loginCallback(code?: string | null | undefined, state?: string | null | undefined): Promise<boolean>;
-    installCallback(code?: string | null | undefined, state?: string | null | undefined): Promise<boolean>;
-}
-
-export class AuthClient extends ClientBase implements IAuthClient {
+export class AuthClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -199,8 +188,10 @@ export class AuthClient extends ClientBase implements IAuthClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    checkAuth(): Promise<UserDTO> {
-        let url_ = this.baseUrl + "/api/Auth";
+    checkAuth(request?: CheckCurrentUserQuery | null | undefined): Promise<UserDTO> {
+        let url_ = this.baseUrl + "/api/Auth?";
+        if (request !== undefined && request !== null)
+            url_ += "request=" + encodeURIComponent("" + request) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -223,8 +214,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserDTO.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <UserDTO>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -259,8 +249,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -299,8 +288,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -339,8 +327,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -352,18 +339,7 @@ export class AuthClient extends ClientBase implements IAuthClient {
     }
 }
 
-export interface IChannelClient {
-    getMyChannelMemberships(request?: GetMyChannelMembershipsQuery | null | undefined): Promise<ChannelMemberDTO[]>;
-    getMyChannelMembership(channelSettingsId: number): Promise<ChannelMemberDTO>;
-    getChannelSettings(channelSettingsId?: number | undefined): Promise<ChannelSettingsIdDto>;
-    getMyAvailableChannels(): Promise<SimpleChannelDTO[]>;
-    updateChannelState(command: UpdateChannelPauseCommand): Promise<FileResponse>;
-    updateChannelSettings(id: number, command: UpdateChannelSettingsCommand): Promise<FileResponse>;
-    getRounds(id: number): Promise<RoundSnipDto[]>;
-    getActiveRound(id: number): Promise<ActiveRoundDto>;
-}
-
-export class ChannelClient extends ClientBase implements IChannelClient {
+export class ChannelClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -400,15 +376,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(ChannelMemberDTO.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <ChannelMemberDTO[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -446,8 +414,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ChannelMemberDTO.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <ChannelMemberDTO>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -486,8 +453,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ChannelSettingsIdDto.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <ChannelSettingsIdDto>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -522,15 +488,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(SimpleChannelDTO.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <SimpleChannelDTO[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -647,15 +605,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(RoundSnipDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <RoundSnipDto[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -693,8 +643,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ActiveRoundDto.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <ActiveRoundDto>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -706,11 +655,7 @@ export class ChannelClient extends ClientBase implements IChannelClient {
     }
 }
 
-export interface IEventClient {
-    allEventSubscriber(body: any): Promise<string>;
-}
-
-export class EventClient extends ClientBase implements IEventClient {
+export class EventClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -749,8 +694,7 @@ export class EventClient extends ClientBase implements IEventClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <string>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -762,11 +706,7 @@ export class EventClient extends ClientBase implements IEventClient {
     }
 }
 
-export interface IGalleryClient {
-    getAll(channelId?: number | undefined): Promise<StandardGroupDto[]>;
-}
-
-export class GalleryClient extends ClientBase implements IGalleryClient {
+export class GalleryClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -777,17 +717,17 @@ export class GalleryClient extends ClientBase implements IGalleryClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getAll(channelId?: number | undefined): Promise<StandardGroupDto[]> {
-        let url_ = this.baseUrl + "/api/Gallery/all?";
-        if (channelId === null)
-            throw new Error("The parameter 'channelId' cannot be null.");
-        else if (channelId !== undefined)
-            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+    getAll(request: GetAllPhotosQuery): Promise<StandardGroupDto[]> {
+        let url_ = this.baseUrl + "/api/Gallery/all";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(request);
+
         let options_ = <RequestInit>{
+            body: content_,
             method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -805,15 +745,7 @@ export class GalleryClient extends ClientBase implements IGalleryClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(StandardGroupDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <StandardGroupDto[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -825,12 +757,7 @@ export class GalleryClient extends ClientBase implements IGalleryClient {
     }
 }
 
-export interface IHealthClient {
-    getBackendHealth(): Promise<boolean>;
-    getCancelTest(): Promise<boolean>;
-}
-
-export class HealthClient extends ClientBase implements IHealthClient {
+export class HealthClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -865,8 +792,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -901,8 +827,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -914,11 +839,7 @@ export class HealthClient extends ClientBase implements IHealthClient {
     }
 }
 
-export interface IInteractionClient {
-    interactionResponse(payload?: string | null | undefined): Promise<void>;
-}
-
-export class InteractionClient extends ClientBase implements IInteractionClient {
+export class InteractionClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -967,16 +888,7 @@ export class InteractionClient extends ClientBase implements IInteractionClient 
     }
 }
 
-export interface IPrizesClient {
-    getChannelPrizes(channelId?: number | undefined): Promise<PrizeIdDTO[]>;
-    createChannelPrize(body: CreateChannelPrizeCommand): Promise<number>;
-    getUserPrizes(slackUserId: string | null, channelId?: number | undefined): Promise<UserPrizesDTO>;
-    getMyPrizes(channelId?: number | undefined): Promise<UserPrizesDTO>;
-    claimPrizeForUser(body: ClaimPrizeForUserCommand): Promise<boolean>;
-    getClaimedPrizesForApproval(channelSettingsId?: number | undefined): Promise<ClaimedUserPrizeDTO[]>;
-}
-
-export class PrizesClient extends ClientBase implements IPrizesClient {
+export class PrizesClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -987,12 +899,12 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getChannelPrizes(channelId?: number | undefined): Promise<PrizeIdDTO[]> {
+    getChannelPrizes(channelSettingsId?: number | undefined): Promise<PrizeIdDTO[]> {
         let url_ = this.baseUrl + "/api/Prizes?";
-        if (channelId === null)
-            throw new Error("The parameter 'channelId' cannot be null.");
-        else if (channelId !== undefined)
-            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        if (channelSettingsId === null)
+            throw new Error("The parameter 'channelSettingsId' cannot be null.");
+        else if (channelSettingsId !== undefined)
+            url_ += "ChannelSettingsId=" + encodeURIComponent("" + channelSettingsId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1015,15 +927,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(PrizeIdDTO.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <PrizeIdDTO[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1062,8 +966,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <number>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1105,8 +1008,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserPrizesDTO.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <UserPrizesDTO>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1145,8 +1047,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserPrizesDTO.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <UserPrizesDTO>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1185,8 +1086,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1225,15 +1125,7 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(ClaimedUserPrizeDTO.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <ClaimedUserPrizeDTO[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1243,13 +1135,48 @@ export class PrizesClient extends ClientBase implements IPrizesClient {
         }
         return Promise.resolve<ClaimedUserPrizeDTO[]>(<any>null);
     }
+
+    deliverClaimedPrize(body: DeliverClaimedPrizeCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/Prizes/admin/claim";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processDeliverClaimedPrize(_response));
+        });
+    }
+
+    protected processDeliverClaimedPrize(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <number>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(<any>null);
+    }
 }
 
-export interface IRoundClient {
-    getRound(id: number): Promise<ActiveRoundDto>;
-}
-
-export class RoundClient extends ClientBase implements IRoundClient {
+export class RoundClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -1260,11 +1187,12 @@ export class RoundClient extends ClientBase implements IRoundClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getRound(id: number): Promise<ActiveRoundDto> {
-        let url_ = this.baseUrl + "/api/Round/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    getRound(roundId?: number | undefined): Promise<ActiveRoundDto> {
+        let url_ = this.baseUrl + "/api/Round?";
+        if (roundId === null)
+            throw new Error("The parameter 'roundId' cannot be null.");
+        else if (roundId !== undefined)
+            url_ += "RoundId=" + encodeURIComponent("" + roundId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1287,8 +1215,7 @@ export class RoundClient extends ClientBase implements IRoundClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ActiveRoundDto.fromJS(resultData200);
+            result200 = _responseText === "" ? null : <ActiveRoundDto>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1300,11 +1227,7 @@ export class RoundClient extends ClientBase implements IRoundClient {
     }
 }
 
-export interface IStatsClient {
-    getMemberStats(channelId?: number | undefined): Promise<StatsDto[]>;
-}
-
-export class StatsClient extends ClientBase implements IStatsClient {
+export class StatsClient extends ClientBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -1320,7 +1243,7 @@ export class StatsClient extends ClientBase implements IStatsClient {
         if (channelId === null)
             throw new Error("The parameter 'channelId' cannot be null.");
         else if (channelId !== undefined)
-            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+            url_ += "ChannelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1343,15 +1266,7 @@ export class StatsClient extends ClientBase implements IStatsClient {
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(StatsDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = _responseText === "" ? null : <StatsDto[]>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -1363,95 +1278,20 @@ export class StatsClient extends ClientBase implements IStatsClient {
     }
 }
 
-export class AuthUser implements IAuthUser {
-    slackUserId?: string | null;
-    slackToken?: string | null;
-    email?: string | null;
-
-    constructor(data?: IAuthUser) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
-            this.slackToken = _data["slackToken"] !== undefined ? _data["slackToken"] : <any>null;
-            this.email = _data["email"] !== undefined ? _data["email"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): AuthUser {
-        data = typeof data === 'object' ? data : {};
-        let result = new AuthUser();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
-        data["slackToken"] = this.slackToken !== undefined ? this.slackToken : <any>null;
-        data["email"] = this.email !== undefined ? this.email : <any>null;
-        return data; 
-    }
-}
-
-export interface IAuthUser {
+export interface AuthUser {
     slackUserId?: string | null;
     slackToken?: string | null;
     email?: string | null;
 }
 
-export class UserDTO extends AuthUser implements IUserDTO {
-    channelsToAdmin?: number[] | null;
-
-    constructor(data?: IUserDTO) {
-        super(data);
-    }
-
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            if (Array.isArray(_data["channelsToAdmin"])) {
-                this.channelsToAdmin = [] as any;
-                for (let item of _data["channelsToAdmin"])
-                    this.channelsToAdmin!.push(item);
-            }
-            else {
-                this.channelsToAdmin = <any>null;
-            }
-        }
-    }
-
-    static fromJS(data: any): UserDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.channelsToAdmin)) {
-            data["channelsToAdmin"] = [];
-            for (let item of this.channelsToAdmin)
-                data["channelsToAdmin"].push(item);
-        }
-        super.toJSON(data);
-        return data; 
-    }
-}
-
-export interface IUserDTO extends IAuthUser {
+export interface UserDTO extends AuthUser {
     channelsToAdmin?: number[] | null;
 }
 
-export class ChannelMemberDTO implements IChannelMemberDTO {
+export interface CheckCurrentUserQuery {
+}
+
+export interface ChannelMemberDTO {
     id?: number;
     slackChannelId?: string | null;
     slackUserId?: string | null;
@@ -1463,122 +1303,9 @@ export class ChannelMemberDTO implements IChannelMemberDTO {
     isRemoved?: boolean;
     returnFromPauseDate?: Date | null;
     channelSettings?: ChannelSettingsIdDto | null;
-
-    constructor(data?: IChannelMemberDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.channelSettings = data.channelSettings && !(<any>data.channelSettings).toJSON ? new ChannelSettingsIdDto(data.channelSettings) : <ChannelSettingsIdDto>this.channelSettings; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
-            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
-            this.slackName = _data["slackName"] !== undefined ? _data["slackName"] : <any>null;
-            this.channelSettingsId = _data["channelSettingsId"] !== undefined ? _data["channelSettingsId"] : <any>null;
-            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
-            this.isAdmin = _data["isAdmin"] !== undefined ? _data["isAdmin"] : <any>null;
-            this.onPause = _data["onPause"] !== undefined ? _data["onPause"] : <any>null;
-            this.isRemoved = _data["isRemoved"] !== undefined ? _data["isRemoved"] : <any>null;
-            this.returnFromPauseDate = _data["returnFromPauseDate"] ? new Date(_data["returnFromPauseDate"].toString()) : <any>null;
-            this.channelSettings = _data["channelSettings"] ? ChannelSettingsIdDto.fromJS(_data["channelSettings"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ChannelMemberDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new ChannelMemberDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
-        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
-        data["slackName"] = this.slackName !== undefined ? this.slackName : <any>null;
-        data["channelSettingsId"] = this.channelSettingsId !== undefined ? this.channelSettingsId : <any>null;
-        data["points"] = this.points !== undefined ? this.points : <any>null;
-        data["isAdmin"] = this.isAdmin !== undefined ? this.isAdmin : <any>null;
-        data["onPause"] = this.onPause !== undefined ? this.onPause : <any>null;
-        data["isRemoved"] = this.isRemoved !== undefined ? this.isRemoved : <any>null;
-        data["returnFromPauseDate"] = this.returnFromPauseDate ? this.returnFromPauseDate.toISOString() : <any>null;
-        data["channelSettings"] = this.channelSettings ? this.channelSettings.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface IChannelMemberDTO {
-    id?: number;
-    slackChannelId?: string | null;
-    slackUserId?: string | null;
-    slackName?: string | null;
-    channelSettingsId?: number;
-    points?: number;
-    isAdmin?: boolean;
-    onPause?: boolean;
-    isRemoved?: boolean;
-    returnFromPauseDate?: Date | null;
-    channelSettings?: IChannelSettingsIdDto | null;
-}
-
-export class ChannelSettingsDto implements IChannelSettingsDto {
-    groupSize?: number;
-    startsDay?: DayOfWeek;
-    weekRepeat?: number;
-    durationInDays?: number;
-    individualMessage?: boolean;
-    slackChannelId?: string | null;
-    slackChannelName?: string | null;
-
-    constructor(data?: IChannelSettingsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.groupSize = _data["groupSize"] !== undefined ? _data["groupSize"] : <any>null;
-            this.startsDay = _data["startsDay"] !== undefined ? _data["startsDay"] : <any>null;
-            this.weekRepeat = _data["weekRepeat"] !== undefined ? _data["weekRepeat"] : <any>null;
-            this.durationInDays = _data["durationInDays"] !== undefined ? _data["durationInDays"] : <any>null;
-            this.individualMessage = _data["individualMessage"] !== undefined ? _data["individualMessage"] : <any>null;
-            this.slackChannelId = _data["slackChannelId"] !== undefined ? _data["slackChannelId"] : <any>null;
-            this.slackChannelName = _data["slackChannelName"] !== undefined ? _data["slackChannelName"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ChannelSettingsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ChannelSettingsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["groupSize"] = this.groupSize !== undefined ? this.groupSize : <any>null;
-        data["startsDay"] = this.startsDay !== undefined ? this.startsDay : <any>null;
-        data["weekRepeat"] = this.weekRepeat !== undefined ? this.weekRepeat : <any>null;
-        data["durationInDays"] = this.durationInDays !== undefined ? this.durationInDays : <any>null;
-        data["individualMessage"] = this.individualMessage !== undefined ? this.individualMessage : <any>null;
-        data["slackChannelId"] = this.slackChannelId !== undefined ? this.slackChannelId : <any>null;
-        data["slackChannelName"] = this.slackChannelName !== undefined ? this.slackChannelName : <any>null;
-        return data; 
-    }
-}
-
-export interface IChannelSettingsDto {
+export interface ChannelSettingsDto {
     groupSize?: number;
     startsDay?: DayOfWeek;
     weekRepeat?: number;
@@ -1588,36 +1315,7 @@ export interface IChannelSettingsDto {
     slackChannelName?: string | null;
 }
 
-export class ChannelSettingsIdDto extends ChannelSettingsDto implements IChannelSettingsIdDto {
-    id?: number;
-
-    constructor(data?: IChannelSettingsIdDto) {
-        super(data);
-    }
-
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ChannelSettingsIdDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ChannelSettingsIdDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        super.toJSON(data);
-        return data; 
-    }
-}
-
-export interface IChannelSettingsIdDto extends IChannelSettingsDto {
+export interface ChannelSettingsIdDto extends ChannelSettingsDto {
     id?: number;
 }
 
@@ -1631,249 +1329,30 @@ export enum DayOfWeek {
     Saturday = 6,
 }
 
-export class GetMyChannelMembershipsQuery implements IGetMyChannelMembershipsQuery {
-
-    constructor(data?: IGetMyChannelMembershipsQuery) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-    }
-
-    static fromJS(data: any): GetMyChannelMembershipsQuery {
-        data = typeof data === 'object' ? data : {};
-        let result = new GetMyChannelMembershipsQuery();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        return data; 
-    }
+export interface GetMyChannelMembershipsQuery {
 }
 
-export interface IGetMyChannelMembershipsQuery {
-}
-
-export class SimpleChannelDTO implements ISimpleChannelDTO {
-    id?: string | null;
-    name?: string | null;
-    isPrivate?: boolean;
-
-    constructor(data?: ISimpleChannelDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.name = _data["name"] !== undefined ? _data["name"] : <any>null;
-            this.isPrivate = _data["isPrivate"] !== undefined ? _data["isPrivate"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): SimpleChannelDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new SimpleChannelDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["name"] = this.name !== undefined ? this.name : <any>null;
-        data["isPrivate"] = this.isPrivate !== undefined ? this.isPrivate : <any>null;
-        return data; 
-    }
-}
-
-export interface ISimpleChannelDTO {
+export interface SimpleChannelDTO {
     id?: string | null;
     name?: string | null;
     isPrivate?: boolean;
 }
 
-export class UpdateChannelPauseCommand implements IUpdateChannelPauseCommand {
+export interface UpdateChannelPauseCommand {
     input?: UpdateChannelPauseInput | null;
-
-    constructor(data?: IUpdateChannelPauseCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.input = data.input && !(<any>data.input).toJSON ? new UpdateChannelPauseInput(data.input) : <UpdateChannelPauseInput>this.input; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.input = _data["input"] ? UpdateChannelPauseInput.fromJS(_data["input"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): UpdateChannelPauseCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateChannelPauseCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface IUpdateChannelPauseCommand {
-    input?: IUpdateChannelPauseInput | null;
-}
-
-export class UpdateChannelPauseInput implements IUpdateChannelPauseInput {
-    channelId?: number;
-    paused?: boolean;
-    unPauseDate?: Date | null;
-
-    constructor(data?: IUpdateChannelPauseInput) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
-            this.paused = _data["paused"] !== undefined ? _data["paused"] : <any>null;
-            this.unPauseDate = _data["unPauseDate"] ? new Date(_data["unPauseDate"].toString()) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): UpdateChannelPauseInput {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateChannelPauseInput();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
-        data["paused"] = this.paused !== undefined ? this.paused : <any>null;
-        data["unPauseDate"] = this.unPauseDate ? this.unPauseDate.toISOString() : <any>null;
-        return data; 
-    }
-}
-
-export interface IUpdateChannelPauseInput {
+export interface UpdateChannelPauseInput {
     channelId?: number;
     paused?: boolean;
     unPauseDate?: Date | null;
 }
 
-export class UpdateChannelSettingsCommand implements IUpdateChannelSettingsCommand {
+export interface UpdateChannelSettingsCommand {
     settings?: ChannelSettingsDto | null;
-
-    constructor(data?: IUpdateChannelSettingsCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.settings = data.settings && !(<any>data.settings).toJSON ? new ChannelSettingsDto(data.settings) : <ChannelSettingsDto>this.settings; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.settings = _data["settings"] ? ChannelSettingsDto.fromJS(_data["settings"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): UpdateChannelSettingsCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateChannelSettingsCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["settings"] = this.settings ? this.settings.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface IUpdateChannelSettingsCommand {
-    settings?: IChannelSettingsDto | null;
-}
-
-export class RoundSnipDto implements IRoundSnipDto {
-    id?: number;
-    channelId?: number;
-    active?: boolean;
-    startDate?: Date;
-    endDate?: Date;
-    meetupPercentage?: number;
-    photoPercentage?: number;
-
-    constructor(data?: IRoundSnipDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
-            this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
-            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
-            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
-            this.meetupPercentage = _data["meetupPercentage"] !== undefined ? _data["meetupPercentage"] : <any>null;
-            this.photoPercentage = _data["photoPercentage"] !== undefined ? _data["photoPercentage"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): RoundSnipDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new RoundSnipDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
-        data["active"] = this.active !== undefined ? this.active : <any>null;
-        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
-        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
-        data["meetupPercentage"] = this.meetupPercentage !== undefined ? this.meetupPercentage : <any>null;
-        data["photoPercentage"] = this.photoPercentage !== undefined ? this.photoPercentage : <any>null;
-        return data; 
-    }
-}
-
-export interface IRoundSnipDto {
+export interface RoundSnipDto {
     id?: number;
     channelId?: number;
     active?: boolean;
@@ -1883,7 +1362,7 @@ export interface IRoundSnipDto {
     photoPercentage?: number;
 }
 
-export class ActiveRoundDto implements IActiveRoundDto {
+export interface ActiveRoundDto {
     id?: number;
     channelId?: number;
     active?: boolean;
@@ -1894,279 +1373,34 @@ export class ActiveRoundDto implements IActiveRoundDto {
     previousPhoto?: number | null;
     previousId?: number | null;
     nextId?: number | null;
-
-    constructor(data?: IActiveRoundDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            if (data.groups) {
-                this.groups = [];
-                for (let i = 0; i < data.groups.length; i++) {
-                    let item = data.groups[i];
-                    this.groups[i] = item && !(<any>item).toJSON ? new ActiveRoundGroupDto(item) : <ActiveRoundGroupDto>item;
-                }
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.channelId = _data["channelId"] !== undefined ? _data["channelId"] : <any>null;
-            this.active = _data["active"] !== undefined ? _data["active"] : <any>null;
-            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>null;
-            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>null;
-            if (Array.isArray(_data["groups"])) {
-                this.groups = [] as any;
-                for (let item of _data["groups"])
-                    this.groups!.push(ActiveRoundGroupDto.fromJS(item));
-            }
-            else {
-                this.groups = <any>null;
-            }
-            this.previousMeetup = _data["previousMeetup"] !== undefined ? _data["previousMeetup"] : <any>null;
-            this.previousPhoto = _data["previousPhoto"] !== undefined ? _data["previousPhoto"] : <any>null;
-            this.previousId = _data["previousId"] !== undefined ? _data["previousId"] : <any>null;
-            this.nextId = _data["nextId"] !== undefined ? _data["nextId"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ActiveRoundDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActiveRoundDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["channelId"] = this.channelId !== undefined ? this.channelId : <any>null;
-        data["active"] = this.active !== undefined ? this.active : <any>null;
-        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>null;
-        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>null;
-        if (Array.isArray(this.groups)) {
-            data["groups"] = [];
-            for (let item of this.groups)
-                data["groups"].push(item.toJSON());
-        }
-        data["previousMeetup"] = this.previousMeetup !== undefined ? this.previousMeetup : <any>null;
-        data["previousPhoto"] = this.previousPhoto !== undefined ? this.previousPhoto : <any>null;
-        data["previousId"] = this.previousId !== undefined ? this.previousId : <any>null;
-        data["nextId"] = this.nextId !== undefined ? this.nextId : <any>null;
-        return data; 
-    }
 }
 
-export interface IActiveRoundDto {
+export interface ActiveRoundGroupDto {
     id?: number;
+    slackMessageId?: string | null;
+    hasMet?: boolean;
+    hasPhoto?: boolean;
+    finishedAt?: Date | null;
+    notificationCount?: number;
+    photoUrl?: string | null;
+    coffeeRoundId?: number;
+    members?: string[] | null;
+}
+
+export interface StandardGroupDto {
+    id?: number;
+    hasMet?: boolean;
+    hasPhoto?: boolean;
+    photoUrl?: string | null;
+    finishedAt?: Date;
+    members?: string[] | null;
+}
+
+export interface GetAllPhotosQuery {
     channelId?: number;
-    active?: boolean;
-    startDate?: Date;
-    endDate?: Date;
-    groups?: IActiveRoundGroupDto[] | null;
-    previousMeetup?: number | null;
-    previousPhoto?: number | null;
-    previousId?: number | null;
-    nextId?: number | null;
 }
 
-export class ActiveRoundGroupDto implements IActiveRoundGroupDto {
-    id?: number;
-    slackMessageId?: string | null;
-    hasMet?: boolean;
-    hasPhoto?: boolean;
-    finishedAt?: Date | null;
-    notificationCount?: number;
-    photoUrl?: string | null;
-    coffeeRoundId?: number;
-    members?: string[] | null;
-
-    constructor(data?: IActiveRoundGroupDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.slackMessageId = _data["slackMessageId"] !== undefined ? _data["slackMessageId"] : <any>null;
-            this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
-            this.hasPhoto = _data["hasPhoto"] !== undefined ? _data["hasPhoto"] : <any>null;
-            this.finishedAt = _data["finishedAt"] ? new Date(_data["finishedAt"].toString()) : <any>null;
-            this.notificationCount = _data["notificationCount"] !== undefined ? _data["notificationCount"] : <any>null;
-            this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
-            this.coffeeRoundId = _data["coffeeRoundId"] !== undefined ? _data["coffeeRoundId"] : <any>null;
-            if (Array.isArray(_data["members"])) {
-                this.members = [] as any;
-                for (let item of _data["members"])
-                    this.members!.push(item);
-            }
-            else {
-                this.members = <any>null;
-            }
-        }
-    }
-
-    static fromJS(data: any): ActiveRoundGroupDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActiveRoundGroupDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["slackMessageId"] = this.slackMessageId !== undefined ? this.slackMessageId : <any>null;
-        data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
-        data["hasPhoto"] = this.hasPhoto !== undefined ? this.hasPhoto : <any>null;
-        data["finishedAt"] = this.finishedAt ? this.finishedAt.toISOString() : <any>null;
-        data["notificationCount"] = this.notificationCount !== undefined ? this.notificationCount : <any>null;
-        data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
-        data["coffeeRoundId"] = this.coffeeRoundId !== undefined ? this.coffeeRoundId : <any>null;
-        if (Array.isArray(this.members)) {
-            data["members"] = [];
-            for (let item of this.members)
-                data["members"].push(item);
-        }
-        return data; 
-    }
-}
-
-export interface IActiveRoundGroupDto {
-    id?: number;
-    slackMessageId?: string | null;
-    hasMet?: boolean;
-    hasPhoto?: boolean;
-    finishedAt?: Date | null;
-    notificationCount?: number;
-    photoUrl?: string | null;
-    coffeeRoundId?: number;
-    members?: string[] | null;
-}
-
-export class StandardGroupDto implements IStandardGroupDto {
-    id?: number;
-    hasMet?: boolean;
-    hasPhoto?: boolean;
-    photoUrl?: string | null;
-    finishedAt?: Date;
-    members?: string[] | null;
-
-    constructor(data?: IStandardGroupDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.hasMet = _data["hasMet"] !== undefined ? _data["hasMet"] : <any>null;
-            this.hasPhoto = _data["hasPhoto"] !== undefined ? _data["hasPhoto"] : <any>null;
-            this.photoUrl = _data["photoUrl"] !== undefined ? _data["photoUrl"] : <any>null;
-            this.finishedAt = _data["finishedAt"] ? new Date(_data["finishedAt"].toString()) : <any>null;
-            if (Array.isArray(_data["members"])) {
-                this.members = [] as any;
-                for (let item of _data["members"])
-                    this.members!.push(item);
-            }
-            else {
-                this.members = <any>null;
-            }
-        }
-    }
-
-    static fromJS(data: any): StandardGroupDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new StandardGroupDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["hasMet"] = this.hasMet !== undefined ? this.hasMet : <any>null;
-        data["hasPhoto"] = this.hasPhoto !== undefined ? this.hasPhoto : <any>null;
-        data["photoUrl"] = this.photoUrl !== undefined ? this.photoUrl : <any>null;
-        data["finishedAt"] = this.finishedAt ? this.finishedAt.toISOString() : <any>null;
-        if (Array.isArray(this.members)) {
-            data["members"] = [];
-            for (let item of this.members)
-                data["members"].push(item);
-        }
-        return data; 
-    }
-}
-
-export interface IStandardGroupDto {
-    id?: number;
-    hasMet?: boolean;
-    hasPhoto?: boolean;
-    photoUrl?: string | null;
-    finishedAt?: Date;
-    members?: string[] | null;
-}
-
-export class PrizeDTO implements IPrizeDTO {
-    pointCost?: number;
-    isMilestone?: boolean;
-    isRepeatable?: boolean;
-    channelSettingsId?: number;
-    title?: string | null;
-    description?: string | null;
-
-    constructor(data?: IPrizeDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
-            this.isMilestone = _data["isMilestone"] !== undefined ? _data["isMilestone"] : <any>null;
-            this.isRepeatable = _data["isRepeatable"] !== undefined ? _data["isRepeatable"] : <any>null;
-            this.channelSettingsId = _data["channelSettingsId"] !== undefined ? _data["channelSettingsId"] : <any>null;
-            this.title = _data["title"] !== undefined ? _data["title"] : <any>null;
-            this.description = _data["description"] !== undefined ? _data["description"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): PrizeDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new PrizeDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
-        data["isMilestone"] = this.isMilestone !== undefined ? this.isMilestone : <any>null;
-        data["isRepeatable"] = this.isRepeatable !== undefined ? this.isRepeatable : <any>null;
-        data["channelSettingsId"] = this.channelSettingsId !== undefined ? this.channelSettingsId : <any>null;
-        data["title"] = this.title !== undefined ? this.title : <any>null;
-        data["description"] = this.description !== undefined ? this.description : <any>null;
-        return data; 
-    }
-}
-
-export interface IPrizeDTO {
+export interface PrizeDTO {
     pointCost?: number;
     isMilestone?: boolean;
     isRepeatable?: boolean;
@@ -2175,352 +1409,48 @@ export interface IPrizeDTO {
     description?: string | null;
 }
 
-export class PrizeIdDTO extends PrizeDTO implements IPrizeIdDTO {
-    id?: number;
-
-    constructor(data?: IPrizeIdDTO) {
-        super(data);
-    }
-
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): PrizeIdDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new PrizeIdDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        super.toJSON(data);
-        return data; 
-    }
-}
-
-export interface IPrizeIdDTO extends IPrizeDTO {
+export interface PrizeIdDTO extends PrizeDTO {
     id?: number;
 }
 
-export class CreateChannelPrizeCommand implements ICreateChannelPrizeCommand {
+export interface CreateChannelPrizeCommand {
     input?: PrizeDTO | null;
-
-    constructor(data?: ICreateChannelPrizeCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.input = data.input && !(<any>data.input).toJSON ? new PrizeDTO(data.input) : <PrizeDTO>this.input; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.input = _data["input"] ? PrizeDTO.fromJS(_data["input"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): CreateChannelPrizeCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateChannelPrizeCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["input"] = this.input ? this.input.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface ICreateChannelPrizeCommand {
-    input?: IPrizeDTO | null;
-}
-
-export class UserPrizesDTO implements IUserPrizesDTO {
+export interface UserPrizesDTO {
     slackUserId?: string | null;
     points?: number;
     pointsRemaining?: number;
     prizesClaimed?: ClaimedPrizeDTO[] | null;
     prizesAvailable?: PrizeIdDTO[] | null;
-
-    constructor(data?: IUserPrizesDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            if (data.prizesClaimed) {
-                this.prizesClaimed = [];
-                for (let i = 0; i < data.prizesClaimed.length; i++) {
-                    let item = data.prizesClaimed[i];
-                    this.prizesClaimed[i] = item && !(<any>item).toJSON ? new ClaimedPrizeDTO(item) : <ClaimedPrizeDTO>item;
-                }
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.slackUserId = _data["slackUserId"] !== undefined ? _data["slackUserId"] : <any>null;
-            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
-            this.pointsRemaining = _data["pointsRemaining"] !== undefined ? _data["pointsRemaining"] : <any>null;
-            if (Array.isArray(_data["prizesClaimed"])) {
-                this.prizesClaimed = [] as any;
-                for (let item of _data["prizesClaimed"])
-                    this.prizesClaimed!.push(ClaimedPrizeDTO.fromJS(item));
-            }
-            else {
-                this.prizesClaimed = <any>null;
-            }
-            if (Array.isArray(_data["prizesAvailable"])) {
-                this.prizesAvailable = [] as any;
-                for (let item of _data["prizesAvailable"])
-                    this.prizesAvailable!.push(PrizeIdDTO.fromJS(item));
-            }
-            else {
-                this.prizesAvailable = <any>null;
-            }
-        }
-    }
-
-    static fromJS(data: any): UserPrizesDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserPrizesDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["slackUserId"] = this.slackUserId !== undefined ? this.slackUserId : <any>null;
-        data["points"] = this.points !== undefined ? this.points : <any>null;
-        data["pointsRemaining"] = this.pointsRemaining !== undefined ? this.pointsRemaining : <any>null;
-        if (Array.isArray(this.prizesClaimed)) {
-            data["prizesClaimed"] = [];
-            for (let item of this.prizesClaimed)
-                data["prizesClaimed"].push(item.toJSON());
-        }
-        if (Array.isArray(this.prizesAvailable)) {
-            data["prizesAvailable"] = [];
-            for (let item of this.prizesAvailable)
-                data["prizesAvailable"].push(item.toJSON());
-        }
-        return data; 
-    }
 }
 
-export interface IUserPrizesDTO {
-    slackUserId?: string | null;
-    points?: number;
-    pointsRemaining?: number;
-    prizesClaimed?: IClaimedPrizeDTO[] | null;
-    prizesAvailable?: PrizeIdDTO[] | null;
-}
-
-export class ClaimedPrizeDTO implements IClaimedPrizeDTO {
+export interface ClaimedPrizeDTO {
     id?: number;
     dateClaimed?: Date;
     pointCost?: number;
     isDelivered?: boolean;
     prize?: PrizeIdDTO | null;
-
-    constructor(data?: IClaimedPrizeDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.prize = data.prize && !(<any>data.prize).toJSON ? new PrizeIdDTO(data.prize) : <PrizeIdDTO>this.prize; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.dateClaimed = _data["dateClaimed"] ? new Date(_data["dateClaimed"].toString()) : <any>null;
-            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
-            this.isDelivered = _data["isDelivered"] !== undefined ? _data["isDelivered"] : <any>null;
-            this.prize = _data["prize"] ? PrizeIdDTO.fromJS(_data["prize"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ClaimedPrizeDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClaimedPrizeDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["dateClaimed"] = this.dateClaimed ? this.dateClaimed.toISOString() : <any>null;
-        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
-        data["isDelivered"] = this.isDelivered !== undefined ? this.isDelivered : <any>null;
-        data["prize"] = this.prize ? this.prize.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface IClaimedPrizeDTO {
-    id?: number;
-    dateClaimed?: Date;
-    pointCost?: number;
-    isDelivered?: boolean;
-    prize?: IPrizeIdDTO | null;
-}
-
-export class ClaimPrizeForUserCommand implements IClaimPrizeForUserCommand {
-    prizeId?: number;
-
-    constructor(data?: IClaimPrizeForUserCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.prizeId = _data["prizeId"] !== undefined ? _data["prizeId"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ClaimPrizeForUserCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClaimPrizeForUserCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["prizeId"] = this.prizeId !== undefined ? this.prizeId : <any>null;
-        return data; 
-    }
-}
-
-export interface IClaimPrizeForUserCommand {
+export interface ClaimPrizeForUserCommand {
     prizeId?: number;
 }
 
-export class ClaimedUserPrizeDTO implements IClaimedUserPrizeDTO {
+export interface ClaimedUserPrizeDTO {
     id?: number;
     dateClaimed?: Date;
     pointCost?: number;
     isDelivered?: boolean;
     prize?: PrizeIdDTO | null;
     channelMember?: ChannelMemberDTO | null;
-
-    constructor(data?: IClaimedUserPrizeDTO) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-            this.prize = data.prize && !(<any>data.prize).toJSON ? new PrizeIdDTO(data.prize) : <PrizeIdDTO>this.prize; 
-            this.channelMember = data.channelMember && !(<any>data.channelMember).toJSON ? new ChannelMemberDTO(data.channelMember) : <ChannelMemberDTO>this.channelMember; 
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"] !== undefined ? _data["id"] : <any>null;
-            this.dateClaimed = _data["dateClaimed"] ? new Date(_data["dateClaimed"].toString()) : <any>null;
-            this.pointCost = _data["pointCost"] !== undefined ? _data["pointCost"] : <any>null;
-            this.isDelivered = _data["isDelivered"] !== undefined ? _data["isDelivered"] : <any>null;
-            this.prize = _data["prize"] ? PrizeIdDTO.fromJS(_data["prize"]) : <any>null;
-            this.channelMember = _data["channelMember"] ? ChannelMemberDTO.fromJS(_data["channelMember"]) : <any>null;
-        }
-    }
-
-    static fromJS(data: any): ClaimedUserPrizeDTO {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClaimedUserPrizeDTO();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id !== undefined ? this.id : <any>null;
-        data["dateClaimed"] = this.dateClaimed ? this.dateClaimed.toISOString() : <any>null;
-        data["pointCost"] = this.pointCost !== undefined ? this.pointCost : <any>null;
-        data["isDelivered"] = this.isDelivered !== undefined ? this.isDelivered : <any>null;
-        data["prize"] = this.prize ? this.prize.toJSON() : <any>null;
-        data["channelMember"] = this.channelMember ? this.channelMember.toJSON() : <any>null;
-        return data; 
-    }
 }
 
-export interface IClaimedUserPrizeDTO {
-    id?: number;
-    dateClaimed?: Date;
-    pointCost?: number;
-    isDelivered?: boolean;
-    prize?: IPrizeIdDTO | null;
-    channelMember?: IChannelMemberDTO | null;
+export interface DeliverClaimedPrizeCommand {
+    claimPrizeId?: number;
 }
 
-export class StatsDto implements IStatsDto {
-    slackMemberId?: string | null;
-    slackMemberName?: string | null;
-    points?: number;
-    meepupPercent?: number;
-    photoPercent?: number;
-    totalParticipation?: number;
-
-    constructor(data?: IStatsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.slackMemberId = _data["slackMemberId"] !== undefined ? _data["slackMemberId"] : <any>null;
-            this.slackMemberName = _data["slackMemberName"] !== undefined ? _data["slackMemberName"] : <any>null;
-            this.points = _data["points"] !== undefined ? _data["points"] : <any>null;
-            this.meepupPercent = _data["meepupPercent"] !== undefined ? _data["meepupPercent"] : <any>null;
-            this.photoPercent = _data["photoPercent"] !== undefined ? _data["photoPercent"] : <any>null;
-            this.totalParticipation = _data["totalParticipation"] !== undefined ? _data["totalParticipation"] : <any>null;
-        }
-    }
-
-    static fromJS(data: any): StatsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new StatsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["slackMemberId"] = this.slackMemberId !== undefined ? this.slackMemberId : <any>null;
-        data["slackMemberName"] = this.slackMemberName !== undefined ? this.slackMemberName : <any>null;
-        data["points"] = this.points !== undefined ? this.points : <any>null;
-        data["meepupPercent"] = this.meepupPercent !== undefined ? this.meepupPercent : <any>null;
-        data["photoPercent"] = this.photoPercent !== undefined ? this.photoPercent : <any>null;
-        data["totalParticipation"] = this.totalParticipation !== undefined ? this.totalParticipation : <any>null;
-        return data; 
-    }
-}
-
-export interface IStatsDto {
+export interface StatsDto {
     slackMemberId?: string | null;
     slackMemberName?: string | null;
     points?: number;
@@ -2561,6 +1491,14 @@ export enum CommandErrorCode {
     RegularExpressionValidator = 28,
     ScalePrecisionValidator = 29,
     StringEnumValidator = 30,
+}
+
+export interface AllHubs {
+    prize?: PrizeHub | null;
+}
+
+export interface PrizeHub {
+    newPrize?: PrizeIdDTO | null;
 }
 
 export interface FileResponse {

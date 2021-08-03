@@ -102,7 +102,6 @@ namespace Web
       services.AddScoped<ICurrentUserService, CurrentUserService>();
       services.AddScoped<IAuthorizationService, AuthorizationService>();
       services.AddScoped<ITokenService, TokenService>();
-      services.AddSignalR();
 
       services.AddHangfire(connString: Configuration.GetConnectionString("DefaultConnection"));
 
@@ -124,8 +123,37 @@ namespace Web
             ValidateIssuer = false,
             ValidateAudience = false
           };
+
+          x.Events = new JwtBearerEvents
+          {
+            OnMessageReceived = context =>
+            {
+              var path = context.HttpContext.Request.Path;
+              if (!path.HasValue || !(path.Value.StartsWith("/hubs/"))) {
+                return System.Threading.Tasks.Task.CompletedTask;
+              }
+
+              var accessToken = context.Request.Query["access_token"];
+              if (string.IsNullOrEmpty(accessToken)) {
+                return System.Threading.Tasks.Task.CompletedTask;
+              }
+
+              var accessTokenStr = accessToken.ToString();
+              if(!accessTokenStr.StartsWith("bearer ", true, null)) {
+                return System.Threading.Tasks.Task.CompletedTask;
+              }
+
+              var bearerToken = accessTokenStr.Substring(7);
+              context.Token = bearerToken;
+
+              return System.Threading.Tasks.Task.CompletedTask;
+            }
+          };
         });
+
+        services.AddSignalR();
     }
+
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMediator mediator, ApplicationDbContext context)
@@ -179,7 +207,7 @@ namespace Web
         endpoints.MapHangfireDashboard();
       });
 
-      mediator.SetupHangfireJobs(env);
+      mediator.SetupHangfireJobs(env.IsDevelopment());
     }
   }
 }

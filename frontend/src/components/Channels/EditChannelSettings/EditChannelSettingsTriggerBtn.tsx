@@ -17,11 +17,7 @@ import {
 import ChannelSettingsForm from "components/Channels/EditChannelSettings/ChannelSettingsForm";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { FC, useCallback } from "react";
-import {
-  ChannelClient,
-  IChannelSettingsDto,
-  UpdateChannelSettingsCommand
-} from "services/backend/nswagts";
+import { ChannelClient, ChannelSettingsDto } from "services/backend/nswagts";
 import { logger } from "utils/logger";
 
 type Props = {
@@ -35,10 +31,10 @@ const EditChannelSettingsTriggerBtn: FC<Props> = ({ channelId, children, as = Bu
 
   const { genClient } = useNSwagClient(ChannelClient);
 
-  const submitSettings = useCallback(async (settings: IChannelSettingsDto) => {
+  const submitSettings = useCallback(async (settings: ChannelSettingsDto) => {
     const client = await genClient();
     try {
-      await client.updateChannelSettings(channelId, new UpdateChannelSettingsCommand({ settings }));
+      await client.updateChannelSettings(channelId, { settings });
       toast({
         description: "Channel Settings updated",
         status: "success",

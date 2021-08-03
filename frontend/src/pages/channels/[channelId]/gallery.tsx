@@ -38,7 +38,7 @@ const IndexPage: NextPage = () => {
     const channelId = parseInt(query.channelId as string);
 
     const client = await genClient();
-    const allImages: StandardGroupDto[] = await client.getAll(channelId).catch(() => []);
+    const allImages: StandardGroupDto[] = await client.getAll({ channelId }).catch(() => []);
 
     setImages({
       type: ListReducerActionType.Reset,
