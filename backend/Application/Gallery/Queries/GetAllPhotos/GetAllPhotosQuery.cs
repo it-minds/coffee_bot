@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Gallery.Queries.GetAllPhotos
 {
-  [AuthorizeAttribute]
+  [Authorize]
   public class GetAllPhotosQuery : IRequest<List<StandardGroupDto>>
   {
     public int ChannelId;

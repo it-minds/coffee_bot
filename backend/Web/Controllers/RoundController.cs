@@ -9,7 +9,9 @@ namespace Web.Controllers
   public class RoundController : ApiControllerBase
   {
     [HttpGet()]
-    public async Task<ActiveRoundDto> GetRound([FromQuery] GetRoundQuery request, CancellationToken cancellationToken) =>
-       await Mediator.Send(request, cancellationToken);
+    public async Task<ActiveRoundDto> GetRound([FromQuery] int roundId, CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetRoundQuery{
+        RoundId = roundId
+      } , cancellationToken);
   }
 }

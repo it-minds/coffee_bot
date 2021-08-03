@@ -28,8 +28,8 @@ const Timeline: FC<Props> = ({ round }) => {
 
     const now = Date.now();
 
-    const nowBaseStart = now - round.startDate.getTime();
-    const endBaseStat = round.endDate.getTime() - round.startDate.getTime();
+    const nowBaseStart = now - new Date(round.startDate).getTime();
+    const endBaseStat = new Date(round.endDate).getTime() - new Date(round.startDate).getTime();
 
     return (nowBaseStart * 100) / endBaseStat;
   }, [round]);
@@ -48,9 +48,9 @@ const Timeline: FC<Props> = ({ round }) => {
     <VStack textAlign="left">
       <Text mb={-7}>Current Progress:</Text>
       <HStack w="100%" marginBottom="-7px">
-        <Text as="i">{dateTimeFormatter.format(round.startDate)}</Text>
+        <Text as="i">{dateTimeFormatter.format(new Date(round.startDate))}</Text>
         <Spacer />
-        <Text as="i">{dateTimeFormatter.format(round.endDate)}</Text>
+        <Text as="i">{dateTimeFormatter.format(new Date(round.endDate))}</Text>
       </HStack>
       <Slider
         aria-label="slider-ex-1"

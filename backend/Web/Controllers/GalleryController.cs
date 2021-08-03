@@ -11,7 +11,9 @@ namespace Web.Controllers
   public class GalleryController : ApiControllerBase
   {
     [HttpGet("all")]
-    public async Task<ActionResult<List<StandardGroupDto>>> GetAll(GetAllPhotosQuery request, CancellationToken cancellationToken) =>
-      await Mediator.Send(request, cancellationToken);
+    public async Task<ActionResult<List<StandardGroupDto>>> GetAll([FromQuery] int channelId, CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetAllPhotosQuery {
+        ChannelId = channelId
+      } , cancellationToken);
   }
 }

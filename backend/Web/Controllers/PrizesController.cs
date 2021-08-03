@@ -25,8 +25,10 @@ namespace Web.Controllers
     }
 
     [HttpGet]
-    public async Task<IEnumerable<PrizeIdDTO>> GetChannelPrizes([FromQuery] GetChannelPrizesQuery request, CancellationToken cancellationToken) =>
-       await Mediator.Send(request, cancellationToken);
+    public async Task<IEnumerable<PrizeIdDTO>> GetChannelPrizes([FromQuery] int channelId, CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetChannelPrizesQuery {
+        ChannelSettingsId = channelId
+      }, cancellationToken);
 
 
     [HttpPost]

@@ -46,8 +46,8 @@ const IndexPage: NextPage = () => {
           p={2}
           cursor="pointer"
           backgroundColor={round.active ? activeColor : normalColor}>
-          Round: {dateTimeFormatter.format(round.startDate)} -{" "}
-          {dateTimeFormatter.format(round.endDate)}
+          Round: {dateTimeFormatter.format(new Date(round.startDate))} -{" "}
+          {dateTimeFormatter.format(new Date(round.endDate))}
           <br />
           Meetup: {percentFormatter.format(round.meetupPercentage)}
           <br />

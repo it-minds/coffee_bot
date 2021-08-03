@@ -25,7 +25,7 @@ const ImageCover: FC<Props> = ({ image, onClose }) => {
     <Modal onClose={onClose} size="5xl" isOpen={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{dateTimeFormatter.format(image.finishedAt)}</ModalHeader>
+        <ModalHeader>{dateTimeFormatter.format(new Date(image.finishedAt))}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack>

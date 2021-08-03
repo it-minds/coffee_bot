@@ -8,9 +8,16 @@ using Application.Common.Interfaces.Hubs;
 
 namespace Application
 {
-  public class AllHubsTypeGenerator
+  public static class AllHubsTypeGenerator
   {
-    public Type Generate() {
+    private static IDictionary<string, Dictionary<string, IEnumerable<Type>>> AllMyHubs()
+    {
+      return new Dictionary<string, Dictionary<string, IEnumerable<Type>>> {
+        {"Prize", FindHubServiceType(typeof(IPrizeHubService))}
+      };
+    }
+
+    public static Type Generate() {
       var dict = AllMyHubs();
 
       TypeBuilder parent = GetTypeBuilder("AllHubs");
@@ -32,7 +39,7 @@ namespace Application
       return parent.CreateType();
     }
 
-    private TypeBuilder GetTypeBuilder(string typeSignature = "MyDynamicType")
+    private static TypeBuilder GetTypeBuilder(string typeSignature = "MyDynamicType")
     {
       var an = new AssemblyName(typeSignature);
 
@@ -88,14 +95,7 @@ namespace Application
       propertyBuilder.SetSetMethod(setPropMthdBldr);
     }
 
-    private Dictionary<string, Dictionary<string, IEnumerable<Type>>> AllMyHubs()
-    {
-      var dict = new Dictionary<string, Dictionary<string, IEnumerable<Type>>>();
-      dict.Add("Prize", MyHubs(typeof(IPrizeHubService)));
-      return dict;
-    }
-
-    private Dictionary<string, IEnumerable<Type>> MyHubs(Type type)
+    private static Dictionary<string, IEnumerable<Type>> FindHubServiceType(Type type)
     {
       var dict = new Dictionary<string, IEnumerable<Type>>();
       foreach (MethodInfo method in type.GetMethods())

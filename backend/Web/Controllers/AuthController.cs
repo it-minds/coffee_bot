@@ -22,8 +22,8 @@ namespace Web.Controllers
     }
 
     [HttpPut]
-    public async Task<ActionResult<UserDTO>> CheckAuth([FromQuery] CheckCurrentUserQuery request, CancellationToken cancellationToken) =>
-      await Mediator.Send(request, cancellationToken);
+    public async Task<ActionResult<UserDTO>> CheckAuth( CancellationToken cancellationToken) =>
+      await Mediator.Send(new CheckCurrentUserQuery {}, cancellationToken);
 
 
     [HttpGet("login")]

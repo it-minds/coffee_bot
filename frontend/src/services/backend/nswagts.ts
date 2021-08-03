@@ -188,10 +188,8 @@ export class AuthClient extends ClientBase {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    checkAuth(request?: CheckCurrentUserQuery | null | undefined): Promise<UserDTO> {
-        let url_ = this.baseUrl + "/api/Auth?";
-        if (request !== undefined && request !== null)
-            url_ += "request=" + encodeURIComponent("" + request) + "&";
+    checkAuth(): Promise<UserDTO> {
+        let url_ = this.baseUrl + "/api/Auth";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -350,10 +348,8 @@ export class ChannelClient extends ClientBase {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getMyChannelMemberships(request?: GetMyChannelMembershipsQuery | null | undefined): Promise<ChannelMemberDTO[]> {
-        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships?";
-        if (request !== undefined && request !== null)
-            url_ += "request=" + encodeURIComponent("" + request) + "&";
+    getMyChannelMemberships(): Promise<ChannelMemberDTO[]> {
+        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -391,7 +387,7 @@ export class ChannelClient extends ClientBase {
         let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships/{ChannelSettingsId}";
         if (channelSettingsId === undefined || channelSettingsId === null)
             throw new Error("The parameter 'channelSettingsId' must be defined.");
-        url_ = url_.replace("{ChannelSettingsId}", encodeURIComponent("" + channelSettingsId));
+        url_ = url_.replace("{channelSettingsId}", encodeURIComponent("" + channelSettingsId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -425,12 +421,12 @@ export class ChannelClient extends ClientBase {
         return Promise.resolve<ChannelMemberDTO>(<any>null);
     }
 
-    getChannelSettings(channelSettingsId?: number | undefined): Promise<ChannelSettingsIdDto> {
+    getChannelSettings(channelId?: number | undefined): Promise<ChannelSettingsIdDto> {
         let url_ = this.baseUrl + "/api/Channel?";
-        if (channelSettingsId === null)
-            throw new Error("The parameter 'channelSettingsId' cannot be null.");
-        else if (channelSettingsId !== undefined)
-            url_ += "ChannelSettingsId=" + encodeURIComponent("" + channelSettingsId) + "&";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -717,17 +713,17 @@ export class GalleryClient extends ClientBase {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getAll(request: GetAllPhotosQuery): Promise<StandardGroupDto[]> {
-        let url_ = this.baseUrl + "/api/Gallery/all";
+    getAll(channelId?: number | undefined): Promise<StandardGroupDto[]> {
+        let url_ = this.baseUrl + "/api/Gallery/all?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(request);
-
         let options_ = <RequestInit>{
-            body: content_,
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -899,12 +895,12 @@ export class PrizesClient extends ClientBase {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getChannelPrizes(channelSettingsId?: number | undefined): Promise<PrizeIdDTO[]> {
+    getChannelPrizes(channelId?: number | undefined): Promise<PrizeIdDTO[]> {
         let url_ = this.baseUrl + "/api/Prizes?";
-        if (channelSettingsId === null)
-            throw new Error("The parameter 'channelSettingsId' cannot be null.");
-        else if (channelSettingsId !== undefined)
-            url_ += "ChannelSettingsId=" + encodeURIComponent("" + channelSettingsId) + "&";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1192,7 +1188,7 @@ export class RoundClient extends ClientBase {
         if (roundId === null)
             throw new Error("The parameter 'roundId' cannot be null.");
         else if (roundId !== undefined)
-            url_ += "RoundId=" + encodeURIComponent("" + roundId) + "&";
+            url_ += "roundId=" + encodeURIComponent("" + roundId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1243,7 +1239,7 @@ export class StatsClient extends ClientBase {
         if (channelId === null)
             throw new Error("The parameter 'channelId' cannot be null.");
         else if (channelId !== undefined)
-            url_ += "ChannelId=" + encodeURIComponent("" + channelId) + "&";
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -1288,9 +1284,6 @@ export interface UserDTO extends AuthUser {
     channelsToAdmin?: number[] | null;
 }
 
-export interface CheckCurrentUserQuery {
-}
-
 export interface ChannelMemberDTO {
     id?: number;
     slackChannelId?: string | null;
@@ -1327,9 +1320,6 @@ export enum DayOfWeek {
     Thursday = 4,
     Friday = 5,
     Saturday = 6,
-}
-
-export interface GetMyChannelMembershipsQuery {
 }
 
 export interface SimpleChannelDTO {
@@ -1394,10 +1384,6 @@ export interface StandardGroupDto {
     photoUrl?: string | null;
     finishedAt?: Date;
     members?: string[] | null;
-}
-
-export interface GetAllPhotosQuery {
-    channelId?: number;
 }
 
 export interface PrizeDTO {

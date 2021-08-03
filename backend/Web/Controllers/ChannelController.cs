@@ -18,22 +18,26 @@ namespace Web.Controllers
   public class ChannelController : ApiControllerBase
   {
     [HttpGet("MyChannelMemberships")]
-    public async Task<IEnumerable<ChannelMemberDTO>> GetMyChannelMemberships([FromQuery] GetMyChannelMembershipsQuery request, CancellationToken cancellationToken) => await Mediator.Send(request, cancellationToken);
+    public async Task<IEnumerable<ChannelMemberDTO>> GetMyChannelMemberships(CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetMyChannelMembershipsQuery {}, cancellationToken);
 
     [HttpGet("MyChannelMemberships/{ChannelSettingsId}")]
-    public async Task<ChannelMemberDTO> GetMyChannelMembership([FromRoute] GetMyChannelMembershipQuery request, CancellationToken cancellationToken) => await Mediator.Send(request, cancellationToken);
+    public async Task<ChannelMemberDTO> GetMyChannelMembership([FromRoute] int channelSettingsId, CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetMyChannelMembershipQuery {
+        ChannelSettingsId = channelSettingsId
+      }, cancellationToken);
 
 
     [HttpGet()]
-    public async Task<ActionResult<ChannelSettingsIdDto>> GetChannelSettings([FromQuery] GetChannelSettingsQuery request, CancellationToken cancellationToken)
-      => await Mediator.Send(request, cancellationToken);
-
-
+    public async Task<ActionResult<ChannelSettingsIdDto>> GetChannelSettings([FromQuery] int channelId, CancellationToken cancellationToken)
+      => await Mediator.Send(new GetChannelSettingsQuery {
+        ChannelSettingsId = channelId
+      }, cancellationToken);
 
     [HttpGet("MyChannels/available")]
     public async Task<IEnumerable<SimpleChannelDTO>> GetMyAvailableChannels(CancellationToken cancellationToken)
     {
-      return await Mediator.Send(new GetMyAvailableChannelsQuery(), cancellationToken);
+      return await Mediator.Send(new GetMyAvailableChannelsQuery {}, cancellationToken);
     }
 
     [HttpPut("UpdateChannelPause")]

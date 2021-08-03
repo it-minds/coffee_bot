@@ -27,29 +27,12 @@ namespace Web.DocumentProcessors
         context.SchemaGenerator.Generate(type, context.SchemaResolver);
       }
 
-      var hubType = new AllHubsTypeGenerator().Generate();
+      var hubType = AllHubsTypeGenerator.Generate();
 
       if (!context.SchemaResolver.HasSchema(hubType, true))
       {
         context.SchemaGenerator.Generate(hubType, context.SchemaResolver);
       }
-    }
-
-    public static Dictionary<string, Dictionary<string, IEnumerable<Type>>> AllMyHubs()
-    {
-      var dict = new Dictionary<string, Dictionary<string, IEnumerable<Type>>>();
-      dict.Add("prize", MyHubs(typeof(IPrizeHubService)));
-      return dict;
-    }
-
-    public static Dictionary<string, IEnumerable<Type>> MyHubs(Type type)
-    {
-      var dict = new Dictionary<string, IEnumerable<Type>>();
-      foreach (MethodInfo method in type.GetMethods())
-      {
-        dict.Add(method.Name, method.GetParameters().Select(x => x.ParameterType));
-      }
-      return dict;
     }
   }
 }

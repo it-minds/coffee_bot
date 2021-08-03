@@ -33,13 +33,22 @@ const IndexPage: NextPage = () => {
   const { genClient } = useNSwagClient(GalleryClient);
 
   useEffectAsync(async () => {
-    if (!activeUser || !query.channelId) return;
+    console.log(activeUser, query.channelId);
+    if (!activeUser || !query.channelId) {
+      console.log("closing");
+      return;
+    }
 
     const channelId = parseInt(query.channelId as string);
 
     const client = await genClient();
-    const allImages: StandardGroupDto[] = await client.getAll({ channelId }).catch(() => []);
+    const allImages: StandardGroupDto[] = await client.getAll(channelId).catch((e: Error) => {
+      console.log(e.toJson());
 
+      return [];
+    });
+
+    console.log(allImages);
     setImages({
       type: ListReducerActionType.Reset,
       data: allImages as ExtendedImageDto[]
@@ -61,7 +70,7 @@ const IndexPage: NextPage = () => {
   return (
     <Container maxW="6xl">
       <Heading size="lg" textAlign="center">
-        Buddy Channels!
+        Gallery!
       </Heading>
       <Box
         p={[2, 4, 8]}
@@ -71,7 +80,7 @@ const IndexPage: NextPage = () => {
         {activeImage !== null && (
           <ImageCover image={activeImage} onClose={() => setActiveImage(null)} />
         )}
-        {Object.entries(images.groupBy(x => x.finishedAt?.getFullYear() ?? 1970))
+        {Object.entries(images.groupBy(x => new Date(x.finishedAt).getFullYear() ?? 1970))
           .sortByAttr(([year]) => year, "DESC")
           .map(([year, images]) => (
             <Fragment key={year}>

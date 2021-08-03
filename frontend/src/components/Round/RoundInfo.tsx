@@ -76,7 +76,8 @@ const RoundInfo: FC<Props> = ({ round }) => {
           isDisable={round.previousId == null}
         />
         <Heading fontSize={["2xl", "3xl", "4xl"]}>
-          {dateTimeFormatter.format(round.startDate)} - {dateTimeFormatter.format(round.endDate)}
+          {dateTimeFormatter.format(new Date(round.startDate))} -{" "}
+          {dateTimeFormatter.format(new Date(round.endDate))}
         </Heading>
         <PureIconsButton
           icon={MdArrowForward}
