@@ -6,6 +6,7 @@ import React, { useContext, useState } from "react";
 import { useCallback } from "react";
 import { FC } from "react";
 import { ClaimedUserPrizeDTO, PrizesClient } from "services/backend/nswagts";
+import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
 
 const PrizeClaimsList: FC = () => {
   const { chosenChannel } = useContext(ChosenChannelContext);
@@ -35,7 +36,7 @@ const PrizeClaimsList: FC = () => {
           {x.prize.isMilestone && "(milestone)"}
           {x.prize.isRepeatable && "(repeatable)"}
           <br />
-          {x.dateClaimed.toDateString()}
+          {dateTimeFormatter.format(new Date(x.dateClaimed))}
           <br />
           <Button onClick={() => claimPrize(x.id)}>Set as delivered</Button>
         </Box>
