@@ -9,6 +9,7 @@ import {
   ModalOverlay,
   useDisclosure
 } from "@chakra-ui/react";
+import { FcPlus } from "@react-icons/all-files/Fc/FcPlus";
 import CupImage from "components/Images/CupImage";
 import React, { FC } from "react";
 
@@ -18,7 +19,9 @@ const NewPrizeModal: FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
-      <Button onClick={onOpen}>Add new prize</Button>
+      <Button onClick={onOpen} leftIcon={<FcPlus size={21} />} colorScheme="blue">
+        Add new prize
+      </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

@@ -64,6 +64,17 @@ const UnauthWelcome: FC = () => {
           If your Slack Workspace already has the Coffee Buddies app, go ahead and login. Else you
           need to add the application to your Slack Workspace.
         </Text>
+        <Image
+          src="/images/icons/icon-256x256.png"
+          srcSet={`
+          /images/icons/icon-256x256.png 1x,
+          /images/icons/icon-512x512.png 2x,
+        `}
+          mx="auto"
+          my={4}
+          maxW={"4xl"}
+          w={["95%", "85%", "65%"]}
+        />
         <Stack>
           <Button onClick={click} variant="outline" colorScheme="green">
             Login

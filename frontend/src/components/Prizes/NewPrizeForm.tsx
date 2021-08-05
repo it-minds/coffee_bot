@@ -13,8 +13,9 @@ import {
   Select
 } from "@chakra-ui/react";
 import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
+import FileUpload from "components/Common/Input/FormInput";
 import { useNSwagClient } from "hooks/useNSwagClient";
-import React, { FC, useContext } from "react";
+import React, { FC, useContext, useRef } from "react";
 import { useState } from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
@@ -51,6 +52,8 @@ const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
     setValue
   } = useForm<PrizeDTO>();
 
+  const [image, setImage] = useState<File>(null);
+
   const [loading, setLoading] = useState(false);
 
   const { genClient } = useNSwagClient(PrizesClient);
@@ -61,20 +64,33 @@ const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
       data.channelSettingsId = chosenChannel.id;
 
       const client = await genClient();
-      await client.createChannelPrize({
+      const prizeId = await client.createChannelPrize({
         input: data
       });
+
+      await client.setImageForChannelPrize(
+        {
+          data: image,
+          fileName: image.name
+        },
+        prizeId
+      );
 
       onSuccess();
       setLoading(false);
     },
-    [chosenChannel.id]
+    [chosenChannel.id, image]
   );
 
   useEffect(() => {
     register("isMilestone");
     register("isRepeatable");
   }, []);
+
+  const inputRef = useRef<HTMLInputElement>();
+
+  const test = inputRef.current?.files;
+  console.log(test);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -115,6 +131,14 @@ const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
+      </FormControl>
+
+      <FormControl id="file">
+        <FormLabel>File</FormLabel>
+        <FormHelperText>It is always a good idea to show what the users can buy.</FormHelperText>
+        {/* <Input type="file" /> */}
+        <FileUpload name="file" acceptedFileTypes="image/png, image/jpeg" onFileSelect={setImage} />
+        <FormErrorMessage>Titles length must be less than 3000 characters.</FormErrorMessage>
       </FormControl>
 
       <Button type="submit" colorScheme="green" isLoading={loading} mt={[4, 6]}>

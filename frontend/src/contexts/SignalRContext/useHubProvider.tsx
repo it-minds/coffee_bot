@@ -1,5 +1,6 @@
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { Provider, useEffect, useMemo } from "react";
+import { useRef } from "react";
 import { useState } from "react";
 import { AllHubs } from "services/backend/nswagts";
 
@@ -8,17 +9,26 @@ import { getHubContext } from "./utils";
 
 type Hook = <T extends keyof AllHubs>(
   key: T,
-  autoCloseOnUnmount?: boolean
+  settings?: Partial<{
+    autoCloseOnUnmount?: boolean;
+  }>
 ) => {
   hub: AuthorizedHub<T>;
   Provider: Provider<AuthorizedHub<T>>;
   isConnected: boolean;
 };
 
-export const useHubProvider: Hook = <T extends keyof AllHubs>(
-  key: T,
-  autoCloseOnUnmount = false
-) => {
+const defaultSettings: Parameters<Hook>[1] = {
+  autoCloseOnUnmount: false
+};
+
+export const useHubProvider: Hook = <T extends keyof AllHubs>(key: T, settings = {}) => {
+  const useableSettings = useRef({ ...defaultSettings, ...settings });
+
+  useEffect(() => {
+    useableSettings.current = { ...defaultSettings, ...settings };
+  }, [settings]);
+
   const [hub, setHub] = useState<AuthorizedHub<T>>(null);
 
   const HubProvider = useMemo(() => getHubContext(key), [key]);
@@ -29,7 +39,7 @@ export const useHubProvider: Hook = <T extends keyof AllHubs>(
   }, [key]);
 
   useEffect(() => {
-    if (hub && autoCloseOnUnmount) {
+    if (hub && useableSettings.current.autoCloseOnUnmount) {
       return () => {
         hub.closeConnection();
       };

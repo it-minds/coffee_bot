@@ -5,11 +5,11 @@ using Application.Common.Interfaces;
 using Application.Prizes.Commands.ClaimPrizeForUser;
 using Application.Prizes.Commands.CreateChannelPrize;
 using Application.Prizes.Commands.DeliverClaimedPrize;
+using Application.Prizes.Commands.SetImageForChannelPrize;
 using Application.Prizes.Common;
 using Application.Prizes.Queries.GetChannelPrizes;
 using Application.Prizes.Queries.GetClaimedPrizesForApproval;
 using Application.Prizes.Queries.GetUserPrizes;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,5 +70,10 @@ namespace Web.Controllers
     [HttpPut("admin/claim")]
     public async Task<int> DeliverClaimedPrize([FromBody] DeliverClaimedPrizeCommand body, CancellationToken cancellationToken) =>
       await Mediator.Send(body, cancellationToken);
+
+    [HttpPut("image")]
+    public async Task<dynamic> SetImageForChannelPrize([FromForm] SetImageForChannelPrizeCommand form, CancellationToken cancellationToken) =>
+      await Mediator.Send(form, cancellationToken);
+
   }
 }

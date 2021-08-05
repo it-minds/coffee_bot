@@ -13,34 +13,36 @@ namespace Application.Common
       new string[]{"Blue","Black","Silver","Gray","White","Red","Brown","Maroon","Orange","Gold","Beige","Yellow","Lime","Turquoise","Teal","Green","Indigo","Purple","Magenta", "Violet"},
       new string[]{"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Twenty","Hundred","Thousand","@1","@2","@3","@4","@5"},
       new string[]{"Rice","Sesame","Quinoa","Peanut","Grape","Rhubarb","Apple","Avocado","Banana","Cherry","Lemon","Melon","Potato","Cabbage","Carrot","Biscuits","Maize","Bread","Chocolate","Soup"}
-     };
-
-    private Random rng;
+    };
 
     public int MaxCount { get => sets.RunningSum((set) => set.Count(), (int a, int b) => a == 0 ? b : a * b); }
 
-    public string GetPredeterminedStringFromInt(int x)
+    public string GetPredeterminedStringFromInt(int x, string prefix = "", string suffix = "")
+      => GetPredeterminedStringFromInt(sets, x, prefix, suffix);
+
+    public string GetPredeterminedStringFromInt(string[][] sets, int x, string prefix = "", string suffix = "")
     {
-      rng = new Random(608750231); //hardcoded seed to make it predetermined.
+      var rng = new Random(608750231); //! hardcoded seed to make it predetermined. Do not touch
 
       if (x < 0) throw new ArgumentOutOfRangeException("Less Than 0");
       if (x >= MaxCount) throw new ArgumentOutOfRangeException("More than " + MaxCount);
 
-      var resultBuilder = new StringBuilder();
+      var resultBuilder = new StringBuilder(prefix);
 
       for (int i = 0; i < sets.Count(); i++)
       {
         var remainingCount = sets.Skip(i + 1).RunningSum(x => x.Count(), (int a, int b) => a == 0 ? b : a * b);
-        var set = sets[i].OrderBy(_ignore => this.rng.Next()).ToList();
+        var set = sets[i].OrderBy(_ignore => rng.Next()).ToList(); //predetirmined sort.
         var result = GetModuloIndexIfValueInRange(set, remainingCount, ref x);
 
         resultBuilder.Append(result);
       }
+      resultBuilder.Append(suffix);
 
       return resultBuilder.ToString();
     }
 
-    private string GetModuloIndexIfValueInRange(in IList<string> set, int dividend, ref int value) {
+    private static string GetModuloIndexIfValueInRange(in IList<string> set, int dividend, ref int value) {
       if (value < dividend) return ""; // aka the result of
       if (dividend == 0) {
         var result = set[value];

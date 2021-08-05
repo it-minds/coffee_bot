@@ -1,5 +1,8 @@
+import "ts-array-ext/findAndReplace";
+
 import { Heading, VStack } from "@chakra-ui/react";
 import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
+import { DividerWithText } from "components/Common/DividerWIthText";
 import { useHubProvider } from "contexts/SignalRContext/useHubProvider";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
@@ -15,15 +18,26 @@ import PurchaseButton from "./PurchaseButton";
 const PrizeListOverview: FC = () => {
   const { chosenChannel } = useContext(ChosenChannelContext);
 
-  const { hub, Provider } = useHubProvider("prize", true);
-
   const [prizes, setPrizes] = useState<PrizeIdDTO[]>([]);
+
+  const { hub, Provider } = useHubProvider("prize", {
+    autoCloseOnUnmount: true
+  });
 
   const { genClient } = useNSwagClient(PrizesClient);
 
   useEffect(() => {
     hub?.onConnect("newPrize", newPrize => {
+      console.log("newPrize", newPrize);
       if (newPrize.channelSettingsId === chosenChannel.id) setPrizes(p => [...p, newPrize]);
+    });
+
+    hub?.onConnect("updatedPrize", updatedPrize => {
+      console.log("updatedPrize", updatedPrize);
+      setPrizes(p => {
+        p.findAndReplace(x => x.id === updatedPrize.id, updatedPrize, true);
+        return [...p];
+      });
     });
   }, [hub]);
 
@@ -39,7 +53,9 @@ const PrizeListOverview: FC = () => {
 
   return (
     <Provider value={hub}>
-      <Heading size="ms">Milestones</Heading>
+      <DividerWithText py={4}>
+        <Heading size="sm">Milestones</Heading>
+      </DividerWithText>
       <VStack spacing={4}>
         {prizes
           .filter(x => x.isMilestone)
@@ -52,7 +68,9 @@ const PrizeListOverview: FC = () => {
           ))}
       </VStack>
 
-      <Heading size="ms">Repeatable</Heading>
+      <DividerWithText py={4}>
+        <Heading size="sm">Repeatable</Heading>
+      </DividerWithText>
       <VStack spacing={4}>
         {prizes
           .filter(x => x.isRepeatable)
@@ -64,8 +82,9 @@ const PrizeListOverview: FC = () => {
             </BoxCover>
           ))}
       </VStack>
-
-      <Heading size="ms">Other</Heading>
+      <DividerWithText py={4}>
+        <Heading size="sm">Other</Heading>
+      </DividerWithText>
       <VStack spacing={4}>
         {prizes
           .filter(x => !x.isMilestone && !x.isRepeatable)

@@ -1,6 +1,6 @@
 import { IconButton, IconButtonProps } from "@chakra-ui/react";
-import { MdArrowDownward } from "@react-icons/all-files/md/MdArrowDownward";
-import { MdArrowUpward } from "@react-icons/all-files/md/MdArrowUpward";
+import { FcAlphabeticalSortingAz } from "@react-icons/all-files/Fc/FcAlphabeticalSortingAz";
+import { FcAlphabeticalSortingZa } from "@react-icons/all-files/Fc/FcAlphabeticalSortingZa";
 import { MdSort } from "@react-icons/all-files/md/MdSort";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -134,11 +134,21 @@ const QuerySortBtn: FC<Props & Partial<IconButtonProps>> = ({
 
   return (
     <IconButton
-      size="xs"
+      size="sm"
       aria-label="Sort column"
       onClick={onClick}
-      colorScheme={active ? "purple" : "gray"}
-      icon={active ? direction === "ASC" ? <MdArrowDownward /> : <MdArrowUpward /> : <MdSort />}
+      isActive={active}
+      icon={
+        active ? (
+          direction === "ASC" ? (
+            <FcAlphabeticalSortingAz size={20} />
+          ) : (
+            <FcAlphabeticalSortingZa size={20} />
+          )
+        ) : (
+          <MdSort />
+        )
+      }
       {...rest}
     />
   );

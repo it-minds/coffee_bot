@@ -1,4 +1,4 @@
-import { Heading } from "@chakra-ui/react";
+import { Heading, HStack, Spacer } from "@chakra-ui/react";
 import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
 import NewPrizeModal from "components/Prizes/NewPrizeModal";
 import PrizeListOverview from "components/Prizes/PrizeListOverview";
@@ -24,7 +24,10 @@ const IndexPage: NextPage = () => {
       {/* <PrizeSignalRContext.Provider value={hub}></PrizeSignalRContext.Provider> */}
       <Heading textAlign="center">Prizes</Heading>
 
-      <NewPrizeModal />
+      <HStack>
+        <Spacer />
+        <NewPrizeModal />
+      </HStack>
 
       <PrizeListOverview />
     </>

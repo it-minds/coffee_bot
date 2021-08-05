@@ -1,7 +1,8 @@
-import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
+import { Grid, GridItem, Image, useBreakpointValue } from "@chakra-ui/react";
 import CupImage from "components/Images/CupImage";
 import React, { FC } from "react";
 import { PrizeIdDTO } from "services/backend/nswagts";
+import isomorphicEnvSettings from "utils/envSettings";
 
 interface Props {
   prize: PrizeIdDTO;
@@ -20,13 +21,30 @@ const AvailablePrize: FC<Props> = ({ prize, isClaimed = false, children }) => {
   });
 
   return (
-    <Grid templateRows="5fr 7fr" templateColumns="1fr 7fr 2fr">
+    <Grid templateRows="5fr 7fr" templateColumns="1fr 6fr 2fr">
       <GridItem rowSpan={breakLower ? 1 : 2}>
-        <CupImage w={20} minW={16} filter={isClaimed ? "" : "grayscale(100%)"} opacity={0.8} />
+        {prize.imageName ? (
+          <Image
+            src={isomorphicEnvSettings().backendUrl + "/images/prizes/" + prize.imageName}
+            maxW={20}
+            minW={16}
+            maxH={20}
+            mx="auto"
+          />
+        ) : (
+          <CupImage
+            maxW={20}
+            minW={16}
+            maxH={20}
+            mx="auto"
+            filter={isClaimed ? "" : "grayscale(100%)"}
+            opacity={0.8}
+          />
+        )}
       </GridItem>
       <GridItem p={1}>
         <p>
-          <b>{prize.title}</b>
+          <b>{prize.title}</b> - {prize.imageName}
         </p>
       </GridItem>
       <GridItem>{children}</GridItem>

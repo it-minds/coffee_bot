@@ -17,7 +17,9 @@ import { PrizesClient, UserPrizesDTO } from "services/backend/nswagts";
 const IndexPage: NextPage = () => {
   const { chosenChannel } = useContext(ChosenChannelContext);
 
-  const { hub, Provider } = useHubProvider("prize", true);
+  const { hub, Provider } = useHubProvider("prize", {
+    autoCloseOnUnmount: true
+  });
 
   const [loading, setLoading] = useState(false);
   const [prizes, setPrizes] = useState<UserPrizesDTO>(null);

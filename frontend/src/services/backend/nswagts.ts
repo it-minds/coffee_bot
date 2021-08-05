@@ -1170,6 +1170,49 @@ export class PrizesClient extends ClientBase {
         }
         return Promise.resolve<number>(<any>null);
     }
+
+    setImageForChannelPrize(file?: FileParameter | null | undefined, prizeId?: number | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Prizes/image";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (file !== null && file !== undefined)
+            content_.append("file", file.data, file.fileName ? file.fileName : "file");
+        if (prizeId === null || prizeId === undefined)
+            throw new Error("The parameter 'prizeId' cannot be null.");
+        else
+            content_.append("PrizeId", prizeId.toString());
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processSetImageForChannelPrize(_response));
+        });
+    }
+
+    protected processSetImageForChannelPrize(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
 }
 
 export class RoundClient extends ClientBase {
@@ -1393,6 +1436,7 @@ export interface PrizeDTO {
     channelSettingsId?: number;
     title?: string | null;
     description?: string | null;
+    imageName?: string | null;
 }
 
 export interface PrizeIdDTO extends PrizeDTO {
@@ -1485,6 +1529,12 @@ export interface AllHubs {
 
 export interface PrizeHub {
     newPrize?: PrizeIdDTO | null;
+    updatedPrize?: PrizeIdDTO | null;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export interface FileResponse {

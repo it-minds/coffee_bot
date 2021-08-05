@@ -27,6 +27,7 @@ namespace Domain.Entities
 
     public bool IsValid { get => !(IsMilestone & IsRepeatable); } // Exclusive OR
 
+    public string ImageName { get; set; }
 
     public int ChannelSettingsId { get; set; }
     public ChannelSettings ChannelSettings { get; set; }

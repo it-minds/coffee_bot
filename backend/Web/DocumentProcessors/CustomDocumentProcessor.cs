@@ -20,18 +20,15 @@ namespace Web.DocumentProcessors
   {
     public void Process(DocumentProcessorContext context)
     {
-      var type = typeof(CommandErrorCode);
+      AddTypeToSchema(context, typeof(CommandErrorCode));
+      AddTypeToSchema(context, AllHubsTypeGenerator.Generate());
+    }
 
+    private void AddTypeToSchema(DocumentProcessorContext context, Type type)
+    {
       if (!context.SchemaResolver.HasSchema(type, true))
       {
         context.SchemaGenerator.Generate(type, context.SchemaResolver);
-      }
-
-      var hubType = AllHubsTypeGenerator.Generate();
-
-      if (!context.SchemaResolver.HasSchema(hubType, true))
-      {
-        context.SchemaGenerator.Generate(hubType, context.SchemaResolver);
       }
     }
   }
