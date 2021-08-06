@@ -1,5 +1,5 @@
 import { Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
-import { AiOutlineFileImage } from "@react-icons/all-files/Ai/AiOutlineFileImage";
+import { AiOutlineFileImage } from "@react-icons/all-files/ai/AiOutlineFileImage";
 import React, { FC, useRef, useState } from "react";
 import { useEffect } from "react";
 
