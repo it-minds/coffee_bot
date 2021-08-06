@@ -9,7 +9,7 @@ import {
   ModalOverlay,
   useDisclosure
 } from "@chakra-ui/react";
-import { FcPlus } from "@react-icons/all-files/Fc/FcPlus";
+import { FcPlus } from "@react-icons/all-files/fc/FcPlus";
 import CupImage from "components/Images/CupImage";
 import React, { FC } from "react";
 

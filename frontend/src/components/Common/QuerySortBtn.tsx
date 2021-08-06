@@ -1,6 +1,6 @@
 import { IconButton, IconButtonProps } from "@chakra-ui/react";
-import { FcAlphabeticalSortingAz } from "@react-icons/all-files/Fc/FcAlphabeticalSortingAz";
-import { FcAlphabeticalSortingZa } from "@react-icons/all-files/Fc/FcAlphabeticalSortingZa";
+import { FcAlphabeticalSortingAz } from "@react-icons/all-files/fc/FcAlphabeticalSortingAz";
+import { FcAlphabeticalSortingZa } from "@react-icons/all-files/fc/FcAlphabeticalSortingZa";
 import { MdSort } from "@react-icons/all-files/md/MdSort";
 import { useRouter } from "next/router";
 import { useRef } from "react";
