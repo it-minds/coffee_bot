@@ -44,7 +44,7 @@ const AvailablePrize: FC<Props> = ({ prize, isClaimed = false, children }) => {
       </GridItem>
       <GridItem p={1}>
         <p>
-          <b>{prize.title}</b> - {prize.imageName}
+          <b>{prize.title}</b>
         </p>
       </GridItem>
       <GridItem>{children}</GridItem>

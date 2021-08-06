@@ -20,8 +20,8 @@ console.log("Locales:", locales, "default locale:", defaultLocale);
 module.exports = withPWA({
   pwa: {
     disable: process.env.NODE_ENV === "development",
-    register: false,
-    skipWaiting: false,
+    register: true,
+    skipWaiting: true,
     dest: "public"
   },
   i18n: {

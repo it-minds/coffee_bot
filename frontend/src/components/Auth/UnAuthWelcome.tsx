@@ -65,15 +65,16 @@ const UnauthWelcome: FC = () => {
           need to add the application to your Slack Workspace.
         </Text>
         <Image
-          src="/images/icons/icon-256x256.png"
+          src="/images/icons/icon-512x512.png"
           srcSet={`
           /images/icons/icon-256x256.png 1x,
           /images/icons/icon-512x512.png 2x,
+          /images/icons/icon-1024x1024.png 4x,
         `}
           mx="auto"
           my={4}
           maxW={"4xl"}
-          w={["95%", "85%", "65%"]}
+          w={["95%", "75%", "50%"]}
         />
         <Stack>
           <Button onClick={click} variant="outline" colorScheme="green">

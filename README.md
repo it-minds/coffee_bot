@@ -1,6 +1,6 @@
-<div style="text-align:center">
-  <image src="./docs/resources/icon.png"/>
-</div>
+<p align="center">
+  <image width="512px" src="./docs/resources/icon.png"/>
+</p>
 <h1 align="center">IT Minds Coffee Bot</h1>
 <p align="center">
 <i>Get your members to socialize over a cup of coffee!</i>
