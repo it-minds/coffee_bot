@@ -34,8 +34,8 @@ namespace Application.ChannelSync.Commands.ChannelMemberPointsSync
           var shouldHavePoints = channelMember.RoundScore(coffeeGroupMembers);
           if (shouldHavePoints != channelMember.Points)
           {
-            result.Append(channelMember.SlackName).Append(" should have had p").Append(shouldHavePoints)
-              .Append( "but has p").Append(channelMember.Points).AppendLine("!");
+            result.Append(channelMember.SlackName).Append(" should have had ").Append(shouldHavePoints)
+              .Append("p but has ").Append(channelMember.Points).AppendLine("p!");
             channelMember.Points = shouldHavePoints;
           }
         }

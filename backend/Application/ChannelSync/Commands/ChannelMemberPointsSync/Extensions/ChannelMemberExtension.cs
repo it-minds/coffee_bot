@@ -9,7 +9,10 @@ namespace Application.ChannelSync.Commands.ChannelMemberPointsSync.Extensions
     public static int RoundScore(this ChannelMember channelMember, IEnumerable<CoffeeRoundGroupMember> members )
     {
       return members
-        .Where(x => x.SlackMemberId == channelMember.SlackUserId && x.Participated)
+        .Where(x =>
+          x.CoffeeRoundGroup.CoffeeRound.ChannelId == channelMember.ChannelSettingsId &&
+          x.SlackMemberId == channelMember.SlackUserId && x.Participated
+        )
         .Sum(x =>
         {
           var points = 0;
