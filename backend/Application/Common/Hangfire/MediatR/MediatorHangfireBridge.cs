@@ -13,15 +13,15 @@ namespace Application.Common.Hangfire.MediatR
         _mediator = mediator;
       }
 
-      public async Task Send(IBaseRequest command)
+      public async Task<object?> Send(IBaseRequest command)
       {
-        await _mediator.Send(command);
+        return await _mediator.Send(command);
       }
 
       [DisplayName("{0}")]
-      public async Task Send(string jobName, IBaseRequest command)
+      public async Task<object?> Send(string jobName, IBaseRequest command)
       {
-        await _mediator.Send(command);
+        return await _mediator.Send(command);
       }
     }
 }

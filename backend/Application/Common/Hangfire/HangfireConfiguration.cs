@@ -8,6 +8,7 @@ using Rounds.Commands.RoundFinisherCommand;
 using Rounds.Commands.RoundInitiatorCommand;
 using Rounds.Commands.RoundMidwayCheckupCommand;
 using Application.User.Commands.CheckParticipationStatus;
+using Application.ChannelSync.Commands.ChannelMemberPointsSync;
 
 namespace Application
 {
@@ -66,6 +67,13 @@ namespace Application
         "Check Repaticipation",
         isDev ? Cron.Never() : Cron.Daily(0)
       );
+
+      mediator.RecurringJob(
+        new ChannelMemberPointsSyncCommand { },
+        "Check Member Points",
+        isDev ? Cron.Never() : Cron.Daily(0)
+      );
+
 
 
       return mediator;

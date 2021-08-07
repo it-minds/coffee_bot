@@ -62,7 +62,7 @@ namespace Rounds.Commands.RoundFinisherCommand
           channelUserPoints.Enqueue(
             group.CoffeeRoundGroupMembers.Where(x => x.Participated).Select(x => x.SlackMemberId),
             round.ChannelId,
-            group.HasPhoto ? 2 : 1
+            group.HasPhoto ? 3 : 1
           );
         }
 
