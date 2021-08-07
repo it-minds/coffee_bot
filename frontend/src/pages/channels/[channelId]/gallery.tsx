@@ -33,9 +33,7 @@ const IndexPage: NextPage = () => {
   const { genClient } = useNSwagClient(GalleryClient);
 
   useEffectAsync(async () => {
-    console.log(activeUser, query.channelId);
     if (!activeUser || !query.channelId) {
-      console.log("closing");
       return;
     }
 
@@ -44,11 +42,9 @@ const IndexPage: NextPage = () => {
     const client = await genClient();
     const allImages: StandardGroupDto[] = await client.getAll(channelId).catch((e: Error) => {
       console.log(e.toJson());
-
       return [];
     });
 
-    console.log(allImages);
     setImages({
       type: ListReducerActionType.Reset,
       data: allImages as ExtendedImageDto[]

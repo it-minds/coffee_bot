@@ -10,7 +10,7 @@ namespace Application.Rounds.Extensions
 
       if (group.HasMet) score += 1;
       if (group.HasPhoto) score += 2;
-      if (group.FinishedAt < group.CoffeeRound?.EndDate) score += 1;
+      // if (group.FinishedAt < group.CoffeeRound?.EndDate) score += 1;
 
       return score;
     }

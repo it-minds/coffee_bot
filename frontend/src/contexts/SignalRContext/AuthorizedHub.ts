@@ -13,7 +13,6 @@ export class AuthorizedHub<T extends keyof Wrap> {
 
     const envSettings = isomorphicEnvSettings();
     const token = getAuthToken();
-    console.log(token);
     const connection = new HubConnectionBuilder()
       .withUrl(envSettings.backendUrl + "/hubs/" + hub, {
         headers: {

@@ -384,7 +384,7 @@ export class ChannelClient extends ClientBase {
     }
 
     getMyChannelMembership(channelSettingsId: number): Promise<ChannelMemberDTO> {
-        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships/{ChannelSettingsId}";
+        let url_ = this.baseUrl + "/api/Channel/MyChannelMemberships/{channelSettingsId}";
         if (channelSettingsId === undefined || channelSettingsId === null)
             throw new Error("The parameter 'channelSettingsId' must be defined.");
         url_ = url_.replace("{channelSettingsId}", encodeURIComponent("" + channelSettingsId));

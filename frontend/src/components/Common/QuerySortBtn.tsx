@@ -35,7 +35,6 @@ const QuerySortBtn: FC<Props & Partial<IconButtonProps>> = ({
   const queryCopy = useRef(query);
 
   useEffect(() => {
-    console.log("resetting query", query);
     queryCopy.current = query;
   }, [query]);
 
@@ -117,7 +116,6 @@ const QuerySortBtn: FC<Props & Partial<IconButtonProps>> = ({
 
     const thsort = getQuery(newDirection);
 
-    console.log(queryCopy.current, newDirection, thsort);
     queryCopy.current.thsort = thsort;
     replace({ query: queryCopy.current }, undefined, { shallow: true });
   }, []);

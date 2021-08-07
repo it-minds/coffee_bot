@@ -15,7 +15,7 @@ import {
 import { ChosenChannelContext } from "components/Common/AppContainer/ChosenChannelContext";
 import FileUpload from "components/Common/Input/FormInput";
 import { useNSwagClient } from "hooks/useNSwagClient";
-import React, { FC, useContext, useRef } from "react";
+import React, { FC, useContext } from "react";
 import { useState } from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
@@ -86,11 +86,6 @@ const NewPrizeForm: FC<Props> = ({ onSuccess }) => {
     register("isMilestone");
     register("isRepeatable");
   }, []);
-
-  const inputRef = useRef<HTMLInputElement>();
-
-  const test = inputRef.current?.files;
-  console.log(test);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
