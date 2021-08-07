@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Application.Common.Mappings;
+using Application.Rounds.Extensions;
 using AutoMapper;
 using Domain.Entities;
 
@@ -15,16 +15,17 @@ namespace Application.Rounds.DTO
     public bool HasPhoto { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
     public int NotificationCount { get; set; }
-    public string PhotoUrl { get; set; }
+    public string LocalPhotoUrl { get; set; }
     public int CoffeeRoundId { get; set; }
+    public IEnumerable<ActiveRoundGroupMemberDto> CoffeeRoundGroupMembers { get; set; }
 
-    public IList<string> Members { get; set; }
+
+    public int GroupScore { get; set; }
 
     public void Mapping(Profile profile)
     {
       profile.CreateMap<CoffeeRoundGroup, ActiveRoundGroupDto>()
-        .ForMember(x => x.Members, opts => opts.MapFrom(y => y.CoffeeRoundGroupMembers.Select(member => member.SlackMemberId)))
-        .ForMember(x => x.PhotoUrl, opts => opts.MapFrom(y => y.LocalPhotoUrl))
+        .ForMember(x => x.GroupScore, opts => opts.MapFrom(y => y.GroupScore()))
       ;
     }
   }

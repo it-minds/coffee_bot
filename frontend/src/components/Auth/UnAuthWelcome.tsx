@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Container,
   Heading,
@@ -9,6 +8,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import Logo from "components/Common/AppContainer/Logo";
+import RoundedBox from "components/Common/RoundedBox";
 import { AuthContext } from "contexts/AuthContext";
 import { AuthStage, skipauth } from "hooks/useAuth";
 import router from "next/router";
@@ -50,12 +50,11 @@ const UnauthWelcome: FC = () => {
     }
   }, [authStage, login]);
 
-  const bgColor = useColorModeValue("gray.200", "gray.700");
   const border = useColorModeValue("whiteAlpha.700", "whiteAlpha.300");
 
   return (
     <Container maxW="3xl">
-      <Box p={8} mt={8} bgColor={bgColor} borderRadius={24}>
+      <RoundedBox>
         <Logo mb={2} />
         <Heading textAlign="left" mb={2} fontWeight="extrabold">
           Welcome to Coffee Buddies
@@ -92,7 +91,7 @@ const UnauthWelcome: FC = () => {
             Add App to Slack
           </Button>
         </Stack>
-      </Box>
+      </RoundedBox>
       <Footer />
     </Container>
   );

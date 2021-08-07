@@ -31,8 +31,8 @@ const IndexPage: NextPage = () => {
 
     const envSettings = isomorphicEnvSettings();
 
-    result.groups.forEach(group => {
-      (group as any).publicSrc = envSettings.backendUrl + "/images/coffeegroups/" + group.photoUrl;
+    result.coffeeRoundGroups.forEach(group => {
+      group.localPhotoUrl = envSettings.backendUrl + "/images/coffeegroups/" + group.localPhotoUrl;
     });
 
     setRound(result);

@@ -5,6 +5,7 @@ using Application.Common.Interfaces;
 using Application.Common.Linq;
 using Application.Common.Security;
 using Application.Rounds.DTO;
+using Application.Rounds.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -31,6 +32,8 @@ namespace Application.Rounds.GetRound
       public async Task<ActiveRoundDto> Handle(GetRoundQuery request, CancellationToken cancellationToken)
       {
         var round = await applicationDbContext.CoffeeRounds
+          .Include(x => x.CoffeeRoundGroups)
+            .ThenInclude(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.Id == request.RoundId)
           .ProjectTo<ActiveRoundDto>(mapper.ConfigurationProvider)
           .FirstOrDefaultAsync();
@@ -39,6 +42,7 @@ namespace Application.Rounds.GetRound
 
         var lastRound = await applicationDbContext.CoffeeRounds
           .Include(x => x.CoffeeRoundGroups)
+            .ThenInclude(x => x.CoffeeRoundGroupMembers)
           .Where(x => !x.Active && x.EndDate < round.StartDate)
           .OrderByDescending(x => x.StartDate)
           .FirstOrDefaultAsync();
@@ -47,6 +51,7 @@ namespace Application.Rounds.GetRound
           round.PreviousMeetup = lastRound.CoffeeRoundGroups.Percent(x => x.HasMet);
           round.PreviousPhoto = lastRound.CoffeeRoundGroups.Percent(x => x.HasPhoto, x => x.HasMet);
           round.PreviousId = lastRound.Id;
+          round.PreviousScore = lastRound.CoffeeRoundGroups.Sum(x => x.GroupScore());
         }
 
         var nextId = await applicationDbContext.CoffeeRounds
@@ -64,9 +69,12 @@ namespace Application.Rounds.GetRound
           .Where(x => x.ChannelSettingsId == round.ChannelId)
           .ToListAsync();
 
-        foreach (var group in round.Groups)
+        foreach (var group in round.CoffeeRoundGroups)
         {
-          group.Members = members.Where(x => group.Members.Contains(x.SlackUserId)).Select(x => x.SlackName).ToList() ;
+          foreach (var member in group.CoffeeRoundGroupMembers)
+          {
+            member.SlackMemberName = members.Where(x => x.SlackUserId == member.SlackMemberId).Select(x => x.SlackName).FirstOrDefault();
+          }
         }
 
         return round;

@@ -32,24 +32,23 @@ const ChannelActionsMenu: FC<Props> = ({ channelId }) => {
 
   return (
     <Menu>
-      {smallButton ? (
-        <MenuButton
-          as={IconButton}
-          colorScheme="blue"
-          icon={<BsBoxArrowInRight />}
-          aria-label="menu"
-          m="auto"
-          size="sm"></MenuButton>
-      ) : (
-        <MenuButton
-          as={Button}
-          colorScheme="blue"
-          leftIcon={<BsBoxArrowInRight />}
-          m="auto"
-          size="sm">
-          Navigation Menu
-        </MenuButton>
-      )}
+      <MenuButton
+        as={smallButton ? IconButton : Button}
+        _hover={{
+          bg: "pink.500"
+        }}
+        _active={{
+          bg: "blue.300"
+        }}
+        bg="blue.400"
+        color="white"
+        {...{
+          [smallButton ? "icon" : "leftIcon"]: <BsBoxArrowInRight />
+        }}
+        m="auto"
+        size="sm">
+        {smallButton ? "" : "Navigation Menu"}
+      </MenuButton>
 
       <MenuList maxW="90vw">
         <MenuGroup title="General">
