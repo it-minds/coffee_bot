@@ -43,7 +43,7 @@ namespace Application.Rounds.GetRound
         var lastRound = await applicationDbContext.CoffeeRounds
           .Include(x => x.CoffeeRoundGroups)
             .ThenInclude(x => x.CoffeeRoundGroupMembers)
-          .Where(x => !x.Active && x.EndDate < round.StartDate)
+          .Where(x => x.ChannelId == round.ChannelId && !x.Active && x.EndDate < round.StartDate)
           .OrderByDescending(x => x.StartDate)
           .FirstOrDefaultAsync();
 
@@ -56,7 +56,7 @@ namespace Application.Rounds.GetRound
 
         var nextId = await applicationDbContext.CoffeeRounds
           .Include(x => x.CoffeeRoundGroups)
-          .Where(x => x.StartDate > round.EndDate)
+          .Where(x =>  x.ChannelId == round.ChannelId && x.StartDate > round.EndDate)
           .OrderBy(x => x.StartDate)
           .Select(x => x.Id)
           .FirstOrDefaultAsync();
