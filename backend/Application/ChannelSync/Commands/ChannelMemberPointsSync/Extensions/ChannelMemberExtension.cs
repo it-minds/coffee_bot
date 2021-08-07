@@ -11,14 +11,16 @@ namespace Application.ChannelSync.Commands.ChannelMemberPointsSync.Extensions
       return members
         .Where(x =>
           x.CoffeeRoundGroup.CoffeeRound.ChannelId == channelMember.ChannelSettingsId &&
-          x.SlackMemberId == channelMember.SlackUserId && x.Participated
+          x.SlackMemberId == channelMember.SlackUserId
         )
-        .Sum(x =>
+        .Sum(member =>
         {
+          if (member.CoffeeRoundGroup.CoffeeRound.Active) return 0;
+          if (!member.Participated) return -1;
           var points = 0;
-          if (x.CoffeeRoundGroup.HasMet) points += 1;
-          if (x.CoffeeRoundGroup.HasPhoto) points += 2;
-          if (x.CoffeeRoundGroup.FinishedAt < x.CoffeeRoundGroup.CoffeeRound.EndDate) points += 1;
+          if (member.CoffeeRoundGroup.HasMet) points += 1;
+          if (member.CoffeeRoundGroup.HasPhoto) points += 2;
+          if (member.CoffeeRoundGroup.FinishedAt < member.CoffeeRoundGroup.CoffeeRound.EndDate) points += 1;
 
           return points;
         });

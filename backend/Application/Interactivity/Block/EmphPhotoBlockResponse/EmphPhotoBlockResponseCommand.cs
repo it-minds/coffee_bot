@@ -32,16 +32,14 @@ namespace Application.Interactivity.Block.EmphPhotoBlockResponse
       private readonly ISlackClient slackClient;
       private readonly DownloadImage downloadImage;
       private readonly DeleteSlackMessage deleteSlackMessage;
-      private readonly ChannelUserPoints channelUserPoints;
       private readonly WordStrings wordStrings;
 
-      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage, DeleteSlackMessage deleteSlackMessage, ChannelUserPoints channelUserPoints, WordStrings wordStrings)
+      public EmphPhotoBlockResponseCommandHandler(IApplicationDbContext applicationDbContext, ISlackClient slackClient, DownloadImage downloadImage, DeleteSlackMessage deleteSlackMessage, WordStrings wordStrings)
       {
         this.applicationDbContext = applicationDbContext;
         this.slackClient = slackClient;
         this.downloadImage = downloadImage;
         this.deleteSlackMessage = deleteSlackMessage;
-        this.channelUserPoints = channelUserPoints;
         this.wordStrings = wordStrings;
       }
 
@@ -63,7 +61,6 @@ namespace Application.Interactivity.Block.EmphPhotoBlockResponse
         var channelMembers = await applicationDbContext.ChannelMembers
           .Where(x =>  x.ChannelSettingsId == group.CoffeeRound.ChannelId)
           .ToListAsync();
-
 
         if (request.Value == "Yes")
         {
