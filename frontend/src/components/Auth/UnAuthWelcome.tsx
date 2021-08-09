@@ -60,8 +60,7 @@ const UnauthWelcome: FC = () => {
           Welcome to Coffee Buddies
         </Heading>
         <Text fontSize="lg" color="gray.400" fontWeight="md" mb={4}>
-          If your Slack Workspace already has the Coffee Buddies app, go ahead and login. Else you
-          need to add the application to your Slack Workspace.
+          Socialize with your coworkers - and grab a coffee and a selfie!
         </Text>
         <Image
           src="/images/icons/icon-512x512.png"
@@ -69,12 +68,16 @@ const UnauthWelcome: FC = () => {
           /images/icons/icon-256x256.png 1x,
           /images/icons/icon-512x512.png 2x,
           /images/icons/icon-1024x1024.png 4x,
-        `}
+          `}
           mx="auto"
           my={4}
           maxW={"4xl"}
           w={["95%", "75%", "50%"]}
         />
+        <Text fontSize="lg" color="gray.400" fontWeight="md" mb={4}>
+          If your Slack Workspace already has the Coffee Buddies app, go ahead and login. Else you
+          need to add the application to your Slack Workspace.
+        </Text>
         <Stack>
           <Button onClick={click} variant="outline" colorScheme="green">
             Login

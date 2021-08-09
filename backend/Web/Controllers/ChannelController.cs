@@ -27,6 +27,9 @@ namespace Web.Controllers
         ChannelSettingsId = channelSettingsId
       }, cancellationToken);
 
+    [HttpGet("MyChannelMemberships/not")]
+    public async Task<IEnumerable<ChannelMemberDTO>> GetMyNotChannelMemberships(CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetMyNotChannelMembershipsQuery {}, cancellationToken);
 
     [HttpGet()]
     public async Task<ActionResult<ChannelSettingsIdDto>> GetChannelSettings([FromQuery] int channelId, CancellationToken cancellationToken)

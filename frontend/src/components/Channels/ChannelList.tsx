@@ -9,7 +9,7 @@ import {
   Text,
   useColorModeValue
 } from "@chakra-ui/react";
-import { BiShield } from "@react-icons/all-files/bi/BiShield";
+import { BiShieldQuarter } from "@react-icons/all-files/bi/BiShieldQuarter";
 import { DividerWithText } from "components/Common/DividerWIthText";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
@@ -19,6 +19,7 @@ import { logger } from "utils/logger";
 
 import ChannelListItem from "./ChannelListItem";
 import NewChannelButton from "./NewChannelButton";
+import NotMemberChannelsList from "./NotMemberChannels/NotMemberChannelsList";
 
 const ChannelList: FC = () => {
   const [channels, setChannels] = useState<ChannelMemberDTO[]>([]);
@@ -51,16 +52,16 @@ const ChannelList: FC = () => {
         </Text>
         <List>
           <ListItem>
-            <ListIcon color="blue.500" as={BiShield} />
-            an overview of all the rounds present and past.
+            <ListIcon color="blue.500" as={BiShieldQuarter} />
+            An overview of all the rounds present and past.
           </ListItem>
           <ListItem>
-            <ListIcon color="blue.500" as={BiShield} />a gallery of all the important beautiful
-            selfies everyone has shared.
+            <ListIcon color="blue.500" as={BiShieldQuarter} />A gallery of all the important
+            beautiful selfies everyone has shared.
           </ListItem>
           <ListItem>
-            <ListIcon color="blue.500" as={BiShield} />
-            and most importantly, the prizes!
+            <ListIcon color="blue.500" as={BiShieldQuarter} />
+            Most importantly, the prizes!
           </ListItem>
         </List>
         <DividerWithText m={1}>Your memberships</DividerWithText>
@@ -71,7 +72,10 @@ const ChannelList: FC = () => {
         </Flex>
         <DividerWithText m={1}>Other open channels in your organization</DividerWithText>
         <Flex direction="column">
-          <Text as="i">Not yet implemented</Text>
+          <Text as="i">
+            Click to join isn&apos;t implemented yet - use Slack to join any of these channels.
+          </Text>
+          <NotMemberChannelsList />
         </Flex>
         <DividerWithText m={1}>Create a new buddies channel</DividerWithText>
         <Text mb={4}>
