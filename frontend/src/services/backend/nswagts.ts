@@ -1484,6 +1484,7 @@ export interface RoundSnipDto {
 export interface ActiveRoundDto {
     id?: number;
     channelId?: number;
+    channelName?: string;
     active?: boolean;
     startDate?: Date;
     endDate?: Date;

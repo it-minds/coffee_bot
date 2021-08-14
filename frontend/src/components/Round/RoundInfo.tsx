@@ -51,7 +51,7 @@ const RoundInfo: FC<Props> = ({ round }) => {
   return (
     <>
       <Heading textAlign="center" fontSize={["xl", "2xl", "3xl"]}>
-        #mychannelname
+        #{round.channelName}
       </Heading>
       <RoundedBox>
         <HStack justifyContent="space-between">

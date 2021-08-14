@@ -10,6 +10,7 @@ namespace Application.Rounds.DTO
   {
     public int Id { get; set; }
     public int ChannelId { get; set; }
+    public int ChannelName { get; set; }
     public bool Active { get; set; }
     public DateTimeOffset StartDate { get; set; }
     public DateTimeOffset EndDate { get; set; }
@@ -25,6 +26,7 @@ namespace Application.Rounds.DTO
     public void Mapping(Profile profile)
     {
       profile.CreateMap<CoffeeRound, ActiveRoundDto>()
+        .ForMember(x => x.ChannelName, opts => opts.MapFrom(y => y.ChannelSettings.SlackChannelName))
         .ForMember(x => x.PreviousMeetup, opts => opts.Ignore())
         .ForMember(x => x.PreviousPhoto, opts => opts.Ignore())
         .ForMember(x => x.PreviousId, opts => opts.Ignore())

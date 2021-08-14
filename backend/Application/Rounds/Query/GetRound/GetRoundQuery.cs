@@ -32,6 +32,7 @@ namespace Application.Rounds.GetRound
       public async Task<ActiveRoundDto> Handle(GetRoundQuery request, CancellationToken cancellationToken)
       {
         var round = await applicationDbContext.CoffeeRounds
+          .Include(x => x.ChannelSettings)
           .Include(x => x.CoffeeRoundGroups)
             .ThenInclude(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.Id == request.RoundId)
