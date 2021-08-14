@@ -10,7 +10,7 @@ namespace Application.Rounds.DTO
   {
     public int Id { get; set; }
     public int ChannelId { get; set; }
-    public int ChannelName { get; set; }
+    public string ChannelName { get; set; }
     public bool Active { get; set; }
     public DateTimeOffset StartDate { get; set; }
     public DateTimeOffset EndDate { get; set; }
