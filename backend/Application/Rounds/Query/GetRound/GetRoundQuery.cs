@@ -36,7 +36,7 @@ namespace Application.Rounds.GetRound
           .Include(x => x.CoffeeRoundGroups)
             .ThenInclude(x => x.CoffeeRoundGroupMembers)
           .Where(x => x.Id == request.RoundId)
-          .ProjectTo<ActiveRoundDto>(mapper.ConfigurationProvider)
+          .Select(x => mapper.Map<ActiveRoundDto>(x))
           .FirstOrDefaultAsync();
 
         if (round == null) return null;

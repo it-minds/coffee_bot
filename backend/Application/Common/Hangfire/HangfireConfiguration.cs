@@ -47,19 +47,19 @@ namespace Application
       mediator.RecurringJob(
         new RoundFinisherCommand { },
         "Round Finisher",
-        isDev ? Cron.Never() : "0 12-17 * * *"
+        isDev ? Cron.Never() : "0 15-17 * * *"
       );
 
       mediator.RecurringJob(
         new RoundInitiatorCommand { },
         "Round Initiator",
-        isDev ? Cron.Never() : "0 8-12 * * *"
+        isDev ? Cron.Never() : "0 8-12 * * 1-5"
       );
 
       mediator.RecurringJob(
         new RoundMidwayCheckupCommand { },
         "Round Midway",
-        isDev ? Cron.Never() : "0 11 * * *"
+        isDev ? Cron.Never() : "0 11 * * 1-5"
       );
 
       mediator.RecurringJob(
