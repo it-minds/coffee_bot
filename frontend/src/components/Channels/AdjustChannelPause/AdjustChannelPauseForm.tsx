@@ -39,7 +39,7 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
 
     reset({
       paused: settings.onPause,
-      unPauseDate: settings.returnFromPauseDate?.toISOString().substring(0, 10)
+      unPauseDate: new Date(settings.returnFromPauseDate?.toISOString().substring(0, 10))
     });
     setLoading(false);
   }, []);
