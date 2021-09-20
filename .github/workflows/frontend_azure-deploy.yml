@@ -36,22 +36,6 @@ jobs:
 
       - run: rm -rf node_modules
 
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AzureAppService_PublishProfile_Frontend }}
-      - name: Set Web App ACR authentication
-        uses: Azure/appservice-settings@v1
-        with:
-          app-name: ${{ env.appName }}
-          app-settings-json: |
-            [
-              {
-                "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                "value": "~${{ env.node-version }}",
-                "slotSetting": false
-              }
-            ]
-
       - name: "Deploy Frontend to Azure Web App"
         uses: azure/webapps-deploy@v2
         with:
