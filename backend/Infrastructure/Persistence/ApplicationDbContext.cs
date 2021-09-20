@@ -1,5 +1,4 @@
 using Application.Common.Interfaces;
-using Domain.Common;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -29,6 +28,7 @@ namespace Infrastructure.Persistence
     public DbSet<CoffeeRoundGroupMember> CoffeeRoundGroupMembers { get; set; }
     public DbSet<Prize> Prizes { get; set; }
     public DbSet<ClaimedPrize> ClaimedPrizes { get; set; }
+    public DbSet<ChannelNotice> ChannelNotices { get; set; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

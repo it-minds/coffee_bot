@@ -19,5 +19,6 @@ namespace Domain.Entities
     public ICollection<ChannelMember> ChannelMembers { get; set; }
     public ICollection<CoffeeRound> CoffeeRounds { get; set; }
     public ICollection<Prize> Prizes { get; set; }
+    public ICollection<ChannelNotice> ChannelNotices { get; set; }
   }
 }

@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210725155935_PrizesDetails")]
-    partial class PrizesDetails
+    [Migration("20210920163225_AddChannelNotices")]
+    partial class AddChannelNotices
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.7")
+                .HasAnnotation("ProductVersion", "5.0.10")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Domain.Entities.ChannelMember", b =>
@@ -43,6 +43,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset?>("ReturnFromPauseDate")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("SlackName")
                         .HasColumnType("nvarchar(max)");
 
@@ -54,6 +57,38 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ChannelSettingsId");
 
                     b.ToTable("ChannelMembers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ChannelNotice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ChannelSettingsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DaysInRound")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NoticeType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Personal")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelSettingsId");
+
+                    b.ToTable("ChannelNotices");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChannelSettings", b =>
@@ -76,6 +111,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SlackChannelName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SlackWorkSpaceId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StartsDay")
@@ -101,6 +139,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("DateClaimed")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDelivered")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PointCost")
                         .HasColumnType("int");
@@ -132,11 +173,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("EndDate")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("SlackChannelId")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetimeoffset");
@@ -222,6 +258,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsMilestone")
                         .HasColumnType("bit");
 
@@ -245,6 +284,17 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.ChannelSettings", "ChannelSettings")
                         .WithMany("ChannelMembers")
+                        .HasForeignKey("ChannelSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChannelSettings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ChannelNotice", b =>
+                {
+                    b.HasOne("Domain.Entities.ChannelSettings", "ChannelSettings")
+                        .WithMany("ChannelNotices")
                         .HasForeignKey("ChannelSettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -323,6 +373,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.ChannelSettings", b =>
                 {
                     b.Navigation("ChannelMembers");
+
+                    b.Navigation("ChannelNotices");
 
                     b.Navigation("CoffeeRounds");
 
