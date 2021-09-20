@@ -12,7 +12,7 @@ defaults:
     working-directory: frontend
 
 env:
-  node-version: 14
+  node-version: 16
   appName: ${{ secrets.AzureAppService_AppName }}-frontend
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Set up Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.3.0
+        uses: actions/setup-node@v2.4.0
         with:
           node-version: ${{ env.node-version }}
 
@@ -35,6 +35,22 @@ jobs:
           NEXT_PUBLIC_APP_VERSION: ${{ github.run_number }}.${{ github.run_id }}
 
       - run: rm -rf node_modules
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AzureAppService_PublishProfile_Frontend }}
+      - name: Set Web App ACR authentication
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.appName }}
+          app-settings-json: |
+            [
+              {
+                "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                "value": "~${{ env.node-version }}",
+                "slotSetting": false
+              }
+            ]
 
       - name: "Deploy Frontend to Azure Web App"
         uses: azure/webapps-deploy@v2
