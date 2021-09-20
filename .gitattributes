@@ -1,1 +1,5 @@
-* text=lf
+* text=auto
+
+*.ts text eol=lf
+*.cs text eol=lf
+*.csproj text eol=lf
