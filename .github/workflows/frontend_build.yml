@@ -52,6 +52,6 @@ jobs:
       - run: npm test
 
       - name: Run CodeCov
-        uses: codecov/codecov-action@v2.0.2
+        uses: codecov/codecov-action@v2.1.0
         with:
           working-directory: frontend
