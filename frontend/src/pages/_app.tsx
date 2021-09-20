@@ -5,7 +5,7 @@ import "utils/errorToJSON";
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthContext } from "contexts/AuthContext";
 import { useAuth } from "hooks/useAuth";
-import { AppPropsType } from "next/dist/next-server/lib/utils";
+import { AppProps } from "next/dist/shared/lib/router/router";
 import Head from "next/head";
 import { I18nProvider } from "next-rosetta";
 import React, { ReactElement, useEffect } from "react";
@@ -19,7 +19,7 @@ type Props = {
   envSettings: EnvSettings;
 };
 
-const MyApp = ({ Component, pageProps, __N_SSG }: AppPropsType & Props): ReactElement => {
+const MyApp = ({ Component, pageProps, __N_SSG }: AppProps & Props): ReactElement => {
   // usePWA(); //! OPT IN
 
   const auth = useAuth();

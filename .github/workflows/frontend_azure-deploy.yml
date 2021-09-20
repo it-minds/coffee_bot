@@ -12,7 +12,7 @@ defaults:
     working-directory: frontend
 
 env:
-  node-version: 14
+  node-version: 16
   appName: ${{ secrets.AzureAppService_AppName }}-frontend
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Set up Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v2.3.0
+        uses: actions/setup-node@v2.4.0
         with:
           node-version: ${{ env.node-version }}
 
