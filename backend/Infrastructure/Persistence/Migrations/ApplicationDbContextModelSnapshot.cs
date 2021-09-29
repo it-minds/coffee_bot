@@ -16,7 +16,7 @@ namespace Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.8")
+                .HasAnnotation("ProductVersion", "5.0.10")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Domain.Entities.ChannelMember", b =>
@@ -55,6 +55,38 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasIndex("ChannelSettingsId");
 
                     b.ToTable("ChannelMembers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ChannelNotice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ChannelSettingsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DaysInRound")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NoticeType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Personal")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelSettingsId");
+
+                    b.ToTable("ChannelNotices");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChannelSettings", b =>
@@ -257,6 +289,17 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("ChannelSettings");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ChannelNotice", b =>
+                {
+                    b.HasOne("Domain.Entities.ChannelSettings", "ChannelSettings")
+                        .WithMany("ChannelNotices")
+                        .HasForeignKey("ChannelSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChannelSettings");
+                });
+
             modelBuilder.Entity("Domain.Entities.ClaimedPrize", b =>
                 {
                     b.HasOne("Domain.Entities.ChannelMember", "ChannelMember")
@@ -328,6 +371,8 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.ChannelSettings", b =>
                 {
                     b.Navigation("ChannelMembers");
+
+                    b.Navigation("ChannelNotices");
 
                     b.Navigation("CoffeeRounds");
 
