@@ -1435,6 +1435,10 @@ export interface ChannelSettingsDto {
     individualMessage?: boolean;
     slackChannelId?: string | null;
     slackChannelName?: string | null;
+    roundStartChannelMessage?: string | null;
+    roundStartGroupMessage?: string | null;
+    roundMidwayMessage?: string | null;
+    roundFinisherMessage?: string | null;
 }
 
 export interface ChannelSettingsIdDto extends ChannelSettingsDto {

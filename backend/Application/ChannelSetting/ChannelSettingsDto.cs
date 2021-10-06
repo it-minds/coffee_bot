@@ -13,5 +13,9 @@ namespace Application.ChannelSetting
     public bool IndividualMessage { get; set; }
     public string SlackChannelId { get; set; }
     public string SlackChannelName { get; set; }
+    public string RoundStartChannelMessage { get; set; }
+    public string RoundStartGroupMessage { get; set; }
+    public string RoundMidwayMessage { get; set; }
+    public string RoundFinisherMessage { get; set; }
   }
 }
