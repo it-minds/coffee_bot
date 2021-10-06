@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.ChannelSetting;
+using Application.ChannelSetting.Commands.UpdateChannelMessages;
 using Application.ChannelSetting.Commands.UpdateChannelPaused;
 using Application.ChannelSetting.Commands.UpdateChannelSettings;
 using Application.ChannelSetting.Queries.GetChannelSettings;
@@ -52,6 +53,14 @@ namespace Web.Controllers
 
     [HttpPut("UpdateChannelSettings/{id}")]
     public async Task<ActionResult> UpdateChannelSettings([FromRoute] int id, UpdateChannelSettingsCommand command, CancellationToken cancellationToken)
+    {
+      command.Id = id;
+      await Mediator.Send(command, cancellationToken);
+      return NoContent();
+    }
+
+    [HttpPut("UpdateChannelSettings/{id}/Messages")]
+    public async Task<ActionResult> UpdateChannelMessages([FromRoute] int id, UpdateChannelMessagesCommand command, CancellationToken cancellationToken)
     {
       command.Id = id;
       await Mediator.Send(command, cancellationToken);
