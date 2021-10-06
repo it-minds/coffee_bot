@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
-using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
@@ -24,17 +21,20 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
+      private readonly IBuildMessageService messageService;
 
-      public RoundMidwayCheckupCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
+      public RoundMidwayCheckupCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, IBuildMessageService messageService)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
+        this.messageService = messageService;
       }
 
       public async Task<int> Handle(RoundMidwayCheckupCommand request, CancellationToken cancellationToken)
       {
         var activeRounds = await applicationDbContext.CoffeeRoundGroups
             .Include(x => x.CoffeeRound)
+              .ThenInclude(x => x.ChannelSettings)
           .Where(x => !x.HasMet && x.CoffeeRound.Active)
           .ToListAsync();
 
@@ -50,7 +50,8 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
             round.NotificationCount++;
 
             if (!String.IsNullOrEmpty(round.SlackMessageId) ) {
-              var message = MidwayMessage.Generate(daysLeft);
+              string messageText = messageService.BuildMessage(round.CoffeeRound.ChannelSettings.RoundMidwayMessage, round.CoffeeRound);
+              var message = MidwayMessage.Generate(messageText, daysLeft);
               message.Channel = round.SlackMessageId;
               var response = await slackClient.SendMessageToChannel(message: message, cancellationToken: cancellationToken);
             }
