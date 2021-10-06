@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common;
 using Application.Common.Interfaces;
 using Application.Common.Linq;
 using Domain.Entities;
@@ -21,13 +19,15 @@ namespace Rounds.Commands.RoundFinisherCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
+      private readonly IBuildMessageService messageService;
 
       private readonly IList<Task> unimportantTasks;
 
-      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
+      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, IBuildMessageService messageService)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
+        this.messageService = messageService;
         unimportantTasks = new List<Task>();
       }
 
@@ -54,29 +54,9 @@ namespace Rounds.Commands.RoundFinisherCommand
         round.Active = false;
         var meetupPercent = round.CoffeeRoundGroups.Percent(x => x.HasMet);
 
-        var msg = BuildChannelMessage(round, meetupPercent);
+        var msg = messageService.BuildMessage(round.ChannelSettings.RoundFinisherMessage, round);
 
         unimportantTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.ChannelSettings.SlackChannelId, msg));
-      }
-
-      private string BuildChannelMessage(CoffeeRound round, decimal meetupPercent)
-      {
-        var sb = new StringBuilder();
-
-        sb
-          .AppendLine("Curtain call ladies and gentlefolk. <!channel>.")
-          .AppendLine("Your success has been measured and I give you a solid 10! (For effort.) Your points have been given.")
-          .Append("The total meetup rate of the round was: ")
-          .Append(Decimal.Round(meetupPercent).ToString())
-          .AppendLine("%.");
-
-        if (meetupPercent < 100m) {
-          sb.AppendLine("Next time, let's try for 100% shall we?");
-        }
-
-        sb.AppendLine("Information regarding your next round TBA. Have a wonderful day :heart:");
-
-        return sb.ToString();
       }
     }
   }

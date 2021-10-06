@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
@@ -24,10 +22,12 @@ namespace Rounds.Commands.RoundInitiatorCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
+      private readonly IBuildMessageService messageService;
 
-      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext) {
+      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, IBuildMessageService messageService) {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
+        this.messageService = messageService;
       }
 
       public async Task<int> Handle(RoundInitiatorMessagesCommand request, CancellationToken cancellationToken)
@@ -48,7 +48,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
         await slackClient.SendMessageToChannel(
           conversationId: settings.SlackChannelId,
-          text: BuildChannelMessage(round, groups.Select(x => x.CoffeeRoundGroupMembers.Select(y => y.SlackMemberId))),
+          text: messageService.BuildMessage(round.ChannelSettings.RoundStartChannelMessage, round, groups: groups.Select(x => x.CoffeeRoundGroupMembers.Select(y => y.SlackMemberId))),
           cancellationToken: cancellationToken
         );
 
@@ -67,52 +67,11 @@ namespace Rounds.Commands.RoundInitiatorCommand
       {
         var members = group.CoffeeRoundGroupMembers.Select(x => x.SlackMemberId);
 
-        var groupMessage = BuildGroupMessage(round, members);
+        var groupMessage = messageService.BuildMessage(round.ChannelSettings.RoundStartGroupMessage, round);
 
         var pm = await slackClient.SendPrivateMessageToMembers(cancellationToken, members, groupMessage);
         group.SlackMessageId = pm.ChannelId;
 
-      }
-
-      private string BuildGroupMessage(CoffeeRound round, IEnumerable<string> group)
-      {
-        var sb = new StringBuilder();
-        sb.AppendLine("Time for your coffe!");
-
-        sb.Append("The round starts: ")
-          .Append(round.StartDate.ToString("dddd, dd/MMMM"))
-          .Append(". The round ends: ")
-          .Append(round.EndDate.ToString("dddd, dd/MMMM"))
-          .AppendLine(".")
-          .AppendLine("Have fun!");
-
-
-        return sb.ToString();
-      }
-
-      private string BuildChannelMessage(CoffeeRound round, IEnumerable<IEnumerable<string>> groups)
-      {
-        var sb = new StringBuilder();
-        sb.AppendLine("Time to drink coffee <!channel>");
-
-        sb.Append("The round starts: ")
-          .Append(round.StartDate.ToString("dddd, dd/MMMM"))
-          .Append(". The round ends: ")
-          .Append(round.EndDate.ToString("dddd, dd/MMMM"))
-          .AppendLine(".");
-
-        sb.AppendLine("The groups are:");
-        for (int i = 0; i < groups.Count(); i++)
-        {
-          var group = groups.ToList()[i];
-
-          sb.Append("Group "+(i+1))
-            .Append(": ")
-            .AppendJoin(", ", group.Select(x => "<@" + x + ">" ))
-            .AppendLine("");
-        }
-
-        return sb.ToString();
       }
     }
   }
