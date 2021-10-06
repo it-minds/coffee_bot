@@ -1,14 +1,13 @@
 using Application.Common;
 using Application.Common.Behaviours;
-using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Slack.Clients;
 using Slack.Interfaces;
-using SlackNet;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Newtonsoft.Json.Serialization;
+using Application.Common.Interfaces;
+using Infrastructure.Services;
 
 namespace Application
 {
@@ -30,6 +29,8 @@ namespace Application
 
       services.AddScoped<ISlackClient, BotClient>();
       services.AddScoped<ISlackOAuthClient, OAuthClient>();
+
+      services.AddScoped<IBuildMessageService, BuildMessageService>();
 
       return services;
     }
