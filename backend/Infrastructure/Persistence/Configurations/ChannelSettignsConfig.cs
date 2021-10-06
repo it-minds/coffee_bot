@@ -24,15 +24,15 @@ namespace Infrastructure.Persistence.Configurations
       builder.Property(e => e.RoundMidwayMessage)
         .IsRequired()
         .HasDefaultValue("Hello, guys! I am cheking in to see if you met for a cup of coffee this round.\n" +
-                         "{{ YesButton: 'Yes, We have met!' }}" +
-                         "{{ NoButton: 'No, we haven't met yet' }}");
+                         "{{ YesButton }}" +
+                         "{{ NoButton }}");
 
       builder.Property(e => e.RoundFinisherMessage)
         .IsRequired()
         .HasDefaultValue("Curtain call ladies and gentlefolk. <!channel>.\n" +
                          "Your success has been measured and I give you a solid 10! (For effort.) Your points have been given.\n" +
                          "The total meetup rate of the round was: {{ MeetupPercentage }}%\n" +
-                         "{{ MeetupCondition: Next time, let's try for 100% shall we? }}\n" +
+                         "{{ MeetupCondition }}\n" +
                          "Information regarding your next round TBA. Have a wonderful day :heart:");
     }
   }
