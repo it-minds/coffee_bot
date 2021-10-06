@@ -16,6 +16,7 @@ import React, { useContext } from "react";
 import { FC } from "react";
 
 import AdjustChannelPauseModal from "./AdjustChannelPause/AdjustChannelPauseModal";
+import EditChannelMessagesTriggerBtn from "./EditChannelMessages/EditChannelMessagesTriggerBtn";
 import EditChannelSettingsTriggerBtn from "./EditChannelSettings/EditChannelSettingsTriggerBtn";
 
 type Props = {
@@ -100,6 +101,9 @@ const ChannelActionsMenu: FC<Props> = ({ channelId }) => {
               <EditChannelSettingsTriggerBtn channelId={channelId} as={MenuItem}>
                 Edit Channel Settings
               </EditChannelSettingsTriggerBtn>
+              <EditChannelMessagesTriggerBtn channelId={channelId} as={MenuItem}>
+                Edit Channel Messages
+              </EditChannelMessagesTriggerBtn>
               <MenuItem
                 onClick={() =>
                   router.push(
