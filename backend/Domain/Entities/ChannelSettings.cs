@@ -16,6 +16,10 @@ namespace Domain.Entities
     public int DurationInDays { get; set; } = 11;
     public bool IndividualMessage { get; set; } = false;
 
+    public int InitializeRoundHour { get; set; } = 10;
+    public int MidwayRoundHour { get; set; } = 11;
+    public int FinalizeRoundHour { get; set; } = 16;
+
     public ICollection<ChannelMember> ChannelMembers { get; set; }
     public ICollection<CoffeeRound> CoffeeRounds { get; set; }
     public ICollection<Prize> Prizes { get; set; }
