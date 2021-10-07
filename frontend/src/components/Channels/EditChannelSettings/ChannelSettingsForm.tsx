@@ -27,7 +27,10 @@ const defaultChannel: ChannelSettingsDto = {
   startsDay: DayOfWeek.Thursday,
   weekRepeat: 1,
   durationInDays: 1,
-  individualMessage: false
+  individualMessage: false,
+  initializeRoundHour: 10,
+  midwayRoundHour: 11,
+  finalizeRoundHour: 16
 };
 
 const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
@@ -133,6 +136,48 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
               }
               size="lg"
             />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Initialize Round Hour:</FormLabel>
+            <NumberInput
+              value={localFormData.initializeRoundHour}
+              onChange={event => updateLocalForm(Number(event), "initializeRoundHour")}
+              max={23}
+              min={0}>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Midway Round Hour:</FormLabel>
+            <NumberInput
+              value={localFormData.midwayRoundHour}
+              onChange={event => updateLocalForm(Number(event), "midwayRoundHour")}
+              max={23}
+              min={0}>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Finalize Round Hour:</FormLabel>
+            <NumberInput
+              value={localFormData.finalizeRoundHour}
+              onChange={event => updateLocalForm(Number(event), "finalizeRoundHour")}
+              max={23}
+              min={0}>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
           </FormControl>
           <Button colorScheme="green" isLoading={isLoading} mt={6} type="submit">
             Submit
