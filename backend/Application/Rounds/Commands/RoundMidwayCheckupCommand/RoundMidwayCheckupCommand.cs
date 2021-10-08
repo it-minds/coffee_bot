@@ -34,6 +34,7 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
       {
         var activeRounds = await applicationDbContext.CoffeeRoundGroups
             .Include(x => x.CoffeeRound)
+              .ThenInclude(x => x.ChannelSettings)
           .Where(x => !x.HasMet && x.CoffeeRound.Active)
           .ToListAsync();
 
