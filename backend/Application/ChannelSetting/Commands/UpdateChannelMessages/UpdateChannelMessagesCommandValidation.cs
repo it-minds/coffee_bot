@@ -1,3 +1,4 @@
+using Domain.Defaults;
 using FluentValidation;
 
 namespace Application.ChannelSetting.Commands.UpdateChannelMessages
@@ -6,25 +7,37 @@ namespace Application.ChannelSetting.Commands.UpdateChannelMessages
   {
     public UpdateChannelMessagesCommandValidation()
     {
+      foreach (string predicate in ChannelMessageDefaults.StartChannelMessageRequiredTags)
+      {
+        RuleFor(e => e.Settings.RoundStartChannelMessage)
+          .Matches(predicate);
+      }
       RuleFor(e => e.Settings.RoundStartChannelMessage)
-        .Matches(@"{{\s*[rR]ound[sS]tart[tT]ime\s*}}")
-        .Matches(@"{{\s*[rR]ound[eE]nd[tT]ime\s*}}")
-        .Matches(@"{{\s*[gG]roups\s*}}")
         .NotNull();
 
+      foreach (string predicate in ChannelMessageDefaults.StartGroupMessageRequiredTags)
+      {
+        RuleFor(e => e.Settings.RoundStartGroupMessage)
+          .Matches(predicate);
+      }
       RuleFor(e => e.Settings.RoundStartGroupMessage)
-        .Matches(@"{{\s*[rR]ound[sS]tart[tT]ime\s*}}")
-        .Matches(@"{{\s*[rR]ound[eE]nd[tT]ime\s*}}")
         .NotNull();
 
+      foreach (string predicate in ChannelMessageDefaults.MidwayMessageRequiredTags)
+      {
+        RuleFor(e => e.Settings.RoundMidwayMessage)
+          .Matches(predicate);
+      }
       RuleFor(e => e.Settings.RoundMidwayMessage)
-        .Matches(@"{{\s*[yY]es[bB]utton\s*}}")
-        .Matches(@"{{\s*[nN]o[bB]utton\s*}}")
         .NotNull();
 
+      foreach (string predicate in ChannelMessageDefaults.FinisherMessageRequiredTags)
+      {
+        RuleFor(e => e.Settings.RoundFinisherMessage)
+          .Matches(predicate);
+      }
       RuleFor(e => e.Settings.RoundFinisherMessage)
-        .NotNull()
-        .NotEmpty();
+        .NotNull();
     }
   }
 }
