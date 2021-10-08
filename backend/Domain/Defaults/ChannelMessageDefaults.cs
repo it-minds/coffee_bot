@@ -22,8 +22,8 @@ namespace Domain.Defaults
       AllTags[1]
     };
     public static string RoundMidwayMessage { get; } =  "Hello, guys! I am cheking in to see if you met for a cup of coffee this round.\n" +
-                                                      "{{ YesButton: 'Yes, We have met!' }}" +
-                                                      "{{ NoButton: 'No, we haven't met yet' }}";
+                                                      "{{ YesButton }}" +
+                                                      "{{ NoButton }}";
     public static readonly List<string> MidwayMessageRequiredTags = new List<string>() {
       AllTags[5],
       AllTags[6]
@@ -31,7 +31,7 @@ namespace Domain.Defaults
     public static string RoundFinisherMessage { get; } =  "Curtain call ladies and gentlefolk. <!channel>.\n" +
                                                         "Your success has been measured and I give you a solid 10! (For effort.) Your points have been given.\n"+
                                                         "The total meetup rate of the round was: {{ MeetupPercentage }}%\n"+
-                                                        "{{ MeetupCondition: Next time, let's try for 100% shall we? }}\n"+
+                                                        "{{ MeetupCondition }}\n"+
                                                         "Information regarding your next round TBA. Have a wonderful day :heart:";
     public static readonly List<string> FinisherMessageRequiredTags = new List<string>() {
     };
