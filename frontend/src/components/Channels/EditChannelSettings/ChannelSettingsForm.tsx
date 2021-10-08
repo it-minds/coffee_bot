@@ -17,6 +17,8 @@ import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { FC, useCallback, useState } from "react";
 import { ChannelClient, ChannelSettingsDto, DayOfWeek } from "services/backend/nswagts";
 
+import HourPickerInput from "./HourPickerInput";
+
 type Props = {
   submitCallback: (metaData: ChannelSettingsDto) => Promise<void>;
   channelId?: number;
@@ -139,45 +141,30 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
           </FormControl>
           <FormControl isRequired>
             <FormLabel>Initialize Round Hour:</FormLabel>
-            <NumberInput
+            <HourPickerInput
               value={localFormData.initializeRoundHour}
-              onChange={event => updateLocalForm(Number(event), "initializeRoundHour")}
-              max={23}
-              min={0}>
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "initializeRoundHour")
+              }
+            />
           </FormControl>
           <FormControl isRequired>
             <FormLabel>Midway Round Hour:</FormLabel>
-            <NumberInput
+            <HourPickerInput
               value={localFormData.midwayRoundHour}
-              onChange={event => updateLocalForm(Number(event), "midwayRoundHour")}
-              max={23}
-              min={0}>
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "midwayRoundHour")
+              }
+            />
           </FormControl>
           <FormControl isRequired>
             <FormLabel>Finalize Round Hour:</FormLabel>
-            <NumberInput
+            <HourPickerInput
               value={localFormData.finalizeRoundHour}
-              onChange={event => updateLocalForm(Number(event), "finalizeRoundHour")}
-              max={23}
-              min={0}>
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "finalizeRoundHour")
+              }
+            />
           </FormControl>
           <Button colorScheme="green" isLoading={isLoading} mt={6} type="submit">
             Submit
