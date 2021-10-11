@@ -7,6 +7,7 @@ using Application.ChannelSetting.Commands.UpdateChannelPaused;
 using Application.ChannelSetting.Commands.UpdateChannelSettings;
 using Application.ChannelSetting.Queries.GetChannelSettings;
 using Application.ChannelSetting.Queries.GetMyChannelMemberships;
+using Application.ChannelSetting.Queries.GetRequiredMessageTags;
 using Application.Rounds.DTO;
 using Application.Rounds.GetChannelRounds;
 using Application.Rounds.GetCurrentRound;
@@ -83,6 +84,10 @@ namespace Web.Controllers
       }, cancellationToken);
     }
 
-
+    [HttpGet("GetMessageTags/required")]
+    public async Task<RequiredTagsDto> GetRequiredTags([FromBody] GetRequiredMessageTags command, CancellationToken cancellationToken)
+    {
+      return await Mediator.Send(command);
+    }
   }
 }

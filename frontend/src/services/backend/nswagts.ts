@@ -725,6 +725,45 @@ export class ChannelClient extends ClientBase {
         }
         return Promise.resolve<ActiveRoundDto>(<any>null);
     }
+
+    getRequiredTags(command: GetRequiredMessageTags): Promise<RequiredTagsDto> {
+        let url_ = this.baseUrl + "/api/Channel/GetMessageTags/required";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetRequiredTags(_response));
+        });
+    }
+
+    protected processGetRequiredTags(response: Response): Promise<RequiredTagsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <RequiredTagsDto>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RequiredTagsDto>(<any>null);
+    }
 }
 
 export class ChannelNoticesClient extends ClientBase {
@@ -1563,6 +1602,17 @@ export interface ActiveRoundGroupMemberDto {
     slackMemberId?: string | null;
     slackMemberName?: string | null;
     participated?: boolean;
+}
+
+export interface RequiredTagsDto {
+    tagToPredicate?: { [key: string]: string; } | null;
+    startChannelMessageRequiredTags?: string[] | null;
+    startGroupMessageRequiredTags?: string[] | null;
+    midwayMessageRequiredTags?: string[] | null;
+    finisherMessageRequiredTags?: string[] | null;
+}
+
+export interface GetRequiredMessageTags {
 }
 
 export interface CreateChannelNoticeCommand {
