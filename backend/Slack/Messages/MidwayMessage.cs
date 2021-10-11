@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SlackNet.Blocks;
 using SlackNet.WebApi;
+using Defaults = Domain.Defaults.ChannelMessageDefaults;
 
 namespace Slack.Messages
 {
@@ -23,8 +24,8 @@ namespace Slack.Messages
     {
       // TODO: check if the deadlineDays is less than 1 then set the text on the buttons to indicate that they missed the round regrettably.
 
-      string yesPattern = @"{{\s*[yY]es[bB]utton\s*}}";
-      string noPattern = @"{{\s*[nN]o[bB]utton\s*}}";
+      string yesPattern = Defaults.TagToPredicate[Defaults.AllTags[5]];
+      string noPattern = Defaults.TagToPredicate[Defaults.AllTags[6]];
 
       string combinedPattern = yesPattern + @"|" + noPattern;
 
