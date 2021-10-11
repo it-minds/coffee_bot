@@ -13,5 +13,8 @@ namespace Application.ChannelSetting
     public bool IndividualMessage { get; set; }
     public string SlackChannelId { get; set; }
     public string SlackChannelName { get; set; }
+    public int InitializeRoundHour { get; set; }
+    public int MidwayRoundHour { get; set; }
+    public int FinalizeRoundHour { get; set; }
   }
 }

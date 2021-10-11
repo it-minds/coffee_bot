@@ -45,6 +45,9 @@ namespace Application.ChannelSetting.Commands.UpdateChannelSettings
         localSettings.WeekRepeat = request.Settings.WeekRepeat;
         localSettings.DurationInDays = request.Settings.DurationInDays;
         localSettings.IndividualMessage = request.Settings.IndividualMessage;
+        localSettings.InitializeRoundHour = request.Settings.InitializeRoundHour;
+        localSettings.MidwayRoundHour = request.Settings.MidwayRoundHour;
+        localSettings.FinalizeRoundHour = request.Settings.FinalizeRoundHour;
 
         dbContext.ChannelSettings.Update(localSettings);
         await dbContext.SaveChangesAsync(cancellationToken);

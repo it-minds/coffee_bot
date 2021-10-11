@@ -23,12 +23,14 @@ namespace Rounds.Commands.RoundInitiatorCommand
     public class RoundInitiatorCommandHandler : IRequestHandler<RoundInitiatorCommand, int>
     {
       private readonly IApplicationDbContext applicationDbContext;
+      private readonly IDateTimeOffsetService timeService;
       private readonly IMediator mediator;
 
-      public RoundInitiatorCommandHandler(IApplicationDbContext applicationDbContext, IMediator mediator)
+      public RoundInitiatorCommandHandler(IApplicationDbContext applicationDbContext, IDateTimeOffsetService timeService, IMediator mediator)
       {
         this.applicationDbContext = applicationDbContext;
         this.mediator = mediator;
+        this.timeService = timeService;
       }
 
       public async Task<int> Handle(RoundInitiatorCommand request, CancellationToken cancellationToken)
@@ -47,6 +49,9 @@ namespace Rounds.Commands.RoundInitiatorCommand
         foreach (var settings in channelSettings)
         {
           if (settings.ChannelMembers.Count() <= 0) {
+            continue;
+          }
+          if (timeService.Now.Hour != settings.InitializeRoundHour) {
             continue;
           }
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common;
 using Application.Common.Interfaces;
 using Application.Common.Linq;
 using Domain.Entities;
@@ -20,13 +19,15 @@ namespace Rounds.Commands.RoundFinisherCommand
     public class RoundFinisherCommandHandler : IRequestHandler<RoundFinisherCommand, int>
     {
       private readonly ISlackClient slackClient;
+      private readonly IDateTimeOffsetService timeService;
       private readonly IApplicationDbContext applicationDbContext;
 
       private readonly IList<Task> unimportantTasks;
 
-      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
+      public RoundFinisherCommandHandler(ISlackClient slackClient, IDateTimeOffsetService timeService, IApplicationDbContext applicationDbContext)
       {
         this.slackClient = slackClient;
+        this.timeService = timeService;
         this.applicationDbContext = applicationDbContext;
         unimportantTasks = new List<Task>();
       }
@@ -41,7 +42,12 @@ namespace Rounds.Commands.RoundFinisherCommand
           .Where(x => x.EndDate < DateTimeOffset.UtcNow)
           .ToListAsync();
 
-        activeRounds.ForEach(round => HandleRound(round, cancellationToken));
+        activeRounds.ForEach(round => {
+          if (timeService.Now.Hour != round.ChannelSettings.FinalizeRoundHour) {
+            return;
+          }
+          HandleRound(round, cancellationToken);
+          });
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
         await Task.WhenAll(unimportantTasks.ToArray());
