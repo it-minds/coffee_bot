@@ -726,17 +726,13 @@ export class ChannelClient extends ClientBase {
         return Promise.resolve<ActiveRoundDto>(<any>null);
     }
 
-    getRequiredTags(command: GetRequiredMessageTags): Promise<RequiredTagsDto> {
+    getRequiredTags(): Promise<RequiredTagsDto> {
         let url_ = this.baseUrl + "/api/Channel/GetMessageTags/required";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(command);
-
         let options_ = <RequestInit>{
-            body: content_,
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -1610,9 +1606,6 @@ export interface RequiredTagsDto {
     startGroupMessageRequiredTags?: string[] | null;
     midwayMessageRequiredTags?: string[] | null;
     finisherMessageRequiredTags?: string[] | null;
-}
-
-export interface GetRequiredMessageTags {
 }
 
 export interface CreateChannelNoticeCommand {

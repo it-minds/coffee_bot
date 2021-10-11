@@ -85,9 +85,9 @@ namespace Web.Controllers
     }
 
     [HttpGet("GetMessageTags/required")]
-    public async Task<RequiredTagsDto> GetRequiredTags([FromBody] GetRequiredMessageTags command, CancellationToken cancellationToken)
+    public async Task<RequiredTagsDto> GetRequiredTags(CancellationToken cancellationToken)
     {
-      return await Mediator.Send(command);
+      return await Mediator.Send(new GetRequiredMessageTags {}, cancellationToken);
     }
   }
 }

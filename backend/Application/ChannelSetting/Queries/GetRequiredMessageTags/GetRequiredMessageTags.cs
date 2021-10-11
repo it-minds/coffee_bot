@@ -9,16 +9,17 @@ namespace Application.ChannelSetting.Queries.GetRequiredMessageTags
     {
     public class GetRequiredMessageTagsHandler : IRequestHandler<GetRequiredMessageTags, RequiredTagsDto>
     {
-      public Task<RequiredTagsDto> Handle(GetRequiredMessageTags request, CancellationToken cancellationToken)
+      public async Task<RequiredTagsDto> Handle(GetRequiredMessageTags request, CancellationToken cancellationToken)
       {
-        var requiredTags = new RequiredTagsDto();
-        requiredTags.StartChannelMessageRequiredTags = ChannelMessageDefaults.StartChannelMessageRequiredTags;
-        requiredTags.StartGroupMessageRequiredTags = ChannelMessageDefaults.StartGroupMessageRequiredTags;
-        requiredTags.MidwayMessageRequiredTags = ChannelMessageDefaults.MidwayMessageRequiredTags;
-        requiredTags.FinisherMessageRequiredTags = ChannelMessageDefaults.FinisherMessageRequiredTags;
-        requiredTags.TagToPredicate = ChannelMessageDefaults.TagToPredicate;
+        var requiredTags = new RequiredTagsDto {
+          StartChannelMessageRequiredTags = ChannelMessageDefaults.StartChannelMessageRequiredTags,
+          StartGroupMessageRequiredTags = ChannelMessageDefaults.StartGroupMessageRequiredTags,
+          MidwayMessageRequiredTags = ChannelMessageDefaults.MidwayMessageRequiredTags,
+          FinisherMessageRequiredTags = ChannelMessageDefaults.FinisherMessageRequiredTags,
+          TagToPredicate = ChannelMessageDefaults.TagToPredicate
+        };
 
-        return new Task<RequiredTagsDto>(() => requiredTags);
+        return requiredTags;
       }
     }
   }
