@@ -1,14 +1,15 @@
-import { Box, useColorModeValue } from "@chakra-ui/react";
+import { useColorModeValue } from "@chakra-ui/react";
+import { ChartData, ChartOptions } from "chart.js";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
 import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { Bar } from "react-chartjs-2";
 import { ChannelClient, RoundSnipDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
-import { percentFormatter } from "utils/formatters/percentFormatter";
 
 const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
@@ -31,29 +32,58 @@ const IndexPage: NextPage = () => {
     setRounds(result);
   }, [activeUser, router.query]);
 
+  const [data, setData] = useState<ChartData>();
+  const [options, setOptions] = useState<ChartOptions>();
+  useEffect(() => {
+    setData({
+      labels: rounds.map(
+        round =>
+          dateTimeFormatter.format(new Date(round.startDate)) +
+          " - " +
+          dateTimeFormatter.format(new Date(round.endDate))
+      ),
+      datasets: [
+        {
+          label: "Meetup percentage",
+          data: rounds.map(round => (round.meetupPercentage > 0 ? round.meetupPercentage : 1)),
+          backgroundColor: "rgb(255, 0, 0)"
+        },
+        {
+          label: "Photo percentage",
+          data: rounds.map(round => (round.photoPercentage > 0 ? round.photoPercentage : 1)),
+          backgroundColor: "rgb(0, 255, 0)"
+        }
+      ]
+    });
+    setOptions({
+      onHover: (event, elements) => {
+        event.native.target.style.cursor = elements.length > 0 ? "pointer" : "default";
+      },
+      onClick: (event, elements) => {
+        if (elements.length == 0) return;
+        router.push(
+          "/channels/[channelId]/rounds/[roundId]",
+          `/channels/${router.query.channelId}/rounds/${rounds[elements[0].index].id}`
+        );
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100
+        }
+      }
+    });
+  }, [rounds]);
+
   return (
     <>
-      {rounds.map(round => (
-        <Box
-          key={round.id}
-          onClick={() =>
-            router.push(
-              "/channels/[channelId]/rounds/[roundId]",
-              `/channels/${router.query.channelId}/rounds/${round.id}`
-            )
-          }
-          m={2}
-          p={2}
-          cursor="pointer"
-          backgroundColor={round.active ? activeColor : normalColor}>
-          Round: {dateTimeFormatter.format(new Date(round.startDate))} -{" "}
-          {dateTimeFormatter.format(new Date(round.endDate))}
-          <br />
-          Meetup: {percentFormatter.format(round.meetupPercentage)}
-          <br />
-          Photo: {percentFormatter.format(round.photoPercentage)}
-        </Box>
-      ))}
+      <Bar
+        data={data}
+        options={options}
+        onMouseLeave={event => {
+          event.target.style.cursor = "default";
+        }}
+      />
     </>
   );
 };
