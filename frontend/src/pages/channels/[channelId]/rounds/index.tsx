@@ -1,4 +1,4 @@
-import { useColorModeValue } from "@chakra-ui/react";
+import { Button, HStack, Input, Text, useColorModeValue } from "@chakra-ui/react";
 import { ChartData, ChartOptions } from "chart.js";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
@@ -75,8 +75,35 @@ const IndexPage: NextPage = () => {
     });
   }, [rounds]);
 
+  const [fromDate, setFromDate] = useState<string>(
+    // 5 weeks ago
+    new Date(new Date().valueOf() - 5 * 7 * 24 * 3600 * 1000).toISOString().substring(0, 10)
+  );
+  const [toDate, setToDate] = useState<string>(new Date().toISOString().substring(0, 10));
+
   return (
     <>
+      <form>
+        <HStack>
+          <Text>Date interval: From: </Text>
+          <Input
+            type="date"
+            w="xsm"
+            value={fromDate}
+            onChange={event => setFromDate(event.target.value)}
+          />
+          <Text> To: </Text>
+          <Input
+            type="date"
+            w="xsm"
+            value={toDate}
+            onChange={event => setToDate(event.target.value)}
+          />
+          <Input type="submit" as={Button} value="Get selected" w="sm">
+            Get selected
+          </Input>
+        </HStack>
+      </form>
       <Bar
         data={data}
         options={options}
