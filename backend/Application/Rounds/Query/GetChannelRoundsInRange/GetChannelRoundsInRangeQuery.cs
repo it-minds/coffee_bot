@@ -26,7 +26,7 @@ namespace Application.Rounds.GetChannelRoundsInRange
       {
         var rounds = await dbContext.CoffeeRounds
           .Include(x => x.CoffeeRoundGroups)
-          .Where(x => x.ChannelId == request.ChannelId && request.StartDate <= x.StartDate && request.EndDate >= x.EndDate)
+          .Where(x => x.ChannelId == request.ChannelId && request.StartDate.Date <= x.StartDate.Date && request.EndDate.Date >= x.StartDate)
           .ToListAsync();
 
         return rounds.Select(round => mapper.Map<RoundSnipDto>(round));

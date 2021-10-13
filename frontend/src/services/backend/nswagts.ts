@@ -647,20 +647,22 @@ export class ChannelClient extends ClientBase {
         return Promise.resolve<RoundSnipDto[]>(<any>null);
     }
 
-    getRoundsInRange(id: number, command: GetChannelRoundsInRangeQuery): Promise<RoundSnipDto[]> {
-        let url_ = this.baseUrl + "/api/Channel/{id}/rounds/range";
+    getRoundsInRange(id: number, startDate: Date, endDate: Date): Promise<RoundSnipDto[]> {
+        let url_ = this.baseUrl + "/api/Channel/{id}/rounds/range/{startDate}/{endDate}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (startDate === undefined || startDate === null)
+            throw new Error("The parameter 'startDate' must be defined.");
+        url_ = url_.replace("{startDate}", encodeURIComponent(startDate ? "" + startDate.toJSON() : "null"));
+        if (endDate === undefined || endDate === null)
+            throw new Error("The parameter 'endDate' must be defined.");
+        url_ = url_.replace("{endDate}", encodeURIComponent(endDate ? "" + endDate.toJSON() : "null"));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(command);
-
         let options_ = <RequestInit>{
-            body: content_,
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -1521,12 +1523,6 @@ export interface RoundSnipDto {
     endDate?: Date;
     meetupPercentage?: number;
     photoPercentage?: number;
-}
-
-export interface GetChannelRoundsInRangeQuery {
-    channelId?: number;
-    startDate?: Date;
-    endDate?: Date;
 }
 
 export interface ActiveRoundDto {
