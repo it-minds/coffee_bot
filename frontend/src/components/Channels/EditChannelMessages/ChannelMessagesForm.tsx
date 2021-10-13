@@ -130,7 +130,8 @@ const ChannelMessagesForm: FC<Props> = ({ submitCallback, channelId }) => {
               }
             />
             <FormErrorMessage>
-              This message must contain the following tags: {requiredTags[0].join(", ")}
+              This message must contain the following tags:{" "}
+              {requiredTags && requiredTags[0].join(", ")}
             </FormErrorMessage>
           </FormControl>
           <FormControl isRequired isInvalid={!validFields[1]}>
@@ -143,7 +144,8 @@ const ChannelMessagesForm: FC<Props> = ({ submitCallback, channelId }) => {
               }
             />
             <FormErrorMessage>
-              This message must contain the following tags: {requiredTags[1].join(", ")}
+              This message must contain the following tags:{" "}
+              {requiredTags && requiredTags[1].join(", ")}
             </FormErrorMessage>
           </FormControl>
           <FormControl isRequired isInvalid={!validFields[2]}>
@@ -154,7 +156,8 @@ const ChannelMessagesForm: FC<Props> = ({ submitCallback, channelId }) => {
               onChange={event => updateLocalForm(String(event.target.value), "roundMidwayMessage")}
             />
             <FormErrorMessage>
-              This message must contain the following tags: {requiredTags[2].join(", ")}
+              This message must contain the following tags:{" "}
+              {requiredTags && requiredTags[2].join(", ")}
             </FormErrorMessage>
           </FormControl>
           <FormControl isRequired isInvalid={!validFields[3]}>
@@ -167,7 +170,8 @@ const ChannelMessagesForm: FC<Props> = ({ submitCallback, channelId }) => {
               }
             />
             <FormErrorMessage>
-              This message must contain the following tags: {requiredTags[3].join(", ")}
+              This message must contain the following tags:{" "}
+              {requiredTags && requiredTags[3].join(", ")}
             </FormErrorMessage>
           </FormControl>
           <Button colorScheme="green" isLoading={isLoading} mt={6} type="submit">
