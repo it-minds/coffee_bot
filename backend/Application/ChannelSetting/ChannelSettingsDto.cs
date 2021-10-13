@@ -17,5 +17,8 @@ namespace Application.ChannelSetting
     public string RoundStartGroupMessage { get; set; }
     public string RoundMidwayMessage { get; set; }
     public string RoundFinisherMessage { get; set; }
+    public int InitializeRoundHour { get; set; }
+    public int MidwayRoundHour { get; set; }
+    public int FinalizeRoundHour { get; set; }
   }
 }

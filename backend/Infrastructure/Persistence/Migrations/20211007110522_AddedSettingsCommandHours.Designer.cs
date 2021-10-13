@@ -4,14 +4,16 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211007110522_AddedSettingsCommandHours")]
+    partial class AddedSettingsCommandHours
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,29 +110,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<bool>("IndividualMessage")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RoundFinisherMessage")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Curtain call ladies and gentlefolk. <!channel>.\nYour success has been measured and I give you a solid 10! (For effort.) Your points have been given.\nThe total meetup rate of the round was: {{ MeetupPercentage }}%\n{{ MeetupCondition }}\nInformation regarding your next round TBA. Have a wonderful day :heart:");
-
-                    b.Property<string>("RoundMidwayMessage")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Hello, guys! I am cheking in to see if you met for a cup of coffee this round.\n{{ YesButton }}{{ NoButton }}");
-
-                    b.Property<string>("RoundStartChannelMessage")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Time to drink coffee <!channel>\nThe round starts: {{ RoundStartTime }}. The round ends {{ RoundEndTime }}.\nThe groups are:\n{{ Groups }}");
-
-                    b.Property<string>("RoundStartGroupMessage")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Time for your coffee!\nThe round starts: {{ RoundStartTime }}. The round ends: {{ RoundEndTime }}.\nHave fun!");
                     b.Property<int>("InitializeRoundHour")
                         .HasColumnType("int");
 

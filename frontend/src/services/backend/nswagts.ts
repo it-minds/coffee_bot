@@ -1515,6 +1515,9 @@ export interface ChannelSettingsDto {
     roundStartGroupMessage?: string | null;
     roundMidwayMessage?: string | null;
     roundFinisherMessage?: string | null;
+    initializeRoundHour?: number;
+    midwayRoundHour?: number;
+    finalizeRoundHour?: number;
 }
 
 export interface ChannelSettingsIdDto extends ChannelSettingsDto {

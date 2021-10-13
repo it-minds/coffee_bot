@@ -20,12 +20,14 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
     public class RoundMidwayCheckupCommandHandler : IRequestHandler<RoundMidwayCheckupCommand, int>
     {
       private readonly ISlackClient slackClient;
+      private readonly IDateTimeOffsetService timeService;
       private readonly IApplicationDbContext applicationDbContext;
 
-      public RoundMidwayCheckupCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
+      public RoundMidwayCheckupCommandHandler(ISlackClient slackClient, IDateTimeOffsetService timeService, IApplicationDbContext applicationDbContext)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
+        this.timeService = timeService;
       }
 
       public async Task<int> Handle(RoundMidwayCheckupCommand request, CancellationToken cancellationToken)
@@ -38,6 +40,11 @@ namespace Rounds.Commands.RoundMidwayCheckupCommand
 
         foreach (var round in activeRounds)
         {
+          if (timeService.Now.Hour != round.CoffeeRound.ChannelSettings.MidwayRoundHour)
+          {
+            continue;
+          }
+
           var daysLeft = (round.CoffeeRound.EndDate - DateTimeOffset.UtcNow).Days;
           var roundDays = (round.CoffeeRound.EndDate - round.CoffeeRound.StartDate).Days;
 

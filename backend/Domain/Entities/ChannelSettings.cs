@@ -21,6 +21,9 @@ namespace Domain.Entities
     public string RoundStartGroupMessage { get; set; } =  ChannelMessageDefaults.RoundStartGroupMessage;
     public string RoundMidwayMessage { get; set; } =  ChannelMessageDefaults.RoundMidwayMessage;
     public string RoundFinisherMessage { get; set; } =  ChannelMessageDefaults.RoundFinisherMessage;
+    public int InitializeRoundHour { get; set; } = 10;
+    public int MidwayRoundHour { get; set; } = 11;
+    public int FinalizeRoundHour { get; set; } = 16;
 
     public ICollection<ChannelMember> ChannelMembers { get; set; }
     public ICollection<CoffeeRound> CoffeeRounds { get; set; }

@@ -17,6 +17,8 @@ import { useNSwagClient } from "hooks/useNSwagClient";
 import React, { FC, useCallback, useState } from "react";
 import { ChannelClient, ChannelSettingsDto, DayOfWeek } from "services/backend/nswagts";
 
+import HourPickerInput from "./HourPickerInput";
+
 type Props = {
   submitCallback: (metaData: ChannelSettingsDto) => Promise<void>;
   channelId?: number;
@@ -27,7 +29,10 @@ const defaultChannel: ChannelSettingsDto = {
   startsDay: DayOfWeek.Thursday,
   weekRepeat: 1,
   durationInDays: 1,
-  individualMessage: false
+  individualMessage: false,
+  initializeRoundHour: 10,
+  midwayRoundHour: 11,
+  finalizeRoundHour: 16
 };
 
 const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
@@ -132,6 +137,33 @@ const ChannelSettingsForm: FC<Props> = ({ submitCallback, channelId }) => {
                 updateLocalForm(!localFormData.individualMessage, "individualMessage")
               }
               size="lg"
+            />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Initialize Round Hour:</FormLabel>
+            <HourPickerInput
+              value={localFormData.initializeRoundHour}
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "initializeRoundHour")
+              }
+            />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Midway Round Hour:</FormLabel>
+            <HourPickerInput
+              value={localFormData.midwayRoundHour}
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "midwayRoundHour")
+              }
+            />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Finalize Round Hour:</FormLabel>
+            <HourPickerInput
+              value={localFormData.finalizeRoundHour}
+              onChange={event =>
+                updateLocalForm(Number(event.target.value.split(":")[0]), "finalizeRoundHour")
+              }
             />
           </FormControl>
           <Button colorScheme="green" isLoading={isLoading} mt={6} type="submit">
