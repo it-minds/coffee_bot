@@ -66,7 +66,7 @@ const IndexPage: NextPage = () => {
     });
     setOptions({
       onHover: (event, elements) => {
-        //it says style property does not exist, but this works as if it does
+        //@ts-expect-error it says style property does not exist, but this works as expected
         event.native.target.style.cursor = elements.length > 0 ? "pointer" : "default";
       },
       onClick: (event, elements) => {
@@ -116,6 +116,7 @@ const IndexPage: NextPage = () => {
         data={data}
         options={options}
         onMouseLeave={event => {
+          //@ts-expect-error it says style property does not exist, but this works as expected
           event.target.style.cursor = "default";
         }}
       />
