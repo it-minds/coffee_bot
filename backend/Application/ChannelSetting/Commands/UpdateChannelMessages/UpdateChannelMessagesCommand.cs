@@ -23,9 +23,9 @@ namespace Application.ChannelSetting.Commands.UpdateChannelMessages
       private readonly IApplicationDbContext dbContext;
       private readonly ICurrentUserService currentUserService;
 
-      public UpdateChannelMessagesCommandHandler(IApplicationDbContext o, ICurrentUserService currentUserService)
+      public UpdateChannelMessagesCommandHandler(IApplicationDbContext dbContext, ICurrentUserService currentUserService)
       {
-        dbContext = o;
+        this.dbContext = dbContext;
         this.currentUserService = currentUserService;
       }
 
