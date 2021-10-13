@@ -2,20 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using Application.Common.Interfaces;
 using Domain.Entities;
 using System.Linq;
-using Application.Common.Linq;
 using Domain.Defaults;
 
-namespace Infrastructure.Services
+namespace Slack.Messages
 {
-  public class BuildMessageService : IBuildMessageService
+  public static class BuildMessageService
   {
     private static IList<string> predicates = ChannelMessageDefaults.TagToPredicate.Values.ToList();
-    public string BuildMessage(string text, CoffeeRound roundInfo, IEnumerable<IEnumerable<string>>? groups = null)
+    public static string BuildMessage(string text, CoffeeRound roundInfo, IEnumerable<IEnumerable<string>>? groups = null)
     {
-      var meetupPercent = roundInfo.CoffeeRoundGroups.Percent(x => x.HasMet);
+      var meetupPercent = (100m * roundInfo.CoffeeRoundGroups.Where(x => x.HasMet).Count()) / roundInfo.CoffeeRoundGroups.Count();
       text = Regex.Replace(text, predicates[0], roundInfo.StartDate.ToString("dddd, dd/MMMM"));
       text = Regex.Replace(text, predicates[1], roundInfo.EndDate.ToString("dddd, dd/MMMM"));
       text = Regex.Replace(text, predicates[2], meetupPercent.ToString());

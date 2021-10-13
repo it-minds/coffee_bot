@@ -9,6 +9,7 @@ using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
+using Slack.Messages;
 
 namespace Rounds.Commands.RoundFinisherCommand
 {
@@ -19,15 +20,13 @@ namespace Rounds.Commands.RoundFinisherCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
-      private readonly IBuildMessageService messageService;
 
       private readonly IList<Task> unimportantTasks;
 
-      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, IBuildMessageService messageService)
+      public RoundFinisherCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
-        this.messageService = messageService;
         unimportantTasks = new List<Task>();
       }
 
@@ -54,7 +53,7 @@ namespace Rounds.Commands.RoundFinisherCommand
         round.Active = false;
         var meetupPercent = round.CoffeeRoundGroups.Percent(x => x.HasMet);
 
-        var msg = messageService.BuildMessage(round.ChannelSettings.RoundFinisherMessage, round);
+        var msg = BuildMessageService.BuildMessage(round.ChannelSettings.RoundFinisherMessage, round);
 
         unimportantTasks.Add(slackClient.SendMessageToChannel(cancellationToken, round.ChannelSettings.SlackChannelId, msg));
       }

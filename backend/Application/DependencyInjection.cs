@@ -6,8 +6,6 @@ using Slack.Clients;
 using Slack.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Application.Common.Interfaces;
-using Infrastructure.Services;
 
 namespace Application
 {
@@ -29,8 +27,6 @@ namespace Application
 
       services.AddScoped<ISlackClient, BotClient>();
       services.AddScoped<ISlackOAuthClient, OAuthClient>();
-
-      services.AddScoped<IBuildMessageService, BuildMessageService>();
 
       return services;
     }

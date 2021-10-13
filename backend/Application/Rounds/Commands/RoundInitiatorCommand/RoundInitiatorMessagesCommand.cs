@@ -6,6 +6,7 @@ using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
+using Slack.Messages;
 
 namespace Rounds.Commands.RoundInitiatorCommand
 {
@@ -22,12 +23,10 @@ namespace Rounds.Commands.RoundInitiatorCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
-      private readonly IBuildMessageService messageService;
 
-      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, IBuildMessageService messageService) {
+      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext) {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
-        this.messageService = messageService;
       }
 
       public async Task<int> Handle(RoundInitiatorMessagesCommand request, CancellationToken cancellationToken)
@@ -48,7 +47,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
         await slackClient.SendMessageToChannel(
           conversationId: settings.SlackChannelId,
-          text: messageService.BuildMessage(round.ChannelSettings.RoundStartChannelMessage, round, groups: groups.Select(x => x.CoffeeRoundGroupMembers.Select(y => y.SlackMemberId))),
+          text: BuildMessageService.BuildMessage(round.ChannelSettings.RoundStartChannelMessage, round, groups: groups.Select(x => x.CoffeeRoundGroupMembers.Select(y => y.SlackMemberId))),
           cancellationToken: cancellationToken
         );
 
@@ -67,7 +66,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
       {
         var members = group.CoffeeRoundGroupMembers.Select(x => x.SlackMemberId);
 
-        var groupMessage = messageService.BuildMessage(round.ChannelSettings.RoundStartGroupMessage, round);
+        var groupMessage = BuildMessageService.BuildMessage(round.ChannelSettings.RoundStartGroupMessage, round);
 
         var pm = await slackClient.SendPrivateMessageToMembers(cancellationToken, members, groupMessage);
         group.SlackMessageId = pm.ChannelId;
