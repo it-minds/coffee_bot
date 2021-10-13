@@ -1,4 +1,4 @@
-import { Button, HStack, Input, Text, useColorModeValue } from "@chakra-ui/react";
+import { Button, HStack, Input, Text } from "@chakra-ui/react";
 import { ChartData, ChartOptions } from "chart.js";
 import { AuthContext } from "contexts/AuthContext";
 import { withAuth } from "hocs/withAuth";
@@ -15,9 +15,11 @@ const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const router = useRouter();
 
-  const activeColor = useColorModeValue("green.200", "green.600");
-  const normalColor = useColorModeValue("blue.100", "blue.700");
-
+  const [fromDate, setFromDate] = useState<string>(
+    // 5 weeks ago as default value
+    new Date(new Date().valueOf() - 5 * 7 * 24 * 3600 * 1000).toISOString().substring(0, 10)
+  );
+  const [toDate, setToDate] = useState<string>(new Date().toISOString().substring(0, 10));
   const [rounds, setRounds] = useState<RoundSnipDto[]>([]);
 
   const { genClient } = useNSwagClient(ChannelClient);
@@ -27,7 +29,7 @@ const IndexPage: NextPage = () => {
     const channelId = parseInt(router.query.channelId as string);
 
     const client = await genClient();
-    const result = await client.getRounds(channelId);
+    const result = await client.getRoundsInRange(channelId, new Date(fromDate), new Date(toDate));
 
     setRounds(result);
   }, [activeUser, router.query]);
@@ -57,6 +59,7 @@ const IndexPage: NextPage = () => {
     });
     setOptions({
       onHover: (event, elements) => {
+        //it says style property does not exist, but this works as if it does
         event.native.target.style.cursor = elements.length > 0 ? "pointer" : "default";
       },
       onClick: (event, elements) => {
@@ -74,12 +77,6 @@ const IndexPage: NextPage = () => {
       }
     });
   }, [rounds]);
-
-  const [fromDate, setFromDate] = useState<string>(
-    // 5 weeks ago
-    new Date(new Date().valueOf() - 5 * 7 * 24 * 3600 * 1000).toISOString().substring(0, 10)
-  );
-  const [toDate, setToDate] = useState<string>(new Date().toISOString().substring(0, 10));
 
   return (
     <>
