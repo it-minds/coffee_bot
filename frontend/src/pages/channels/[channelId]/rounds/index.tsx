@@ -6,7 +6,7 @@ import { useEffectAsync } from "hooks/useEffectAsync";
 import { useNSwagClient } from "hooks/useNSwagClient";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { ChannelClient, RoundSnipDto } from "services/backend/nswagts";
 import { dateTimeFormatter } from "utils/formatters/dateTimeFormatter";
@@ -15,6 +15,7 @@ const IndexPage: NextPage = () => {
   const { activeUser } = useContext(AuthContext);
   const router = useRouter();
 
+  const [channelId, setChannelId] = useState(0);
   const [fromDate, setFromDate] = useState<string>(
     // 5 weeks ago as default value
     new Date(new Date().valueOf() - 5 * 7 * 24 * 3600 * 1000).toISOString().substring(0, 10)
@@ -24,15 +25,21 @@ const IndexPage: NextPage = () => {
 
   const { genClient } = useNSwagClient(ChannelClient);
 
-  useEffectAsync(async () => {
-    if (!activeUser || !router.query.channelId) return;
-    const channelId = parseInt(router.query.channelId as string);
-
+  const fetchRounds = useCallback(async () => {
     const client = await genClient();
     const result = await client.getRoundsInRange(channelId, new Date(fromDate), new Date(toDate));
 
     setRounds(result);
+  }, [fromDate, toDate, setRounds, channelId]);
+
+  useEffectAsync(async () => {
+    if (!activeUser || !router.query.channelId) return;
+    setChannelId(parseInt(router.query.channelId as string));
   }, [activeUser, router.query]);
+
+  useEffect(() => {
+    fetchRounds();
+  }, [channelId]);
 
   const [data, setData] = useState<ChartData>();
   const [options, setOptions] = useState<ChartOptions>();
@@ -80,7 +87,11 @@ const IndexPage: NextPage = () => {
 
   return (
     <>
-      <form>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          fetchRounds();
+        }}>
         <HStack>
           <Text>Date interval: From: </Text>
           <Input
@@ -96,8 +107,8 @@ const IndexPage: NextPage = () => {
             value={toDate}
             onChange={event => setToDate(event.target.value)}
           />
-          <Input type="submit" as={Button} value="Get selected" w="sm">
-            Get selected
+          <Input type="submit" as={Button} w="sm">
+            Get rounds from selected interval
           </Input>
         </HStack>
       </form>
