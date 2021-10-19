@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Hangfire.Server;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
@@ -15,36 +16,47 @@ namespace Rounds.Commands.RoundInitiatorCommand
   /// <summary>
   ///  This Command
   /// </summary>
-  public class RoundInitiatorMessagesCommand
-   : IRequest<int>
+  public class RoundInitiatorMessagesCommand : IRequest<string>
   {
     public int ChannelSettingsId { get; set; }
 
-    public class RoundInitiatorMessagesCommandHandler : IRequestHandler<RoundInitiatorMessagesCommand, int>
+    public class RoundInitiatorMessagesCommandHandler : IRequestHandler<RoundInitiatorMessagesCommand, string>
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
+      private readonly PerformingContext performingContext;
 
-      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext) {
+      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, PerformingContext performingContext)
+      {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
+        this.performingContext = performingContext;
       }
 
-      public async Task<int> Handle(RoundInitiatorMessagesCommand request, CancellationToken cancellationToken)
+      [System.Obsolete]
+      public async Task<string> Handle(RoundInitiatorMessagesCommand request, CancellationToken cancellationToken)
       {
 
         var settings = await applicationDbContext.ChannelSettings
           .Where(x => x.Id == request.ChannelSettingsId)
-          .FirstOrDefaultAsync();
+          .FirstOrDefaultAsync(cancellationToken);
+
+        if (settings == null) {
+          return "No settings";
+        }
 
         var round = await applicationDbContext.CoffeeRounds
           .Where(x => x.Active && x.ChannelId == request.ChannelSettingsId)
-          .FirstOrDefaultAsync();
+          .FirstOrDefaultAsync(cancellationToken);
+
+        if (round == null) {
+          return "No round";
+        }
 
         var groups = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRoundGroupMembers)
-          .Where(x => x.CoffeeRound.Active && x.CoffeeRoundId == round.Id )
-          .ToListAsync();
+          .Where(x => x.CoffeeRoundId == round.Id )
+          .ToListAsync(cancellationToken);
 
         await slackClient.SendMessageToChannel(
           conversationId: settings.SlackChannelId,
@@ -60,7 +72,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        return 1;
+        return "Success for id: "+ performingContext.BackgroundJob.Id;
       }
 
       private async Task BuildNewCoffeeRoundGroup(CoffeeRound round, CoffeeRoundGroup group, CancellationToken cancellationToken)
