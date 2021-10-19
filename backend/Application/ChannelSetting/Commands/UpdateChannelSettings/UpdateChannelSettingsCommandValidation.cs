@@ -10,6 +10,12 @@ namespace Application.ChannelSetting.Commands.UpdateChannelSettings
         .NotNull();
       RuleFor(e => e.Settings)
         .NotNull();
+      RuleFor(e => e.Settings.InitializeRoundHour)
+        .InclusiveBetween(0, 23);
+      RuleFor(e => e.Settings.MidwayRoundHour)
+        .InclusiveBetween(0, 23);
+      RuleFor(e => e.Settings.FinalizeRoundHour)
+        .InclusiveBetween(0, 23);
     }
   }
 }

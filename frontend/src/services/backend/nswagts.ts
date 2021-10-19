@@ -1435,6 +1435,9 @@ export interface ChannelSettingsDto {
     individualMessage?: boolean;
     slackChannelId?: string | null;
     slackChannelName?: string | null;
+    initializeRoundHour?: number;
+    midwayRoundHour?: number;
+    finalizeRoundHour?: number;
 }
 
 export interface ChannelSettingsIdDto extends ChannelSettingsDto {
