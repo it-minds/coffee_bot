@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Domain.Entities;
-using Hangfire.Server;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Slack.Interfaces;
@@ -24,19 +23,14 @@ namespace Rounds.Commands.RoundInitiatorCommand
     {
       private readonly ISlackClient slackClient;
       private readonly IApplicationDbContext applicationDbContext;
-      private readonly PerformingContext performingContext;
-
-      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext, PerformingContext performingContext)
+      public RoundInitiatorMessagesCommandHandler(ISlackClient slackClient, IApplicationDbContext applicationDbContext)
       {
         this.slackClient = slackClient;
         this.applicationDbContext = applicationDbContext;
-        this.performingContext = performingContext;
       }
 
-      [System.Obsolete]
       public async Task<string> Handle(RoundInitiatorMessagesCommand request, CancellationToken cancellationToken)
       {
-
         var settings = await applicationDbContext.ChannelSettings
           .Where(x => x.Id == request.ChannelSettingsId)
           .FirstOrDefaultAsync(cancellationToken);
@@ -72,7 +66,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
         await applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        return "Success for id: "+ performingContext.BackgroundJob.Id;
+        return "Success";
       }
 
       private async Task BuildNewCoffeeRoundGroup(CoffeeRound round, CoffeeRoundGroup group, CancellationToken cancellationToken)

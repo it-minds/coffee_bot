@@ -146,11 +146,9 @@ namespace Rounds.Commands.RoundInitiatorCommand
         }
         var groups = new List<string>[calculatedChunkCount];
 
-        Random rng = new Random();
-        var iterator = members.OrderBy(a => rng.Next()).GetEnumerator();
-        var curGroupI = 0;
 
-        while (iterator.MoveNext())
+        var curGroupI = 0;
+        foreach (var member in members.ToList().Shuffle())
         {
           if (curGroupI >= groups.Count()) {
             curGroupI = 0;
@@ -161,7 +159,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
             curGroup = new List<string>();
             groups[curGroupI] = curGroup;
           }
-          curGroup.Add(iterator.Current);
+          curGroup.Add(member);
 
           curGroupI++;
         }
