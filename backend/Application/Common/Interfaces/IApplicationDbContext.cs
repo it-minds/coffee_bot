@@ -15,6 +15,8 @@ namespace Application.Common.Interfaces
     DbSet<Prize> Prizes { get; set; }
     DbSet<ClaimedPrize> ClaimedPrizes { get; set; }
     DbSet<ChannelNotice> ChannelNotices { get; set; }
+    DbSet<PredefinedGroup> PredefinedGroups { get; set; }
+    DbSet<PredefinedGroupMember> PredefinedGroupMembers { get; set; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
   }
 }

@@ -1,6 +1,5 @@
 using Application.Common.Interfaces;
 using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -38,7 +37,23 @@ namespace Application.UnitTests
     public static void SeedSampleData(ApplicationDbContext context)
     {
 
-      // TODO add content to context
+      context.ChannelSettings.Add(new ChannelSettings {
+        Id = 1,
+        GroupSize = 3
+      });
+
+      context.ChannelMembers.Add(new ChannelMember {
+        ChannelSettingsId = 1,
+        Id = 1
+       });
+      context.ChannelMembers.Add(new ChannelMember {
+        ChannelSettingsId = 1,
+        Id = 2
+       });
+      context.ChannelMembers.Add(new ChannelMember {
+        ChannelSettingsId = 1,
+        Id = 3
+       });
 
       context.SaveChanges();
     }

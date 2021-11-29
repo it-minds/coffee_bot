@@ -29,6 +29,8 @@ namespace Infrastructure.Persistence
     public DbSet<Prize> Prizes { get; set; }
     public DbSet<ClaimedPrize> ClaimedPrizes { get; set; }
     public DbSet<ChannelNotice> ChannelNotices { get; set; }
+    public DbSet<PredefinedGroup> PredefinedGroups { get; set; }
+    public DbSet<PredefinedGroupMember> PredefinedGroupMembers { get; set; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

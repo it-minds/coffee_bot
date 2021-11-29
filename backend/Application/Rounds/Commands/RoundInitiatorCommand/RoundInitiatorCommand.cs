@@ -55,10 +55,15 @@ namespace Rounds.Commands.RoundInitiatorCommand
             continue;
           }
 
-          var membersToParticipate = settings.ChannelMembers.Where(x => !x.IsRemoved && !x.OnPause).Select(x => x.SlackUserId);
-          var groups = SplitChannelIntoSubGroups(membersToParticipate, settings.GroupSize);
-
           var round = BuildNewCoffeeRound(settings);
+
+          var predefinedUsers = await BuildPredefinedGroups(round, cancellationToken);
+
+          var membersToParticipate = settings.ChannelMembers.Where(x => !x.IsRemoved && !x.OnPause)
+            .Select(x => x.SlackUserId)
+            .Where(x => predefinedUsers.Contains(x));
+
+          var groups = SplitChannelIntoSubGroups(membersToParticipate, settings.GroupSize);
 
           groups.ForEach(group => BuildNewCoffeeRoundGroup(round: round, group: group, cancellationToken: cancellationToken));
         }
@@ -93,6 +98,40 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
           applicationDbContext.CoffeeRoundGroupMembers.Add(member);
         }
+      }
+
+      private async Task<IEnumerable<string>> BuildPredefinedGroups(CoffeeRound round, CancellationToken cancellationToken)
+      {
+        var groups = await applicationDbContext.PredefinedGroups
+          .Include(x => x.PredefinedGroupMembers)
+            .ThenInclude(x => x.ChannelMember)
+          .Where(x => x.ChannelSettingsId == round.ChannelId)
+          .ToListAsync(cancellationToken);
+
+        var result = new List<string>();
+
+        foreach (var group in groups)
+        {
+          var roundGroup = new CoffeeRoundGroup
+          {
+            CoffeeRound = round
+          };
+          applicationDbContext.CoffeeRoundGroups.Add(roundGroup);
+          foreach (var memberId in group.PredefinedGroupMembers.Select(x => x.ChannelMember.SlackUserId))
+          {
+            var member = new CoffeeRoundGroupMember
+            {
+              SlackMemberId = memberId,
+              CoffeeRoundGroup = roundGroup
+            };
+            result.Add(memberId);
+
+            applicationDbContext.CoffeeRoundGroupMembers.Add(member);
+          }
+          applicationDbContext.PredefinedGroups.Remove(group);
+        }
+
+        return result;
       }
 
       private CoffeeRound BuildNewCoffeeRound(ChannelSettings settings)
@@ -145,7 +184,6 @@ namespace Rounds.Commands.RoundInitiatorCommand
           calculatedChunkCount += 1;
         }
         var groups = new List<string>[calculatedChunkCount];
-
 
         var curGroupI = 0;
         foreach (var member in members.ToList().Shuffle())
