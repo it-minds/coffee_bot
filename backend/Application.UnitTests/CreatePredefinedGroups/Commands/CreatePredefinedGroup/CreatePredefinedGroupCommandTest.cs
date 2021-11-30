@@ -21,7 +21,35 @@ namespace Application.UnitTests.CreatePredefinedGroups.Commands.CreatePredefined
 
       var result = await handler.Handle(cmd, CancellationToken.None);
 
-      Console.WriteLine("result $1", result);
+      Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public async Task Handle_CreatePartial()
+    {
+      var cmd = new CreatePredefinedGroupCommand {
+        ChannelId = 1,
+        MemberIds = new int[]{ 1, 2}
+      };
+
+      var handler = new CreatePredefinedGroupCommand.CreatePredefinedGroupCommandHandler(Context);
+
+      var result = await handler.Handle(cmd, CancellationToken.None);
+
+      Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public async Task Handle_CreateNotExistingMemeberl()
+    {
+      var cmd = new CreatePredefinedGroupCommand {
+        ChannelId = 1,
+        MemberIds = new int[]{ 1, 2, 3, 999 }
+      };
+
+      var handler = new CreatePredefinedGroupCommand.CreatePredefinedGroupCommandHandler(Context);
+
+      await Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(cmd, CancellationToken.None));
     }
 
     [Fact]
@@ -35,9 +63,8 @@ namespace Application.UnitTests.CreatePredefinedGroups.Commands.CreatePredefined
       var handler = new CreatePredefinedGroupCommand.CreatePredefinedGroupCommandHandler(Context);
 
       var result1 = await handler.Handle(cmd, CancellationToken.None);
-      var result2 = await handler.Handle(cmd, CancellationToken.None);
 
-      Console.WriteLine("result $1", result2);
+      await Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(cmd, CancellationToken.None));
     }
   }
 }

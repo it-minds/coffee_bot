@@ -27,24 +27,21 @@ namespace Application.CreatePredefinedGroups.Commands.CreatePredefinedGroup
 
         if (channel == null)
         {
-          throw new ArgumentException("");
+          throw new ArgumentException("Channel not found");
         }
 
-        var allMembersExists = !(await dbContext.ChannelMembers.AnyAsync(x =>
-          x.ChannelSettingsId == channel.Id &&
-          !request.MemberIds.Any(y => y == x.Id)
-        , cancellationToken));
+        var isIdListValid = !request.MemberIds.Any(id => !(dbContext.ChannelMembers.Any(x => x.ChannelSettingsId == channel.Id && x.Id == id)));
 
-        if (!allMembersExists)
+        if (!isIdListValid)
         {
-          throw new ArgumentException("");
+          throw new ArgumentException("Not all members are valid");
         }
 
         var groupMemberExists = await dbContext.PredefinedGroupMembers.AnyAsync(x => request.MemberIds.Contains(x.Id), cancellationToken);
 
         if (groupMemberExists)
         {
-          throw new ArgumentException("");
+          throw new ArgumentException("Group members already exists");
         }
 
         var group = new PredefinedGroup
