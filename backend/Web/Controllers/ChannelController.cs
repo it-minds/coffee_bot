@@ -9,9 +9,11 @@ using Application.ChannelSetting.Queries.GetMyChannelMemberships;
 using Application.Rounds.DTO;
 using Application.Rounds.GetChannelRounds;
 using Application.Rounds.GetCurrentRound;
+using Application.Rounds.GetChannelRoundsInRange;
 using Application.User.GetMyAvailableChannels;
 using Common;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Web.Controllers
 {
@@ -64,6 +66,17 @@ namespace Web.Controllers
       return await Mediator.Send(new GetChannelRoundsQuery {
         ChannelId = id
       }, cancellationToken);
+    }
+
+    [HttpGet("{id}/rounds/range/{startDate}/{endDate}")]
+    public async Task<IEnumerable<RoundSnipDto>> GetRoundsInRange([FromRoute] int id, [FromRoute] DateTimeOffset startDate, [FromRoute] DateTimeOffset endDate, CancellationToken cancellationToken)
+    {
+      var command = new GetChannelRoundsInRangeQuery() {
+        ChannelId = id,
+        StartDate = startDate,
+        EndDate = endDate
+      };
+      return await Mediator.Send(command, cancellationToken);
     }
 
     [HttpGet("{id}/rounds/active")]

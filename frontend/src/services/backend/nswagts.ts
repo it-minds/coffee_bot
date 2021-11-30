@@ -647,6 +647,50 @@ export class ChannelClient extends ClientBase {
         return Promise.resolve<RoundSnipDto[]>(<any>null);
     }
 
+    getRoundsInRange(id: number, startDate: Date, endDate: Date): Promise<RoundSnipDto[]> {
+        let url_ = this.baseUrl + "/api/Channel/{id}/rounds/range/{startDate}/{endDate}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (startDate === undefined || startDate === null)
+            throw new Error("The parameter 'startDate' must be defined.");
+        url_ = url_.replace("{startDate}", encodeURIComponent(startDate ? "" + startDate.toJSON() : "null"));
+        if (endDate === undefined || endDate === null)
+            throw new Error("The parameter 'endDate' must be defined.");
+        url_ = url_.replace("{endDate}", encodeURIComponent(endDate ? "" + endDate.toJSON() : "null"));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetRoundsInRange(_response));
+        });
+    }
+
+    protected processGetRoundsInRange(response: Response): Promise<RoundSnipDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <RoundSnipDto[]>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoundSnipDto[]>(<any>null);
+    }
+
     getActiveRound(id: number): Promise<ActiveRoundDto> {
         let url_ = this.baseUrl + "/api/Channel/{id}/rounds/active";
         if (id === undefined || id === null)
