@@ -1019,6 +1019,45 @@ export class PredefinedGroupsClient extends ClientBase {
         }
         return Promise.resolve<number>(<any>null);
     }
+
+    getChannelsPredefinedGroups(channelId?: number | undefined): Promise<PredefinedGroupDTO[]> {
+        let url_ = this.baseUrl + "/api/PredefinedGroups?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetChannelsPredefinedGroups(_response));
+        });
+    }
+
+    protected processGetChannelsPredefinedGroups(response: Response): Promise<PredefinedGroupDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <PredefinedGroupDTO[]>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PredefinedGroupDTO[]>(<any>null);
+    }
 }
 
 export class PrizesClient extends ClientBase {
@@ -1597,6 +1636,18 @@ export interface StandardGroupDto {
 export interface CreatePredefinedGroupCommand {
     channelId?: number;
     memberIds?: number[] | null;
+}
+
+export interface PredefinedGroupDTO {
+    id?: number;
+    channelSettingsId?: number;
+    predefinedGroupMembers?: PredefinedGroupMemberDTO[] | null;
+}
+
+export interface PredefinedGroupMemberDTO {
+    id?: number;
+    predefinedGroupId?: number;
+    channelMemberId?: number;
 }
 
 export interface PrizeDTO {
