@@ -48,7 +48,7 @@ namespace Infrastructure.Persistence.Migrations
                         column: x => x.PredefinedGroupId,
                         principalTable: "PredefinedGroups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
