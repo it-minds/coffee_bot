@@ -13,7 +13,8 @@ namespace Infrastructure.Persistence.Configurations
       builder.HasOne<PredefinedGroup>(x => x.PredefinedGroup)
         .WithMany(x => x.PredefinedGroupMembers)
         .HasForeignKey(x => x.PredefinedGroupId)
-        .OnDelete(DeleteBehavior.Cascade);
+        .IsRequired(true)
+        .OnDelete(DeleteBehavior.NoAction);
 
       builder.HasOne<ChannelMember>(x => x.ChannelMember);
     }

@@ -47,8 +47,7 @@ namespace Infrastructure.Persistence.Migrations
                         name: "FK_PredefinedGroupMembers_PredefinedGroups_PredefinedGroupId",
                         column: x => x.PredefinedGroupId,
                         principalTable: "PredefinedGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

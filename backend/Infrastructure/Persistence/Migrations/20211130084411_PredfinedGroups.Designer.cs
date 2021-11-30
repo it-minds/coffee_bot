@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211129174534_PredfinedGroups")]
+    [Migration("20211130084411_PredfinedGroups")]
     partial class PredfinedGroups
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -424,7 +424,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.PredefinedGroup", "PredefinedGroup")
                         .WithMany("PredefinedGroupMembers")
                         .HasForeignKey("PredefinedGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ChannelMember");

@@ -422,7 +422,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.PredefinedGroup", "PredefinedGroup")
                         .WithMany("PredefinedGroupMembers")
                         .HasForeignKey("PredefinedGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ChannelMember");
