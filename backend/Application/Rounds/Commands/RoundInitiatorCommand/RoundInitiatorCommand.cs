@@ -59,9 +59,10 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
           var predefinedUsers = await BuildPredefinedGroups(round, cancellationToken);
 
-          var membersToParticipate = settings.ChannelMembers.Where(x => !x.IsRemoved && !x.OnPause)
+          var membersToParticipate = settings.ChannelMembers
+            .Where(x => !x.IsRemoved && !x.OnPause)
             .Select(x => x.SlackUserId)
-            .Where(x => predefinedUsers.Contains(x));
+            .Where(x => !predefinedUsers.Contains(x));
 
           var groups = SplitChannelIntoSubGroups(membersToParticipate, settings.GroupSize);
 
