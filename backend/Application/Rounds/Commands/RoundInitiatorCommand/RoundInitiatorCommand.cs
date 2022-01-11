@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Hangfire.MediatR;
@@ -17,10 +18,10 @@ namespace Rounds.Commands.RoundInitiatorCommand
   ///  This Command
   /// </summary>
   public class RoundInitiatorCommand
-   : IRequest<int>
+   : IRequest<string>
   {
 
-    public class RoundInitiatorCommandHandler : IRequestHandler<RoundInitiatorCommand, int>
+    public class RoundInitiatorCommandHandler : IRequestHandler<RoundInitiatorCommand, string>
     {
       private readonly IApplicationDbContext applicationDbContext;
       private readonly IDateTimeOffsetService timeService;
@@ -33,7 +34,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
         this.timeService = timeService;
       }
 
-      public async Task<int> Handle(RoundInitiatorCommand request, CancellationToken cancellationToken)
+      public async Task<string> Handle(RoundInitiatorCommand request, CancellationToken cancellationToken)
       {
         var activeRounds = await applicationDbContext.CoffeeRounds
           .Include(x => x.ChannelSettings)
@@ -46,18 +47,25 @@ namespace Rounds.Commands.RoundInitiatorCommand
           .Where(x => !activeRounds.Contains(x.SlackChannelId))
           .ToListAsync();
 
+        var result = new StringBuilder();
+
         foreach (var settings in channelSettings)
         {
-          if (settings.ChannelMembers.Count() <= 0) {
+          if (settings.ChannelMembers.Count() <= 0)
+          {
+            result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" currently has no members. Skipped.");
             continue;
           }
-          if (timeService.Now.Hour != settings.InitializeRoundHour) {
+          if (timeService.Now.Hour != settings.InitializeRoundHour)
+          {
+            result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" isn't set to start now.");
             continue;
           }
 
           var round = BuildNewCoffeeRound(settings);
 
           var predefinedUsers = await BuildPredefinedGroups(round, cancellationToken);
+          result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(predefinedUsers.Count()).Append(" predefined users.");
 
           var membersToParticipate = settings.ChannelMembers
             .Where(x => !x.IsRemoved && !x.OnPause)
@@ -65,6 +73,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
             .Where(x => !predefinedUsers.Contains(x));
 
           var groups = SplitChannelIntoSubGroups(membersToParticipate, settings.GroupSize);
+          result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(groups.Count()).Append(" groups.");
 
           groups.ForEach(group => BuildNewCoffeeRoundGroup(round: round, group: group, cancellationToken: cancellationToken));
         }
@@ -78,7 +87,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
           "New round messages for " + x.SlackChannelName
         ));
 
-        return 1;
+        return result.ToString();
       }
 
       private void BuildNewCoffeeRoundGroup(CoffeeRound round, IEnumerable<string> group, CancellationToken cancellationToken)
@@ -103,33 +112,36 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
       private async Task<IEnumerable<string>> BuildPredefinedGroups(CoffeeRound round, CancellationToken cancellationToken)
       {
-        var groups = await applicationDbContext.PredefinedGroups
+        var predefinedGroups = await applicationDbContext.PredefinedGroups
           .Include(x => x.PredefinedGroupMembers)
             .ThenInclude(x => x.ChannelMember)
           .Where(x => x.ChannelSettingsId == round.ChannelId)
           .ToListAsync(cancellationToken);
 
         var result = new List<string>();
-
-        foreach (var group in groups)
+        foreach (var predefinedGroup in predefinedGroups)
         {
           var roundGroup = new CoffeeRoundGroup
           {
             CoffeeRound = round
           };
-          applicationDbContext.CoffeeRoundGroups.Add(roundGroup);
-          foreach (var memberId in group.PredefinedGroupMembers.Select(x => x.ChannelMember.SlackUserId))
+
+          foreach (var predefinedMember in predefinedGroup.PredefinedGroupMembers)
           {
             var member = new CoffeeRoundGroupMember
             {
-              SlackMemberId = memberId,
+              SlackMemberId = predefinedMember.ChannelMember.SlackUserId,
               CoffeeRoundGroup = roundGroup
             };
-            result.Add(memberId);
 
             applicationDbContext.CoffeeRoundGroupMembers.Add(member);
+            applicationDbContext.PredefinedGroupMembers.Remove(predefinedMember);
+
+            result.Add(predefinedMember.ChannelMember.SlackUserId);
           }
-          applicationDbContext.PredefinedGroups.Remove(group);
+
+          applicationDbContext.CoffeeRoundGroups.Add(roundGroup);
+          applicationDbContext.PredefinedGroups.Remove(predefinedGroup);
         }
 
         return result;
@@ -138,11 +150,12 @@ namespace Rounds.Commands.RoundInitiatorCommand
       private CoffeeRound BuildNewCoffeeRound(ChannelSettings settings)
       {
         var baseDate = DateTimeOffset.UtcNow.Date;
-        var daysToAdd = ((int) settings.StartsDay - (int) baseDate.DayOfWeek + 7) % 7;
+        var daysToAdd = ((int)settings.StartsDay - (int)baseDate.DayOfWeek + 7) % 7;
         var startDate = baseDate.AddDays(daysToAdd);
         var endDate = startDate.AddDays(settings.DurationInDays);
 
-        var round = new CoffeeRound {
+        var round = new CoffeeRound
+        {
           Active = true,
           ChannelId = settings.Id,
           StartDate = startDate,
@@ -173,7 +186,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
       private IEnumerable<IEnumerable<string>> SplitChannelIntoSubGroups(IEnumerable<string> members, int groupSizes = 3)
       {
         // Number representing how many groups there should be.
-        var calculatedChunkCount = (int) Math.Floor((decimal) members.Count() / groupSizes);
+        var calculatedChunkCount = (int)Math.Floor((decimal)members.Count() / groupSizes);
 
         // Minimum size of any group is half the wanted size.
         var minSize = Math.Floor(groupSizes / 2m) + 1;
@@ -189,12 +202,14 @@ namespace Rounds.Commands.RoundInitiatorCommand
         var curGroupI = 0;
         foreach (var member in members.ToList().Shuffle())
         {
-          if (curGroupI >= groups.Count()) {
+          if (curGroupI >= groups.Count())
+          {
             curGroupI = 0;
           }
 
           var curGroup = groups[curGroupI];
-          if (curGroup == null) {
+          if (curGroup == null)
+          {
             curGroup = new List<string>();
             groups[curGroupI] = curGroup;
           }
