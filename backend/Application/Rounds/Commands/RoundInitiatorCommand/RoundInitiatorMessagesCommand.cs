@@ -35,7 +35,8 @@ namespace Rounds.Commands.RoundInitiatorCommand
           .Where(x => x.Id == request.ChannelSettingsId)
           .FirstOrDefaultAsync(cancellationToken);
 
-        if (settings == null) {
+        if (settings == null)
+        {
           return "No settings";
         }
 
@@ -43,13 +44,14 @@ namespace Rounds.Commands.RoundInitiatorCommand
           .Where(x => x.Active && x.ChannelId == request.ChannelSettingsId)
           .FirstOrDefaultAsync(cancellationToken);
 
-        if (round == null) {
+        if (round == null)
+        {
           return "No round";
         }
 
         var groups = await applicationDbContext.CoffeeRoundGroups
           .Include(x => x.CoffeeRoundGroupMembers)
-          .Where(x => x.CoffeeRoundId == round.Id )
+          .Where(x => x.CoffeeRoundId == round.Id)
           .ToListAsync(cancellationToken);
 
         await slackClient.SendMessageToChannel(
@@ -60,7 +62,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
 
         if (settings.IndividualMessage)
         {
-          var tasks = groups.Select(x => BuildNewCoffeeRoundGroup( round, x, cancellationToken )).ToArray();
+          var tasks = groups.Select(x => BuildNewCoffeeRoundGroup(round, x, cancellationToken)).ToArray();
           await Task.WhenAll(tasks);
         }
 
@@ -83,7 +85,7 @@ namespace Rounds.Commands.RoundInitiatorCommand
       private string BuildGroupMessage(CoffeeRound round, IEnumerable<string> group)
       {
         var sb = new StringBuilder();
-        sb.AppendLine("Time for your coffe!");
+        sb.AppendLine("Time for your coffee!");
 
         sb.Append("The round starts: ")
           .Append(round.StartDate.ToString("dddd, dd/MMMM"))
@@ -112,9 +114,9 @@ namespace Rounds.Commands.RoundInitiatorCommand
         {
           var group = groups.ToList()[i];
 
-          sb.Append("Group "+(i+1))
+          sb.Append("Group " + (i + 1))
             .Append(": ")
-            .AppendJoin(", ", group.Select(x => "<@" + x + ">" ))
+            .AppendJoin(", ", group.Select(x => "<@" + x + ">"))
             .AppendLine("");
         }
 

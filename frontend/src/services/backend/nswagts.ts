@@ -1535,6 +1535,47 @@ export class StatsClient extends ClientBase {
         }
         return Promise.resolve<StatsDto[]>(<any>null);
     }
+
+    getMemberMatchups(channelId?: number | undefined, slackUserId?: string | null | undefined): Promise<MatchupDto[]> {
+        let url_ = this.baseUrl + "/api/Stats/matchups?";
+        if (channelId === null)
+            throw new Error("The parameter 'channelId' cannot be null.");
+        else if (channelId !== undefined)
+            url_ += "channelId=" + encodeURIComponent("" + channelId) + "&";
+        if (slackUserId !== undefined && slackUserId !== null)
+            url_ += "slackUserId=" + encodeURIComponent("" + slackUserId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMemberMatchups(_response));
+        });
+    }
+
+    protected processGetMemberMatchups(response: Response): Promise<MatchupDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <MatchupDto[]>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MatchupDto[]>(<any>null);
+    }
 }
 
 export interface AuthUser {
@@ -1752,6 +1793,11 @@ export interface StatsDto {
     meepupPercent?: number;
     photoPercent?: number;
     totalParticipation?: number;
+}
+
+export interface MatchupDto {
+    name?: string | null;
+    count?: number;
 }
 
 export enum CommandErrorCode {

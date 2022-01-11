@@ -16,6 +16,8 @@ namespace Application.Stats.Queries.GetMyMatchups
   public class GetMyMatchupsQuery : IRequest<IEnumerable<MatchupDto>>
   {
     public int ChannelSettingsId { get; set; }
+    public string SlackUserId { get; set; }
+
     public class GetMyMatchupsQueryHandler : QueryBase, IRequestHandler<GetMyMatchupsQuery, IEnumerable<MatchupDto>>
     {
       private readonly ICurrentUserService currentUserService;
@@ -28,7 +30,8 @@ namespace Application.Stats.Queries.GetMyMatchups
 
       public async Task<IEnumerable<MatchupDto>> Handle(GetMyMatchupsQuery request, CancellationToken cancellationToken)
       {
-        var slackMemberId = await dbContext.ChannelMembers.Where(x => x.SlackUserId == currentUserService.UserSlackId && x.ChannelSettingsId == request.ChannelSettingsId)
+        var slackMemberId = await dbContext.ChannelMembers
+          .Where(x => x.SlackUserId == (string.IsNullOrEmpty(request.SlackUserId) ? currentUserService.UserSlackId : request.SlackUserId) && x.ChannelSettingsId == request.ChannelSettingsId)
           .Select(x => x.SlackUserId)
           .FirstOrDefaultAsync(cancellationToken);
 

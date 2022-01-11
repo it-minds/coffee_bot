@@ -14,8 +14,8 @@ namespace Web.Controllers
       await Mediator.Send(new GetMemberStatsQuery { ChannelId = channelId }, cancellationToken);
 
     [HttpGet("matchups")]
-    public async Task<IEnumerable<MatchupDto>> GetMemberMatchups([FromQuery] int channelId, CancellationToken cancellationToken) =>
-      await Mediator.Send(new GetMyMatchupsQuery { ChannelSettingsId = channelId }, cancellationToken);
+    public async Task<IEnumerable<MatchupDto>> GetMemberMatchups([FromQuery] int channelId, [FromQuery] string slackUserId, CancellationToken cancellationToken) =>
+      await Mediator.Send(new GetMyMatchupsQuery { ChannelSettingsId = channelId, SlackUserId = slackUserId }, cancellationToken);
 
   }
 }
