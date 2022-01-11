@@ -53,27 +53,30 @@ namespace Rounds.Commands.RoundInitiatorCommand
         {
           if (settings.ChannelMembers.Count() <= 0)
           {
-            result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" currently has no members. Skipped.");
+            result.Append("Channel ").Append(settings.SlackChannelName).Append(" currently has no members. Skipped.");
+            result.AppendLine();
             continue;
           }
           if (timeService.Now.Hour != settings.InitializeRoundHour)
           {
-            result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" isn't set to start now.");
+            result.Append("Channel ").Append(settings.SlackChannelName).Append(" isn't set to start now.");
+            result.AppendLine();
             continue;
           }
 
           var round = BuildNewCoffeeRound(settings);
 
           var predefinedUsers = await BuildPredefinedGroups(round, cancellationToken);
-          result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(predefinedUsers.Count()).Append(" predefined users.");
+          result.Append("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(predefinedUsers.Count()).Append(" predefined users.");
+          result.AppendLine();
 
           var membersToParticipate = settings.ChannelMembers
-            .Where(x => !x.IsRemoved && !x.OnPause)
-            .Select(x => x.SlackUserId)
-            .Where(x => !predefinedUsers.Contains(x));
+            .Where(x => !x.IsRemoved && !x.OnPause && !predefinedUsers.Contains(x.SlackUserId))
+            .Select(x => x.SlackUserId);
 
           var groups = SplitChannelIntoSubGroups(membersToParticipate, settings.GroupSize);
-          result.AppendLine("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(groups.Count()).Append(" groups.");
+          result.Append("Channel ").Append(settings.SlackChannelName).Append(" has ").Append(groups.Count()).Append(" groups.");
+          result.AppendLine();
 
           groups.ForEach(group => BuildNewCoffeeRoundGroup(round: round, group: group, cancellationToken: cancellationToken));
         }
