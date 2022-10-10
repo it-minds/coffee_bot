@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3.1.0
 
       - name: Set up Node.js ${{ env.node-version }}
         uses: actions/setup-node@v2.4.0
