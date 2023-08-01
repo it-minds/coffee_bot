@@ -35,11 +35,18 @@ const AdjustChannelPauseForm: FC<Props> = ({ channelId, onSuccess = () => null }
   useEffectAsync(async () => {
     setLoading(true);
     const client = await genClient();
-    const settings = await client.getMyChannelMembership(channelId);
+    const { onPause, returnFromPauseDate } = await client.getMyChannelMembership(channelId);
+
+    // Note: returnFromPauseDate is inferred as Date, but is received as a string, why the following checks are needed.
+    const parsedReturnFromPauseDate = returnFromPauseDate
+      ? new Date(returnFromPauseDate).toISOString().substring(0, 10)
+      : null;
 
     reset({
-      paused: settings.onPause,
-      unPauseDate: new Date(settings.returnFromPauseDate?.toISOString().substring(0, 10))
+      paused: onPause,
+      ...(parsedReturnFromPauseDate && {
+        unPauseDate: new Date(parsedReturnFromPauseDate)
+      })
     });
     setLoading(false);
   }, []);
